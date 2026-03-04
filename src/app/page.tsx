@@ -54,6 +54,7 @@ export default function Home() {
           <div className="hidden md:flex space-x-8">
             <Link href="#services" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Services</Link>
             <Link href="#about" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">À Propos</Link>
+            <Link href="/contact" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Contact</Link>
             <Link href="/dashboard" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Espace Client</Link>
           </div>
           <div className="flex items-center space-x-4">
