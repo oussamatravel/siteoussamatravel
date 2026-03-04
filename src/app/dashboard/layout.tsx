@@ -1,0 +1,100 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { LayoutDashboard, FolderOpen, FileCheck2, UserCircle, Bell, LogOut, Menu, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const navigation = [
+        { name: "Tableau de Bord", href: "/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
+        { name: "Mes Dossiers", href: "/dashboard/dossiers", icon: <FolderOpen className="w-5 h-5" /> },
+        { name: "Mes Documents", href: "/dashboard/documents", icon: <FileCheck2 className="w-5 h-5" /> },
+        { name: "Mon Profil", href: "/dashboard/profil", icon: <UserCircle className="w-5 h-5" /> },
+        { name: "Notifications", href: "/dashboard/notifications", icon: <Bell className="w-5 h-5" /> },
+    ];
+
+    return (
+        <div className="min-h-screen bg-slate-50 flex">
+            {/* Sidebar Desktop */}
+            <aside className="hidden md:flex flex-col w-64 bg-slate-900 text-slate-300 border-r border-slate-800 fixed h-full z-40">
+                <div className="p-6 border-b border-slate-800">
+                    <Link href="/" className="flex items-center gap-2 text-white">
+                        <span className="text-xl font-bold tracking-wider">OUSSAMA</span>
+                        <span className="text-2xl text-amber-500" style={{ fontFamily: 'cursive' }}>Travel</span>
+                    </Link>
+                </div>
+
+                <nav className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
+                    {navigation.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                            <Link key={item.name} href={item.href}>
+                                <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? "bg-amber-500 text-gray-900 font-bold shadow-lg shadow-amber-500/20" : "hover:bg-slate-800 hover:text-white"
+                                    }`}>
+                                    {item.icon}
+                                    {item.name}
+                                </div>
+                            </Link>
+                        );
+                    })}
+                </nav>
+
+                <div className="p-4 border-t border-slate-800">
+                    <Link href="/">
+                        <button className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-400/10 hover:text-red-300 rounded-xl transition-all w-full">
+                            <LogOut className="w-5 h-5" />
+                            Déconnexion
+                        </button>
+                    </Link>
+                </div>
+            </aside>
+
+            {/* Header Mobile */}
+            <div className="md:hidden fixed top-0 w-full bg-slate-900 text-white z-50 flex items-center justify-between p-4 border-b border-slate-800">
+                <Link href="/" className="flex items-center gap-2">
+                    <span className="text-lg font-bold tracking-wider">OUSSAMA</span>
+                    <span className="text-xl text-amber-500" style={{ fontFamily: 'cursive' }}>Travel</span>
+                </Link>
+                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 bg-slate-800 rounded-lg">
+                    {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
+            </div>
+
+            {/* Mobile Menu Dropdown */}
+            {isMobileMenuOpen && (
+                <div className="md:hidden fixed inset-0 top-[73px] bg-slate-900 z-40 p-4 border-t border-slate-800">
+                    <nav className="space-y-2">
+                        {navigation.map((item) => {
+                            const isActive = pathname === item.href;
+                            return (
+                                <Link key={item.name} href={item.href} onClick={() => setIsMobileMenuOpen(false)}>
+                                    <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? "bg-amber-500 text-gray-900 font-bold" : "text-slate-300 hover:bg-slate-800"
+                                        }`}>
+                                        {item.icon}
+                                        {item.name}
+                                    </div>
+                                </Link>
+                            );
+                        })}
+                        <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                            <div className="flex items-center gap-3 px-4 py-3 mt-4 text-red-400 border border-red-500/20 rounded-xl">
+                                <LogOut className="w-5 h-5" />
+                                Déconnexion
+                            </div>
+                        </Link>
+                    </nav>
+                </div>
+            )}
+
+            {/* Main Content */}
+            <main className="flex-1 md:ml-64 pt-20 md:pt-0">
+                {children}
+            </main>
+        </div>
+    );
+}
