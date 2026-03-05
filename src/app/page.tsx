@@ -53,7 +53,7 @@ export default function Home() {
           </div>
           <div className="hidden md:flex space-x-8">
             <Link href="#services" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Services</Link>
-            <Link href="#about" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">À Propos</Link>
+            <Link href="/blog" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Actualités</Link>
             <Link href="/contact" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Contact</Link>
             <Link href="/dashboard" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Espace Client</Link>
           </div>
@@ -325,6 +325,78 @@ export default function Home() {
                     {faq.a}
                   </div>
                 </details>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Latest Blog Posts Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div>
+              <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Nos Dernières Actualités</h2>
+              <p className="text-lg text-slate-500 max-w-2xl font-medium">
+                Restez informé des changements de lois, des nouveaux processus de visa et des conseils de nos experts.
+              </p>
+            </div>
+            <Link href="/blog">
+              <button className="px-8 py-4 bg-slate-50 text-slate-900 rounded-full font-bold hover:bg-slate-100 transition-all flex items-center gap-2 border border-slate-200 shadow-sm whitespace-nowrap">
+                Voir tout le blog
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Nouvelles Directives Visa Études Canada 2024",
+                category: "Immigration",
+                image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=400&auto=format&fit=crop",
+                tag: "Canada"
+              },
+              {
+                title: "Top 5 des Destinations sans Visa pour les Algériens",
+                category: "Tourisme",
+                image: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?q=80&w=400&auto=format&fit=crop",
+                tag: "Voyages"
+              },
+              {
+                title: "Réussir son Entretien Consulaire en 10 Étapes",
+                category: "Conseils",
+                image: "https://images.unsplash.com/photo-1521791136064-7986c2923216?q=80&w=400&auto=format&fit=crop",
+                tag: "Visa"
+              }
+            ].map((post, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="group cursor-pointer"
+              >
+                <div className="relative h-64 rounded-[2rem] overflow-hidden mb-6 shadow-lg border border-slate-100">
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute top-4 left-4">
+                    <span className="px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-sky-600 shadow-sm">
+                      {post.tag}
+                    </span>
+                  </div>
+                </div>
+                <h3 className="text-xl font-black text-slate-900 group-hover:text-sky-600 transition-colors leading-tight">
+                  {post.title}
+                </h3>
+                <div className="mt-4 flex items-center gap-2 text-sky-500 font-bold text-sm">
+                  Lire l'article
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+                </div>
               </motion.div>
             ))}
           </div>
