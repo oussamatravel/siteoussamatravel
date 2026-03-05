@@ -213,18 +213,150 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="py-24 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Ils nous ont fait confiance</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Découvrez les retours d'expérience de nos clients qui ont réalisé leurs projets avec Oussama Travel.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Amine Belkacem",
+                role: "Étudiant au Canada",
+                text: "Oussama Travel m'a accompagné de A à Z pour mon visa étudiant. Leur plateforme est révolutionnaire, j'ai pu suivre mon dossier en temps réel !",
+                image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=256&h=256&auto=format&fit=crop",
+                rating: 5
+              },
+              {
+                name: "Sonia Merad",
+                role: "Voyageuse - Dubaï",
+                text: "Service exceptionnel ! Mon visa pour Dubaï a été obtenu en 48h. L'équipe est d'un professionnalisme rare. Je recommande les yeux fermés.",
+                image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=256&h=256&auto=format&fit=crop",
+                rating: 5
+              },
+              {
+                name: "Karim Brahimi",
+                role: "Résident Permanent - France",
+                text: "Après plusieurs refus ailleurs, l'expertise juridique d'Oussama Travel a fait la différence pour mon dossier d'immigration. Un grand merci !",
+                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=256&h=256&auto=format&fit=crop",
+                rating: 5
+              }
+            ].map((testimonial, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 hover:shadow-2xl hover:bg-white transition-all group"
+              >
+                <div className="flex gap-1 mb-6">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <p className="text-gray-700 italic mb-8 leading-relaxed text-lg">
+                  "{testimonial.text}"
+                </p>
+                <div className="flex items-center gap-4 border-t border-slate-100 pt-6">
+                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-md">
+                    <img src={testimonial.image} alt={testimonial.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-slate-900">{testimonial.name}</h4>
+                    <p className="text-sm font-bold text-sky-600 uppercase tracking-tighter">{testimonial.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Questions Fréquentes</h2>
+            <p className="text-lg text-gray-600">
+              Tout ce que vous devez savoir pour démarrer votre projet sereinement.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: "Quels sont les documents de base nécessaires ?",
+                a: "Pour la plupart des procédures, vous aurez besoin d'un passeport valide (minimum 6 mois), de photos d'identité aux normes, et de vos relevés de comptes récents. La liste complète s'affiche dès que vous créez votre dossier dans votre espace client."
+              },
+              {
+                q: "Combien de temps prend le traitement d'un dossier ?",
+                a: "Le temps varie selon la destination et le type de visa. Un visa touristique Dubaï prend 48h-72h, tandis qu'une admission universitaire peut prendre 2 à 4 semaines. Oussama Travel s'engage à traiter vos documents en moins de 24h après réception."
+              },
+              {
+                q: "Est-ce que le paiement en ligne est sécurisé ?",
+                a: "Absolument. Nous utilisons des protocoles de chiffrement SSL de bout en bout. Vos coordonnées bancaires ne sont jamais stockées sur nos serveurs. Nous acceptons CIB, CCP (virement) et les paiements directs à l'agence."
+              },
+              {
+                q: "Aidez-vous pour la préparation de l'entretien ?",
+                a: "Oui, c'est l'une de nos forces. Nous organisons des simulations d'entretiens consulaires pour les visas études et immigration afin de maximiser vos chances de réussite."
+              }
+            ].map((faq, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm"
+              >
+                <details className="group">
+                  <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
+                    <h3 className="text-lg font-bold text-slate-900">{faq.q}</h3>
+                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-open:rotate-180 transition-transform">
+                      <Plus className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </summary>
+                  <div className="p-6 pt-0 text-gray-600 leading-relaxed border-t border-slate-50 bg-slate-50/30">
+                    {faq.a}
+                  </div>
+                </details>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA final */}
-      <section className="py-24 bg-gradient-to-b from-white to-sky-50">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">Prêt à décoller vers votre projet ?</h2>
-          <p className="text-xl text-gray-600 mb-10">
-            Créez votre compte gratuitement, téléversez vos documents et laissez les experts de Oussama Travel s'occuper du reste.
-          </p>
-          <Link href="/auth/register">
-            <button className="px-10 py-5 bg-amber-400 text-gray-900 rounded-full font-bold text-lg hover:bg-amber-500 shadow-xl shadow-amber-200/50 transition-all">
-              Créer mon Espace Client
-            </button>
-          </Link>
+      <section className="py-24 bg-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-50 to-sky-50/50"></div>
+        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 tracking-tight">Prêt à décoller vers <br /> votre projet ?</h2>
+            <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+              Rejoignez plus de 10,000 clients satisfaits. Créez votre compte gratuitement et laissez-nous gérer la complexité.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link href="/auth/register">
+                <button className="px-10 py-5 bg-slate-900 text-white rounded-full font-black text-lg hover:bg-slate-800 shadow-2xl transition-all flex items-center gap-3 group">
+                  Créer mon Espace Client
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </Link>
+              <div className="flex items-center gap-2 px-6 py-5 text-slate-500 font-bold border border-slate-200 rounded-full bg-white shadow-sm">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                Sans frais d'inscription
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>
