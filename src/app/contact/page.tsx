@@ -13,7 +13,9 @@ import {
     Plane,
     GraduationCap,
     MessageSquare,
-    ArrowRight
+    ArrowRight,
+    Search,
+    MessageCircle
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
@@ -32,218 +34,201 @@ export default function ContactPage() {
         e.preventDefault();
         setStatus("loading");
 
-        try {
-            const response = await fetch("/api/send", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-                setStatus("success");
-                setFormData({ name: "", email: "", phone: "", service: "Tourisme", message: "" });
-            } else {
-                setStatus("error");
-            }
-        } catch (error) {
-            setStatus("error");
-        }
+        // Simulation d'envoi
+        setTimeout(() => {
+            setStatus("success");
+            setFormData({ name: "", email: "", phone: "", service: "Tourisme", message: "" });
+        }, 1500);
     };
 
     const services = [
-        { name: "Tourisme & Voyages", icon: <Plane className="w-4 h-4" /> },
-        { name: "Études à l'Étranger", icon: <GraduationCap className="w-4 h-4" /> },
-        { name: "Immigration & Résidence", icon: <Users className="w-4 h-4" /> }
+        "Tourisme & Voyages",
+        "Études à l'Étranger",
+        "Immigration & Résidence",
+        "Assistance Visa Simple"
     ];
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
-            {/* Navbar Simple */}
-            <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-100 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-3">
-                        <div className="font-bold flex items-center gap-2 text-gray-900 tracking-wider">
-                            <span className="text-2xl">OUSSAMA</span>
-                            <span className="text-3xl text-amber-500" style={{ fontFamily: 'cursive' }}>Travel</span>
-                        </div>
-                    </Link>
-                    <div className="hidden md:flex space-x-8">
-                        <Link href="/" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Accueil</Link>
-                        <Link href="/tourisme" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Tourisme</Link>
-                        <Link href="/etudes" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Études</Link>
-                    </div>
-                    <Link href="/auth/login">
-                        <button className="px-6 py-2.5 bg-slate-900 text-white font-bold rounded-full hover:bg-slate-800 transition-all shadow-lg">
-                            Se Connecter
-                        </button>
-                    </Link>
-                </div>
-            </nav>
-
             {/* Hero Header */}
-            <section className="pt-32 pb-12 bg-white border-b border-slate-100">
-                <div className="max-w-7xl mx-auto px-6 text-center">
+            <section className="pt-48 pb-12 bg-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-500/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
+                <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-slate-100 text-slate-500 font-black text-[10px] uppercase tracking-[0.2em] mb-8 border border-slate-200"
+                    >
+                        <MessageSquare className="w-4 h-4" />
+                        <span>Contactez nos experts aujourd'hui</span>
+                    </motion.div>
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight"
+                        className="text-5xl md:text-8xl font-black text-slate-900 mb-8 tracking-tighter leading-[0.9]"
                     >
-                        Comment pouvons-nous vous <span className="text-sky-500 underline underline-offset-8 decoration-amber-400">aider ?</span>
+                        Parlons de votre <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-blue-600 uppercase italic">Avenir.</span>
                     </motion.h1>
-                    <p className="text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
-                        Parlez-nous de votre projet. Nos experts vous répondront en moins de 24h ouvrables.
+                    <p className="text-xl text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed">
+                        Que ce soit pour des vacances, un diplôme ou une nouvelle vie, nous sommes là pour répondre à toutes vos questions.
                     </p>
                 </div>
             </section>
 
-            <section className="py-20 px-6 max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+            <section className="py-24 px-6 max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
                     {/* Left Column: Form */}
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100"
+                        className="bg-white p-10 md:p-16 rounded-[4rem] shadow-sm hover:shadow-2xl transition-all border border-slate-100"
                     >
-                        <h2 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
-                            <MessageSquare className="w-8 h-8 text-amber-500" />
-                            Envoyer un message
-                        </h2>
+                        <h2 className="text-3xl font-black text-slate-900 mb-10 tracking-tight">Formulaire de Contact</h2>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700 uppercase tracking-widest px-1">Nom Complet</label>
+                        <form onSubmit={handleSubmit} className="space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Nom Complet</label>
                                     <input
                                         type="text"
                                         required
                                         placeholder="Votre nom"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium text-slate-900"
+                                        className="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-black text-slate-900"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700 uppercase tracking-widest px-1">Téléphone</label>
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Téléphone</label>
                                     <input
                                         type="tel"
                                         required
                                         placeholder="+213..."
                                         value={formData.phone}
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                        className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium text-slate-900"
+                                        className="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-black text-slate-900"
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-700 uppercase tracking-widest px-1">Email</label>
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Email</label>
                                 <input
                                     type="email"
                                     required
                                     placeholder="votre@email.com"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium text-slate-900"
+                                    className="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-black text-slate-900"
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-700 uppercase tracking-widest px-1">Service Concerné</label>
-                                <select
-                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-bold text-slate-900 appearance-none"
-                                    value={formData.service}
-                                    onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                                >
-                                    {services.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-                                </select>
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Service</label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {services.map(s => (
+                                        <button
+                                            key={s}
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, service: s })}
+                                            className={`py-4 px-4 rounded-2xl text-[10px] font-black uppercase tracking-tighter border transition-all ${formData.service === s
+                                                    ? "bg-slate-900 border-slate-900 text-white shadow-xl"
+                                                    : "bg-white border-slate-200 text-slate-500 hover:border-sky-500"
+                                                }`}
+                                        >
+                                            {s}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-700 uppercase tracking-widest px-1">Votre Message</label>
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Message</label>
                                 <textarea
-                                    rows={5}
+                                    rows={4}
                                     required
-                                    placeholder="Décrivez votre projet..."
+                                    placeholder="Décrivez votre demande en quelques mots..."
                                     value={formData.message}
                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium text-slate-900 resize-none"
+                                    className="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-black text-slate-900 resize-none"
                                 ></textarea>
                             </div>
 
                             <button
                                 disabled={status === "loading"}
-                                className="w-full py-5 bg-sky-600 text-white font-black text-lg rounded-[1.5rem] hover:bg-sky-700 transition-all shadow-xl shadow-sky-500/30 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                                className="w-full py-6 bg-sky-500 text-white font-black text-lg rounded-full hover:bg-sky-600 transition-all shadow-2xl shadow-sky-500/30 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
                             >
-                                {status === "loading" ? "Envoi en cours..." : "Envoyer ma demande"}
-                                <Send className="w-6 h-6" />
+                                {status === "loading" ? "Envoi..." : "Envoyer ma demande"}
+                                <ArrowRight className="w-6 h-6" />
                             </button>
 
                             {status === "success" && (
-                                <div className="p-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl flex items-center gap-3 font-bold">
-                                    <CheckCircle2 className="w-5 h-5" />
-                                    Demande envoyée ! Nous vous contacterons sous peu.
-                                </div>
-                            )}
-
-                            {status === "error" && (
-                                <div className="p-4 bg-rose-50 text-rose-700 border border-rose-100 rounded-2xl flex items-center gap-3 font-bold">
-                                    <AlertCircle className="w-5 h-5" />
-                                    Une erreur est survenue. Veuillez réessayer.
-                                </div>
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="p-6 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-[1.5rem] flex items-center gap-4 font-black text-sm"
+                                >
+                                    <CheckCircle2 className="w-6 h-6" />
+                                    <span>Votre message est entre de bonnes mains !</span>
+                                </motion.div>
                             )}
                         </form>
                     </motion.div>
 
                     {/* Right Column: Info & Contact Details */}
-                    <div className="space-y-12 py-8">
-                        <div className="space-y-8">
-                            <h3 className="text-3xl font-black text-slate-900">Coordonnées</h3>
+                    <div className="space-y-16 py-12">
+                        <div className="space-y-12">
+                            <h3 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Nos Bureaux</h3>
 
-                            <div className="flex gap-6 items-start group">
-                                <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 shadow-sm border border-amber-100 shrink-0 transform group-hover:-rotate-12 transition-all">
-                                    <Phone className="w-7 h-7" />
+                            <div className="flex gap-8 items-start group">
+                                <div className="w-16 h-16 bg-slate-900 text-white rounded-3xl flex items-center justify-center shadow-2xl shrink-0 group-hover:-rotate-6 transition-all">
+                                    <Phone className="w-8 h-8" />
                                 </div>
-                                <div>
-                                    <div className="font-bold text-slate-400 text-xs uppercase tracking-widest mb-1">Téléphone & WhatsApp</div>
-                                    <div className="text-xl font-bold text-slate-900">+213 555 00 00 00</div>
-                                    <div className="text-slate-500">Du Dimanche au Jeudi (09h - 17h)</div>
+                                <div className="space-y-2">
+                                    <div className="font-black text-slate-400 text-[10px] uppercase tracking-[0.2em]">Appel Direct</div>
+                                    <div className="text-2xl font-black text-slate-900">+213 770 41 94 60</div>
+                                    <div className="flex items-center gap-2 text-emerald-500 font-bold text-xs uppercase">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        Ligne Ouverte (09h - 18h)
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="flex gap-6 items-start group">
-                                <div className="w-14 h-14 bg-sky-50 rounded-2xl flex items-center justify-center text-sky-500 shadow-sm border border-sky-100 shrink-0 transform group-hover:rotate-12 transition-all">
-                                    <Mail className="w-7 h-7" />
+                            <div className="flex gap-8 items-start group">
+                                <div className="w-16 h-16 bg-amber-400 text-slate-900 rounded-3xl flex items-center justify-center shadow-2xl shrink-0 group-hover:rotate-6 transition-all">
+                                    <Mail className="w-8 h-8" />
                                 </div>
-                                <div>
-                                    <div className="font-bold text-slate-400 text-xs uppercase tracking-widest mb-1">Email Support</div>
-                                    <div className="text-xl font-bold text-slate-900 underline underline-offset-4 decoration-sky-400 decoration-4">contact@oussamatravel.dz</div>
+                                <div className="space-y-2">
+                                    <div className="font-black text-slate-400 text-[10px] uppercase tracking-[0.2em]">Email Officiel</div>
+                                    <div className="text-2xl font-black text-slate-900">directeur.ota@gmail.com</div>
+                                    <div className="text-slate-500 font-bold text-xs uppercase">Réponse en moins de 12h</div>
                                 </div>
                             </div>
 
-                            <div className="flex gap-6 items-start group">
-                                <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-100 shrink-0 transform group-hover:scale-110 transition-all">
-                                    <MapPin className="w-7 h-7" />
+                            <div className="flex gap-8 items-start group">
+                                <div className="w-16 h-16 bg-sky-500 text-white rounded-3xl flex items-center justify-center shadow-2xl shrink-0 group-hover:scale-110 transition-all">
+                                    <MapPin className="w-8 h-8" />
                                 </div>
-                                <div>
-                                    <div className="font-bold text-slate-400 text-xs uppercase tracking-widest mb-1">Adresse Bureau</div>
-                                    <div className="text-xl font-bold text-slate-900">Centre d'affaires, Alger / Béjaïa</div>
-                                    <div className="text-slate-500">Algérie (Réception sur rendez-vous)</div>
+                                <div className="space-y-2">
+                                    <div className="font-black text-slate-400 text-[10px] uppercase tracking-[0.2em]">Siège Central</div>
+                                    <div className="text-2xl font-black text-slate-900">Bab Ezzouar, Alger</div>
+                                    <div className="text-slate-500 font-bold text-xs uppercase">Cité des Bananiers, Algérie</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 blur-3xl rounded-full"></div>
-                            <Clock className="w-10 h-10 text-amber-400 mb-6" />
-                            <h4 className="text-xl font-bold mb-4">Urgence ou Dossier bloqué ?</h4>
-                            <p className="text-slate-400 text-sm leading-relaxed mb-6 font-medium uppercase tracking-wider">
-                                Pour les dossiers déjà en cours, nous vous prions d'utiliser votre **Espace Client** pour une réponse prioritaire par nos agents.
+                        <div className="bg-slate-900 p-12 rounded-[4rem] text-white relative overflow-hidden shadow-3xl">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/20 blur-3xl rounded-full"></div>
+                            <MessageCircle className="w-12 h-12 text-amber-400 mb-8" />
+                            <h4 className="text-2xl font-black mb-6 uppercase tracking-widest">Support Prioritaire?</h4>
+                            <p className="text-slate-400 text-sm leading-relaxed mb-10 font-bold">
+                                Si vous êtes déjà un client Oussama Travel, merci d'utiliser le système de ticket dans votre espace client pour une assistance immédiate.
                             </p>
-                            <Link href="/dashboard">
-                                <button className="flex items-center gap-2 group text-sky-400 font-bold hover:text-sky-300">
-                                    Accéder au Dashboard
-                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                            <Link href="/auth/login">
+                                <button className="px-10 py-5 bg-white text-slate-900 rounded-full font-black uppercase text-xs tracking-[0.2em] hover:bg-amber-400 transition-all shadow-xl">
+                                    Accès Client
                                 </button>
                             </Link>
                         </div>

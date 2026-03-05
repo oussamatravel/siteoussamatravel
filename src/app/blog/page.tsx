@@ -87,7 +87,7 @@ export default function BlogPage() {
     if (!mounted) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans pt-32 pb-20">
+        <div className="min-h-screen bg-slate-50 font-sans pt-48 pb-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header Section */}
                 <div className="text-center mb-16">

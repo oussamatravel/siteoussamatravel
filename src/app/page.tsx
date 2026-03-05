@@ -41,39 +41,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
-      {/* Navbar Simple */}
-      <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Logo Oussama Travel */}
-            <div className="font-bold flex items-center gap-2">
-              <span className="text-2xl text-gray-900 tracking-wider">OUSSAMA</span>
-              <span className="text-3xl text-amber-500" style={{ fontFamily: 'cursive' }}>Travel</span>
-            </div>
-          </div>
-          <div className="hidden md:flex space-x-8">
-            <Link href="#services" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Services</Link>
-            <Link href="/blog" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Actualités</Link>
-            <Link href="/contact" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Contact</Link>
-            <Link href="/dashboard" className="text-gray-600 hover:text-sky-600 font-medium transition-colors">Espace Client</Link>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Link href="/auth/login">
-              <button className="px-5 py-2.5 text-sky-700 font-medium hover:bg-sky-50 rounded-full transition-colors">
-                Connexion
-              </button>
-            </Link>
-            <Link href="/auth/register">
-              <button className="px-5 py-2.5 bg-amber-400 text-gray-900 font-bold rounded-full hover:bg-amber-500 shadow-lg shadow-amber-200 transition-all">
-                Démarrer
-              </button>
-            </Link>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
-      <section className="pt-40 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
+      <section className="pt-52 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}

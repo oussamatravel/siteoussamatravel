@@ -1,7 +1,20 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GraduationCap, ArrowRight, BookOpen, Globe2, Trophy, Clock, Search, FileText, CheckCircle2 } from "lucide-react";
+import {
+    GraduationCap,
+    ArrowRight,
+    BookOpen,
+    Globe2,
+    Trophy,
+    Clock,
+    Search,
+    FileText,
+    CheckCircle2,
+    Compass,
+    Backpack,
+    School
+} from "lucide-react";
 import Link from "next/link";
 
 export default function Etudes() {
@@ -14,166 +27,153 @@ export default function Etudes() {
     const destinations = [
         {
             country: "Canada",
-            desc: "Universités réputées, permis de travail post-diplôme et environnement multiculturel.",
+            desc: "Accédez à un diplôme nord-américain reconnu mondialement et profitez du permis de travail post-diplôme.",
             icon: "🍁",
-            color: "bg-red-50 text-red-600 border-red-100",
-            programs: ["Bachelors", "Masters", "Collèges techniques"]
-        },
-        {
-            country: "Royaume-Uni",
-            desc: "Excellence académique mondiale avec des programmes courts et intensifs (Master en 1 an).",
-            icon: "🇬🇧",
-            color: "bg-blue-50 text-blue-800 border-blue-100",
-            programs: ["Bachelors (3 ans)", "Masters", "Cours d'anglais"]
+            image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800&auto=format&fit=crop",
+            color: "text-red-600",
+            bg: "bg-red-50",
+            programs: ["Admission Collège (DEC/AEC)", "Bachelor (Licence)", "Maîtrise & PhD"]
         },
         {
             country: "France",
-            desc: "Une qualité de vie exceptionnelle et des frais de scolarité avantageux dans les universités publiques.",
+            desc: "Espace Campus France : bénéficiez d'une éducation de classe mondiale avec des frais de scolarité subventionnés.",
             icon: "🇫🇷",
-            color: "bg-sky-50 text-sky-700 border-sky-100",
-            programs: ["Licences", "Masters", "Grandes Écoles (Ingénieur/Commerce)"]
+            image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=800&auto=format&fit=crop",
+            color: "text-blue-700",
+            bg: "bg-blue-50",
+            programs: ["LMD (Licence/Master/Doctorat)", "Grandes Écoles de Commerce", "Écoles d'Ingénieur"]
+        },
+        {
+            country: "Royaume-Uni",
+            desc: "Tradition d'excellence académique. Obtenez votre Master en seulement un an d'études intensives.",
+            icon: "🇬🇧",
+            image: "https://images.unsplash.com/photo-1486825586573-7131f7991bcc?q=80&w=800&auto=format&fit=crop",
+            color: "text-indigo-800",
+            bg: "bg-indigo-50",
+            programs: ["Foundation Course", "Undergraduate", "Postgraduate (Master)"]
+        }
+    ];
+
+    const services = [
+        {
+            title: "Orientation Stratégique",
+            desc: "Bilan complet de votre profil académique pour choisir la meilleure université selon votre budget.",
+            icon: <Compass className="w-6 h-6" />
+        },
+        {
+            title: "Dossier d'Admission",
+            desc: "Rédaction de lettres de motivation percutantes et gestion complète des inscriptions universitaires.",
+            icon: <FileText className="w-6 h-6" />
+        },
+        {
+            title: "Préparation Visa",
+            desc: "Montage du dossier financier (garants, blocs) et simulation d'entretien consulaire personnalisée.",
+            icon: <ShieldCheck className="w-6 h-6" />
+        },
+        {
+            title: "Accueil & Logement",
+            desc: "Accompagnement après l'arrivée : recherche de logement étudiant et démarches de résidence.",
+            icon: <School className="w-6 h-6" />
         }
     ];
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
-            {/* Navbar Simple */}
-            <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-100 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-3">
-                        <div className="font-bold flex items-center gap-2">
-                            <span className="text-2xl text-gray-900 tracking-wider">OUSSAMA</span>
-                            <span className="text-3xl text-amber-500" style={{ fontFamily: 'cursive' }}>Travel</span>
-                        </div>
-                    </Link>
-                    <div className="hidden md:flex space-x-8">
-                        <Link href="/" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Accueil</Link>
-                        <Link href="/tourisme" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Tourisme</Link>
-                        <Link href="/immigration" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Immigration</Link>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <Link href="/auth/login">
-                            <button className="px-5 py-2.5 bg-amber-400 text-gray-900 font-bold rounded-full hover:bg-amber-500 shadow-lg shadow-amber-200 transition-all">
-                                Mon Espace Client
-                            </button>
-                        </Link>
-                    </div>
-                </div>
-            </nav>
-
             {/* Hero Section */}
-            <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-blue-900 relative overflow-hidden">
-                {/* Background Elements */}
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/20 blur-[100px] rounded-full translate-x-1/3 -translate-y-1/3"></div>
-                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-500/20 blur-[80px] rounded-full -translate-x-1/2 translate-y-1/2"></div>
+            <section className="pt-48 pb-32 px-4 sm:px-6 lg:px-8 bg-blue-900 relative overflow-hidden">
+                <div className="absolute inset-0">
+                    <img
+                        src="https://images.unsplash.com/photo-1523050335392-93851179ae22?q=80&w=2000&auto=format&fit=crop"
+                        className="w-full h-full object-cover opacity-20"
+                        alt="Education background"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-blue-900 via-blue-900/90 to-slate-50"></div>
+                </div>
 
-                <div className="max-w-7xl mx-auto relative z-10 py-16 text-center text-white">
+                <div className="max-w-7xl mx-auto relative z-10 text-center text-white">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-blue-200 font-medium text-sm mb-8 border border-white/20"
+                        className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-md text-blue-200 font-black text-xs uppercase tracking-widest mb-8 border border-white/20"
                     >
-                        <GraduationCap className="w-4 h-4" />
-                        <span>Admissions Internationales</span>
+                        <Trophy className="w-4 h-4" />
+                        <span>Partenaire de plus de 150 universités mondiales</span>
                     </motion.div>
 
                     <motion.h1
                         {...fadeIn}
-                        className="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight mb-6"
+                        className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8"
                     >
-                        Donnez une Dimension <br />
-                        Internationale à vos <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-amber-500">Études</span>.
+                        Votre <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200 italic uppercase">Diplôme</span> <br />
+                        Sans Frontières.
                     </motion.h1>
 
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-xl text-blue-100 max-w-2xl mx-auto mb-10 leading-relaxed"
+                        className="text-xl text-blue-100/80 max-w-2xl mx-auto mb-12 font-medium leading-relaxed"
                     >
-                        Orientation, choix de l'université, admission, visa étudiant et recherche de logement. Nous vous encadrons de A à Z pour garantir la réussite de votre projet académique.
+                        L'éducation internationale est le meilleur investissement pour votre avenir. Oussama Travel vous guide dans le labyrinthe des admissions universitaires mondiales.
                     </motion.p>
 
                     <Link href="/auth/register">
                         <motion.button
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
-                            className="px-8 py-4 bg-amber-400 text-gray-900 rounded-full font-bold text-lg hover:bg-amber-500 transition-all shadow-xl shadow-amber-500/20 flex items-center justify-center gap-2 mx-auto"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="px-10 py-5 bg-amber-400 text-slate-900 rounded-full font-black text-lg hover:bg-amber-300 transition-all shadow-2xl shadow-amber-500/30 flex items-center justify-center gap-3 mx-auto"
                         >
-                            Déposer mon dossier étudiant
-                            <ArrowRight className="w-5 h-5" />
+                            Déposer ma Candidature
+                            <ArrowRight className="w-5 h-5 font-black" />
                         </motion.button>
                     </Link>
                 </div>
             </section>
 
-            {/* Processus Section */}
-            <section className="py-24 bg-white">
+            {/* Destinations Section */}
+            <section className="py-24 -mt-20 relative z-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Un Accompagnement en 4 Étapes</h2>
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">Notre méthodologie éprouvée pour maximiser vos chances d'admission dans les meilleures universités.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                        {[
-                            { step: "01", title: "Orientation", desc: "Évaluation de votre profil et sélection des programmes adaptés.", icon: <Search className="w-6 h-6" /> },
-                            { step: "02", title: "Candidature", desc: "Préparation des lettres de motivation, CV et envoi des dossiers.", icon: <FileText className="w-6 h-6" /> },
-                            { step: "03", title: "Admission", desc: "Réception de la lettre d'acceptation de l'université.", icon: <Trophy className="w-6 h-6" /> },
-                            { step: "04", title: "Visa Étudiant", desc: "Constitution solide du dossier financier et consulaire pour le visa.", icon: <Globe2 className="w-6 h-6" /> }
-                        ].map((item, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                                className="relative p-6 bg-slate-50 border border-slate-100 rounded-2xl hover:border-blue-200 transition-colors"
-                            >
-                                <div className="text-4xl font-black text-blue-100 absolute top-4 right-4">{item.step}</div>
-                                <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-6 relative z-10">
-                                    {item.icon}
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
-                                <p className="text-gray-600">{item.desc}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Top Destinations d'Etudes */}
-            <section className="py-24 bg-slate-50 border-t border-slate-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Destinations Universitaires Phares</h2>
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">Étudiez dans les pays offrant les meilleures opportunités académiques et professionnelles.</p>
-                    </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {destinations.map((dest, i) => (
                             <motion.div
                                 key={i}
-                                whileHover={{ y: -5 }}
-                                className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 group cursor-pointer hover:shadow-xl transition-all p-8"
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1 }}
+                                className="bg-white rounded-[3rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all group border border-slate-100 flex flex-col h-full"
                             >
-                                <div className="flex items-center justify-between mb-6">
-                                    <span className="text-5xl">{dest.icon}</span>
-                                    <span className={`px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${dest.color}`}>Top Choix</span>
+                                <div className="h-64 relative overflow-hidden">
+                                    <img
+                                        src={dest.image}
+                                        alt={dest.country}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                    />
+                                    <div className="absolute top-6 left-6">
+                                        <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl shadow-lg border border-white/20">
+                                            {dest.icon}
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-6 left-6">
+                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-white text-slate-900 shadow-xl`}>
+                                            Top Destination
+                                        </span>
+                                    </div>
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-900 mb-3">{dest.country}</h3>
-                                <p className="text-gray-600 mb-8">{dest.desc}</p>
-                                <div className="space-y-3 pt-6 border-t border-slate-100">
-                                    <h4 className="text-sm font-bold text-gray-900 uppercase">Programmes pris en charge :</h4>
-                                    <ul className="space-y-2">
-                                        {dest.programs.map((prog, ptIndex) => (
-                                            <li key={ptIndex} className="flex items-center gap-2 text-gray-600 text-sm">
-                                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                <div className="p-10 flex flex-col flex-grow">
+                                    <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tight leading-tight">{dest.country}</h3>
+                                    <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+                                        {dest.desc}
+                                    </p>
+                                    <div className="space-y-3 pt-6 border-t border-slate-50 flex-grow">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Programmes disponibles</p>
+                                        {dest.programs.map((prog, pIdx) => (
+                                            <div key={pIdx} className="flex items-center gap-3 text-slate-700 font-black text-sm uppercase tracking-tighter">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
                                                 {prog}
-                                            </li>
+                                            </div>
                                         ))}
-                                    </ul>
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
@@ -181,17 +181,77 @@ export default function Etudes() {
                 </div>
             </section>
 
-            {/* CTA */}
-            <section className="py-20 bg-blue-900 text-white text-center">
-                <div className="max-w-3xl mx-auto px-4">
-                    <BookOpen className="w-16 h-16 text-amber-400 mx-auto mb-6" />
-                    <h2 className="text-3xl font-bold mb-6">Ne laissez pas votre avenir au hasard.</h2>
-                    <p className="text-blue-100 mb-8 text-lg">Nos conseillers d'orientation vous attendent sur votre Espace Client pour évaluer votre profil gratuitement.</p>
-                    <Link href="/auth/register">
-                        <button className="px-8 py-4 bg-white text-blue-900 rounded-full font-bold text-lg hover:bg-blue-50 shadow-lg transition-all">
-                            Évaluer mon profil (Gratuit)
-                        </button>
-                    </Link>
+            {/* Why Oussama Travel? Services */}
+            <section className="py-24 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-20">
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">Accompagnement <br /> Haute Définition.</h2>
+                        <p className="text-lg text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed">
+                            Nous ne sommes pas que des consultants, nous sommes vos partenaires de réussite académique à long terme.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                        {services.map((svc, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1 }}
+                                className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 hover:bg-white hover:shadow-2xl transition-all group text-center"
+                            >
+                                <div className="w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-8 group-hover:bg-blue-600 group-hover:text-white transition-all transform group-hover:-rotate-6">
+                                    {svc.icon}
+                                </div>
+                                <h3 className="text-lg font-black text-slate-900 mb-4 uppercase tracking-widest">{svc.title}</h3>
+                                <p className="text-sm text-slate-500 font-medium leading-relaxed">{svc.desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA Admission */}
+            <section className="py-32 bg-slate-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="bg-blue-900 rounded-[4rem] p-12 md:p-24 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-sky-500/10 blur-[130px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
+                        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-500/10 blur-[100px] rounded-full -translate-x-1/2 translate-y-1/2"></div>
+
+                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                            <div>
+                                <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter leading-tight">
+                                    Évaluez vos chances <br />
+                                    <span className="text-sky-400">gratuitement.</span>
+                                </h2>
+                                <p className="text-blue-100/70 text-lg font-medium leading-relaxed mb-8">
+                                    Une inscription universitaire ne s'improvise pas. Nos conseillers analysent vos relevés de notes et vos relevés pour vous proposer les meilleures options en 48h.
+                                </p>
+                                <ul className="space-y-4">
+                                    {["Analyse de dossier gratuite", "Simulation entretien consulaire", "Recherche de bourses d'études", "Aide à l'ouverture de compte bloqué"].map((item, i) => (
+                                        <div key={i} className="flex items-center gap-4 text-white font-black text-xs uppercase tracking-widest">
+                                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                <CheckCircle2 className="w-3 h-3 text-white" />
+                                            </div>
+                                            {item}
+                                        </div>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-10 md:p-16 rounded-[4rem] shadow-3xl text-center">
+                                <GraduationCap className="w-20 h-20 text-amber-400 mx-auto mb-8" />
+                                <h3 className="text-2xl font-black text-white mb-6 uppercase tracking-widest">Session d'Orientation</h3>
+                                <p className="text-slate-300 font-medium mb-10">Rejoignez notre espace client pour planifier votre appel avec un expert.</p>
+                                <Link href="/auth/register">
+                                    <button className="w-full py-5 bg-white text-blue-900 rounded-full font-black text-lg hover:bg-slate-50 transition-all flex items-center justify-center gap-3">
+                                        Commencer mon Admission
+                                        <ArrowRight className="w-5 h-5" />
+                                    </button>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
