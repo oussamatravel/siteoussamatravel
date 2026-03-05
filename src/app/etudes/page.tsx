@@ -239,51 +239,68 @@ export default function Etudes() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {destinations.map((dest, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 40 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                                className="bg-white rounded-[3rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all group border border-slate-100 flex flex-col h-full"
-                            >
-                                <div className="h-64 relative overflow-hidden">
-                                    <img
-                                        src={dest.image}
-                                        alt={dest.country}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                    />
-                                    <div className="absolute top-6 left-6">
-                                        <div className="w-16 h-12 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg border border-white/40 overflow-hidden transform group-hover:scale-110 transition-transform duration-300">
-                                            <img
-                                                src={`https://flagcdn.com/w160/${dest.code}.png`}
-                                                alt={dest.country}
-                                                className="w-full h-full object-cover"
-                                            />
+                            <Link key={i} href="/auth/register" className="block group h-full">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 40 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="bg-white rounded-[3rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-slate-100 flex flex-col h-full relative"
+                                >
+                                    {/* Ambient Flag Background In The Whole Card */}
+                                    <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none z-0">
+                                        <img
+                                            src={`https://flagcdn.com/w640/${dest.code}.png`}
+                                            alt={dest.country}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 grayscale group-hover:grayscale-0"
+                                        />
+                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/90 to-white/50 z-0 pointer-events-none" />
+
+                                    <div className="h-64 relative overflow-hidden z-10 rounded-t-[3rem]">
+                                        <img
+                                            src={dest.image}
+                                            alt={dest.country}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent"></div>
+                                        <div className="absolute top-6 left-6">
+                                            <div className="w-16 h-12 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg border border-white/40 overflow-hidden transform group-hover:scale-110 transition-transform duration-300">
+                                                <img
+                                                    src={`https://flagcdn.com/w160/${dest.code}.png`}
+                                                    alt={dest.country}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="absolute bottom-6 left-6">
+                                            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-white text-slate-900 shadow-xl`}>
+                                                Top Destination
+                                            </span>
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-6 left-6">
-                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-white text-slate-900 shadow-xl`}>
-                                            Top Destination
-                                        </span>
+                                    <div className="p-10 flex flex-col flex-grow relative z-10 bg-white/40 backdrop-blur-sm">
+                                        <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tight leading-tight group-hover:text-blue-900 transition-colors">{dest.country}</h3>
+                                        <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+                                            {dest.desc}
+                                        </p>
+                                        <div className="space-y-3 pt-6 border-t border-slate-200/50 flex-grow">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Programmes disponibles</p>
+                                            {dest.programs.map((prog, pIdx) => (
+                                                <div key={pIdx} className="flex items-center gap-3 text-slate-700 font-black text-sm uppercase tracking-tighter">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                                                    {prog}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="p-10 flex flex-col flex-grow">
-                                    <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tight leading-tight">{dest.country}</h3>
-                                    <p className="text-slate-500 font-medium mb-8 leading-relaxed">
-                                        {dest.desc}
-                                    </p>
-                                    <div className="space-y-3 pt-6 border-t border-slate-50 flex-grow">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Programmes disponibles</p>
-                                        {dest.programs.map((prog, pIdx) => (
-                                            <div key={pIdx} className="flex items-center gap-3 text-slate-700 font-black text-sm uppercase tracking-tighter">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                                                {prog}
-                                            </div>
-                                        ))}
+
+                                    {/* Hover Arrow */}
+                                    <div className="absolute bottom-8 right-8 w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300 shadow-xl z-20">
+                                        <ArrowRight className="w-5 h-5" />
                                     </div>
-                                </div>
-                            </motion.div>
+                                </motion.div>
+                            </Link>
                         ))}
                     </div>
                 </div>
