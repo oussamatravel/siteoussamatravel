@@ -27,6 +27,7 @@ export default function Etudes() {
 
     const destinations = [
         {
+            code: "fr",
             country: "France",
             desc: "Espace Campus France : éducation d'excellence et frais de scolarité subventionnés.",
             icon: "🇫🇷",
@@ -36,6 +37,7 @@ export default function Etudes() {
             programs: ["LMD (Licence/Master/Doctorat)", "Grandes Écoles", "Écoles d'Ingénieur"]
         },
         {
+            code: "ca",
             country: "Canada",
             desc: "Diplômes reconnus mondialement et excellentes opportunités de travail post-études.",
             icon: "🇨🇦",
@@ -45,6 +47,7 @@ export default function Etudes() {
             programs: ["DEC / AEC", "Bachelor (Baccalauréat)", "Maîtrise & MBA"]
         },
         {
+            code: "es",
             country: "Espagne",
             desc: "Cadre de vie exceptionnel et universités de renommée internationale.",
             icon: "🇪🇸",
@@ -54,6 +57,7 @@ export default function Etudes() {
             programs: ["Grado", "Master", "Doctorado"]
         },
         {
+            code: "be",
             country: "Belgique",
             desc: "Au cœur de l'Europe, des programmes bilingues et une qualité d'enseignement supérieure.",
             icon: "🇧🇪",
@@ -63,6 +67,7 @@ export default function Etudes() {
             programs: ["Bachelier", "Master", "Spécialisations"]
         },
         {
+            code: "us",
             country: "États-Unis",
             desc: "L'excellence académique américaine et des campus à la pointe de la technologie.",
             icon: "🇺🇸",
@@ -72,6 +77,7 @@ export default function Etudes() {
             programs: ["Bachelor (4 ans)", "Master (MS/MBA)", "Doctorat (PhD)"]
         },
         {
+            code: "my",
             country: "Malaisie",
             desc: "Hub éducatif majeur en Asie avec des diplômes internationaux à prix compétitifs.",
             icon: "🇲🇾",
@@ -81,6 +87,7 @@ export default function Etudes() {
             programs: ["Bachelor", "Master Research", "PhD"]
         },
         {
+            code: "it",
             country: "Italie",
             desc: "Berceau de l'art et de l'architecture, offrant des cursus prestigieux en design et sciences.",
             icon: "🇮🇹",
@@ -90,6 +97,7 @@ export default function Etudes() {
             programs: ["Laurea", "Laurea Magistrale", "Masters Spécialisés"]
         },
         {
+            code: "tr",
             country: "Turquie",
             desc: "Pont entre Orient et Occident, des bourses attractives et des universités dynamiques.",
             icon: "🇹🇷",
@@ -99,6 +107,7 @@ export default function Etudes() {
             programs: ["Licence", "Master", "Cours de Langue (TÖMER)"]
         },
         {
+            code: "ie",
             country: "Irlande",
             desc: "Terre d'innovation technologique et d'accueil chaleureux pour les étudiants.",
             icon: "🇮🇪",
@@ -108,6 +117,7 @@ export default function Etudes() {
             programs: ["Undergraduate", "Postgraduate", "Anglais Intensif"]
         },
         {
+            code: "cn",
             country: "Chine",
             desc: "Nouvelle puissance éducative mondiale avec des opportunités uniques de carrière.",
             icon: "🇨🇳",
@@ -117,6 +127,7 @@ export default function Etudes() {
             programs: ["Bachelor", "Master", "Bourse du Gouvernement"]
         },
         {
+            code: "cz",
             country: "Rép. Tchèque",
             desc: "Qualité d'enseignement historique au centre de l'Europe à un coût très abordable.",
             icon: "🇨🇿",
@@ -126,6 +137,7 @@ export default function Etudes() {
             programs: ["Programmes en Anglais", "Master", "PhD"]
         },
         {
+            code: "ru",
             country: "Russie",
             desc: "Tradition scientifique forte et accès simplifié aux cursus médicaux et techniques.",
             icon: "🇷🇺",
@@ -135,6 +147,7 @@ export default function Etudes() {
             programs: ["Médecine", "Ingénierie", "Langue Russe"]
         },
         {
+            code: "de",
             country: "Allemagne",
             desc: "Ingénierie et Technologie de pointe. Études de renommée mondiale souvent gratuites.",
             icon: "🇩🇪",
@@ -241,8 +254,12 @@ export default function Etudes() {
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
                                     <div className="absolute top-6 left-6">
-                                        <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl shadow-lg border border-white/20">
-                                            {dest.icon}
+                                        <div className="w-16 h-12 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg border border-white/40 overflow-hidden transform group-hover:scale-110 transition-transform duration-300">
+                                            <img
+                                                src={`https://flagcdn.com/w160/${dest.code}.png`}
+                                                alt={dest.country}
+                                                className="w-full h-full object-cover"
+                                            />
                                         </div>
                                     </div>
                                     <div className="absolute bottom-6 left-6">
