@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Plane, GraduationCap, FileText, ArrowRight, CheckCircle2, Star, ShieldCheck } from "lucide-react";
+import { Plane, GraduationCap, FileText, ArrowRight, CheckCircle2, Star, ShieldCheck, Plus } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
