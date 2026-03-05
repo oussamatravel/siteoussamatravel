@@ -18,84 +18,121 @@ import {
     Loader2
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function DocumentsPage() {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [mounted, setMounted] = useState(false);
+    const [documents, setDocuments] = useState<any[]>([]);
+    const supabase = createClient();
 
     useEffect(() => {
         setMounted(true);
+        fetchDocuments();
     }, []);
 
-    const [documents, setDocuments] = useState([
-        {
-            id: "doc-001",
-            name: "Passeport - Oussama.pdf",
-            size: "2.4 MB",
-            date: "12 Mars 2024",
-            status: "Validé",
-            statusColor: "text-emerald-600 bg-emerald-50 border-emerald-100",
-            icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-        },
-        {
-            id: "doc-002",
-            name: "Diplôme Bachelor.pdf",
-            size: "4.1 MB",
-            date: "10 Janvier 2024",
-            status: "En Attente",
-            statusColor: "text-amber-600 bg-amber-50 border-amber-100",
-            icon: <AlertCircle className="w-4 h-4 text-amber-500" />
-        },
-        {
-            id: "doc-003",
-            name: "Relevés de Compte - Famille.pdf",
-            size: "8.7 MB",
-            date: "02 Avril 2024",
-            status: "Rejeté",
-            statusColor: "text-red-600 bg-red-50 border-red-100",
-            icon: <XCircle className="w-4 h-4 text-red-500" />
-        }
-    ]);
+    const fetchDocuments = async () => {
+        setIsLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-    const handleUpload = (e: any) => {
+        try {
+            const { data, error } = await supabase.storage
+                .from('client_documents')
+                .list(user.id, {
+                    limit: 100,
+                    offset: 0,
+                    sortBy: { column: 'name', order: 'desc' },
+                });
+
+            if (error) throw error;
+
+            const formattedDocs = data.map((file) => ({
+                id: file.id,
+                name: file.name,
+                size: `${(file.metadata.size / (1024 * 1024)).toFixed(2)} MB`,
+                date: new Date(file.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+                status: "En Attente", // Par défaut, Supabase Storage n'a pas de status
+                statusColor: "text-amber-600 bg-amber-50 border-amber-100",
+                icon: <AlertCircle className="w-4 h-4 text-amber-500" />
+            }));
+
+            setDocuments(formattedDocs);
+        } catch (err: any) {
+            console.error("Erreur fetch docs:", err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleUpload = async (e: any) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
         setIsUploading(true);
-        setUploadProgress(0);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-        // Simulation d'upload
-        const interval = setInterval(() => {
-            setUploadProgress((prev) => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        const newDoc = {
-                            id: `doc-${Date.now()}`,
-                            name: file.name,
-                            size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-                            date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
-                            status: "En Attente",
-                            statusColor: "text-amber-600 bg-amber-50 border-amber-100",
-                            icon: <AlertCircle className="w-4 h-4 text-amber-500" />
-                        };
-                        setDocuments([newDoc, ...documents]);
-                        setIsUploading(false);
-                        setIsUploadModalOpen(false);
-                        setUploadProgress(0);
-                    }, 500);
-                    return 100;
-                }
-                return prev + 10;
-            });
-        }, 200);
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random()}.${fileExt}`;
+            const filePath = `${user.id}/${file.name}`; // On garde le nom original dans le path utilisateur
+
+            const { error: uploadError } = await supabase.storage
+                .from('client_documents')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            await fetchDocuments();
+            setIsUploadModalOpen(false);
+        } catch (err: any) {
+            alert("Erreur lors de l'upload : " + err.message);
+        } finally {
+            setIsUploading(false);
+        }
     };
 
-    const deleteDocument = (id: string) => {
-        setDocuments(documents.filter(doc => doc.id !== id));
+    const downloadDocument = async (fileName: string) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        try {
+            const { data, error } = await supabase.storage
+                .from('client_documents')
+                .download(`${user.id}/${fileName}`);
+
+            if (error) throw error;
+
+            const url = URL.createObjectURL(data);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+        } catch (err: any) {
+            alert("Erreur lors du téléchargement : " + err.message);
+        }
+    };
+
+    const deleteDocument = async (fileName: string) => {
+        if (!confirm("Voulez-vous vraiment supprimer ce document ?")) return;
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        try {
+            const { error } = await supabase.storage
+                .from('client_documents')
+                .remove([`${user.id}/${fileName}`]);
+
+            if (error) throw error;
+            fetchDocuments();
+        } catch (err: any) {
+            alert("Erreur lors de la suppression : " + err.message);
+        }
     };
 
     const filteredDocs = documents.filter(doc =>
@@ -148,63 +185,74 @@ export default function DocumentsPage() {
 
             {/* Document Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredDocs.map((doc, i) => (
-                    <motion.div
-                        key={doc.id}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ delay: i * 0.05 }}
-                        className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:border-sky-100 transition-all group relative cursor-pointer"
-                    >
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
-                                <FileText className="w-7 h-7" />
-                            </div>
-                            <button className="p-2 text-gray-400 hover:text-gray-900 hover:bg-slate-100 rounded-xl transition-all">
-                                <MoreVertical className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        <h3 className="text-lg font-bold text-gray-900 mb-1 truncate">{doc.name}</h3>
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-                            <span>{doc.size}</span>
-                            <span>•</span>
-                            <span>{doc.date}</span>
-                        </div>
-
-                        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${doc.statusColor} mb-8`}>
-                            {doc.icon}
-                            {doc.status}
-                        </div>
-
-                        <div className="flex items-center gap-3 pt-6 border-t border-slate-50">
-                            <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 text-gray-700 font-bold rounded-xl hover:bg-slate-200 transition-all text-sm">
-                                <Download className="w-4 h-4" />
-                                Télécharger
-                            </button>
-                            <button
-                                onClick={() => deleteDocument(doc.id)}
-                                className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                            >
-                                <Trash2 className="w-5 h-5" />
-                            </button>
-                        </div>
-                    </motion.div>
-                ))}
-
-                {/* Upload Card Place Holder */}
-                <div
-                    onClick={() => setIsUploadModalOpen(true)}
-                    className="border-2 border-dashed border-slate-200 bg-white/50 rounded-3xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-white hover:border-amber-400 hover:shadow-xl transition-all h-full min-h-[250px] group"
-                >
-                    <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <Upload className="w-8 h-8" />
+                {isLoading ? (
+                    <div className="col-span-full py-20 flex flex-col items-center justify-center text-slate-400">
+                        <Loader2 className="w-10 h-10 animate-spin mb-4" />
+                        <p className="font-bold">Chargement de votre coffre-fort...</p>
                     </div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-1">Ajouter un document</h4>
-                    <p className="text-sm text-gray-500 px-10">Glissez-déposez vos fichiers PDF, PNG ou JPG ici.</p>
-                </div>
+                ) : filteredDocs.length > 0 ? (
+                    filteredDocs.map((doc, i) => (
+                        <motion.div
+                            key={doc.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ delay: i * 0.05 }}
+                            className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:border-sky-100 transition-all group relative cursor-pointer"
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+                                    <FileText className="w-7 h-7" />
+                                </div>
+                                <button className="p-2 text-gray-400 hover:text-gray-900 hover:bg-slate-100 rounded-xl transition-all">
+                                    <MoreVertical className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <h3 className="text-lg font-bold text-gray-900 mb-1 truncate">{doc.name}</h3>
+                            <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+                                <span>{doc.size}</span>
+                                <span>•</span>
+                                <span>{doc.date}</span>
+                            </div>
+
+                            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${doc.statusColor} mb-8`}>
+                                {doc.icon}
+                                {doc.status}
+                            </div>
+
+                            <div className="flex items-center gap-3 pt-6 border-t border-slate-50">
+                                <button
+                                    onClick={() => downloadDocument(doc.name)}
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 text-gray-700 font-bold rounded-xl hover:bg-slate-200 transition-all text-sm"
+                                >
+                                    <Download className="w-4 h-4" />
+                                    Télécharger
+                                </button>
+                                <button
+                                    onClick={() => deleteDocument(doc.name)}
+                                    className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    ))
+                ) : (
+                    <div
+                        onClick={() => setIsUploadModalOpen(true)}
+                        className="col-span-full border-2 border-dashed border-slate-200 bg-white/50 rounded-[3rem] p-12 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-white hover:border-amber-400 hover:shadow-xl transition-all group"
+                    >
+                        <div className="w-20 h-20 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <Upload className="w-10 h-10" />
+                        </div>
+                        <h4 className="text-2xl font-black text-gray-900 mb-2">Votre coffre-fort est vide</h4>
+                        <p className="text-slate-500 font-medium mb-8 max-w-sm">Dés que vous aurez une demande active, vous pourrez importer vos pièces justificatrices ici.</p>
+                        <button className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold">Importer mon premier fichier</button>
+                    </div>
+                )}
             </div>
+
             {/* Upload Modal */}
             <AnimatePresence>
                 {isUploadModalOpen && (
@@ -258,23 +306,7 @@ export default function DocumentsPage() {
                                 ) : (
                                     <div className="py-12 flex flex-col items-center justify-center text-center">
                                         <div className="relative w-24 h-24 mb-8">
-                                            <div className="absolute inset-0 rounded-full border-4 border-slate-100"></div>
-                                            <svg className="absolute inset-0 w-24 h-24 transform -rotate-90">
-                                                <circle
-                                                    cx="48"
-                                                    cy="48"
-                                                    r="44"
-                                                    stroke="currentColor"
-                                                    strokeWidth="4"
-                                                    fill="transparent"
-                                                    className="text-sky-500 transition-all duration-300"
-                                                    strokeDasharray={276}
-                                                    strokeDashoffset={276 - (276 * uploadProgress) / 100}
-                                                />
-                                            </svg>
-                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                <p className="text-xl font-black text-slate-900">{uploadProgress}%</p>
-                                            </div>
+                                            <Loader2 className="w-full h-full text-sky-500 animate-spin" />
                                         </div>
                                         <h3 className="text-xl font-black text-slate-900 mb-2">Envoi en cours...</h3>
                                         <p className="text-slate-400 font-medium">Veuillez ne pas fermer cette fenêtre.</p>

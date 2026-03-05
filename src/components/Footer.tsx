@@ -12,8 +12,16 @@ import {
     ExternalLink,
     ArrowRight
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+    const pathname = usePathname();
+    const isDashboard = pathname.startsWith("/dashboard");
+    const isAuth = pathname.startsWith("/auth");
+    const isAdmin = pathname.startsWith("/admin");
+
+    if (isDashboard || isAuth || isAdmin) return null;
+
     return (
         <footer className="bg-slate-900 text-white pt-24 pb-12 overflow-hidden relative">
             {/* Background elements */}

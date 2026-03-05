@@ -5,21 +5,26 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight, User } from "lucide-react";
 
 export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
     const isHome = pathname === "/";
+    const isDashboard = pathname.startsWith("/dashboard");
+    const isAuth = pathname.startsWith("/auth");
+    const isAdmin = pathname.startsWith("/admin");
 
     useEffect(() => {
         const handleScroll = () => {
-            setIsScrolled(window.scrollY > 20);
+            setIsScrolled(window.scrollY > 50);
         };
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    if (isDashboard || isAuth || isAdmin) return null;
 
     const navLinks = [
         { name: "À Propos", href: "/a-propos" },
@@ -29,100 +34,114 @@ export default function Navbar() {
         { name: "Immigration", href: "/immigration" },
         { name: "Actualités", href: "/blog" },
         { name: "Contact", href: "/contact" },
-        { name: "Espace Client", href: "/dashboard" },
     ];
 
     return (
-        <nav className={`fixed top-0 w-full z-[100] transition-all duration-500 ${(isScrolled || !isHome)
-            ? "bg-white shadow-xl h-20 border-b border-slate-100"
-            : "bg-white/60 backdrop-blur-xl h-24 border-b border-white/20"
-            }`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+        <header className="fixed top-0 w-full z-[100] px-4 py-6 md:px-10 pointer-events-none">
+            <motion.nav
+                initial={{ y: -100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className={`max-w-7xl mx-auto h-20 md:h-24 rounded-[2rem] border transition-all duration-500 pointer-events-auto flex items-center justify-between px-8 relative
+                ${(isScrolled || !isHome)
+                        ? "bg-sky-950/90 backdrop-blur-2xl border-sky-800 shadow-[0_20px_50px_rgba(7,89,133,0.3)] py-4"
+                        : "bg-sky-900/30 backdrop-blur-xl border-white/10 shadow-lg py-6"
+                    }`}
+            >
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-3 group">
+                <Link href="/" className="flex items-center gap-3 group shrink-0">
                     <img
                         src="/logo.png"
                         alt="Oussama Travel Logo"
-                        className="h-12 md:h-16 w-auto object-contain group-hover:scale-105 transition-transform"
+                        className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform"
                         style={{ minWidth: '150px' }}
                     />
                 </Link>
 
                 {/* Desktop Menu */}
-                <div className="hidden lg:flex items-center space-x-8">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.name}
-                            href={link.href}
-                            className={`text-sm font-black uppercase tracking-widest transition-colors ${(isScrolled || !isHome)
-                                ? "text-slate-900 hover:text-sky-600"
-                                : "text-slate-900 md:text-white/90 md:hover:text-white"
-                                }`}
-                        >
-                            {link.name}
-                        </Link>
-                    ))}
+                <div className="hidden lg:flex items-center gap-1">
+                    {navLinks.map((link) => {
+                        const isActive = pathname === link.href;
+                        return (
+                            <Link
+                                key={link.name}
+                                href={link.href}
+                                className="relative px-4 py-2 text-[13px] font-bold uppercase tracking-[0.15em] transition-all group shrink-0 text-white"
+                            >
+                                <span className={`relative z-10 transition-colors group-hover:text-amber-400 ${isActive ? "text-amber-400" : ""}`}>
+                                    {link.name}
+                                </span>
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="activeNav"
+                                        className="absolute inset-0 bg-white/5 rounded-xl -z-0"
+                                    />
+                                )}
+                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-amber-400 transition-all group-hover:w-full opacity-0 group-hover:opacity-100 rounded-full shadow-[0_0_10px_#fbbf24]"></span>
+                            </Link>
+                        );
+                    })}
                 </div>
 
                 {/* Auth Buttons */}
-                <div className="hidden lg:flex items-center space-x-4">
-                    <Link href="/auth/login">
-                        <button className={`px-6 py-2.5 text-sm font-black uppercase tracking-widest transition-all rounded-full ${(isScrolled || !isHome)
-                            ? "text-slate-900 hover:bg-slate-50 border border-slate-200"
-                            : "text-white hover:bg-white/10"
-                            }`}>
-                            Connexion
+                <div className="hidden lg:flex items-center gap-4 shrink-0">
+                    <Link href="/dashboard">
+                        <button className="flex items-center gap-2 px-5 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-full transition-all border text-white border-white/20 hover:bg-white/10">
+                            <User className="w-4 h-4 text-amber-400" />
+                            Espace Client
                         </button>
                     </Link>
                     <Link href="/auth/register">
-                        <button className="px-6 py-2.5 bg-amber-400 text-slate-900 font-black text-sm uppercase tracking-widest rounded-full hover:bg-amber-500 shadow-xl shadow-amber-500/20 transition-all flex items-center gap-2">
+                        <button className={`px-6 py-2.5 font-black text-[11px] uppercase tracking-widest rounded-full transition-all shadow-xl flex items-center gap-2 group
+                            ${(isScrolled || !isHome)
+                                ? "bg-amber-400 text-sky-950 hover:bg-white hover:scale-105 shadow-amber-500/20"
+                                : "bg-white text-sky-950 hover:bg-amber-400 hover:scale-105 shadow-white/20"
+                            }`}>
                             Décoller
-                            <ArrowRight className="w-4 h-4" />
+                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </button>
                     </Link>
                 </div>
 
                 {/* Mobile Toggle */}
                 <button
-                    className="lg:hidden p-2 text-slate-900 md:text-white mix-blend-difference"
+                    className="lg:hidden p-3 rounded-2xl transition-colors bg-white/10 text-white"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 >
-                    {isMobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
+                    {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6 text-amber-400" />}
                 </button>
-            </div>
 
-            {/* Mobile Menu */}
-            <AnimatePresence>
-                {isMobileMenuOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="lg:hidden bg-white border-b border-slate-100 overflow-hidden"
-                    >
-                        <div className="p-6 space-y-4">
+                {/* Mobile Menu */}
+                <AnimatePresence>
+                    {isMobileMenuOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                            className="absolute top-[calc(100%+10px)] left-0 right-0 lg:hidden bg-sky-950/95 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-sky-800 overflow-hidden z-50 p-6 space-y-2"
+                        >
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.name}
                                     href={link.href}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="block text-lg font-black text-slate-900 hover:text-sky-600 transition-colors uppercase tracking-widest"
+                                    className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 text-sky-100 hover:text-amber-400 font-black uppercase tracking-widest text-sm group"
                                 >
                                     {link.name}
+                                    <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-amber-400" />
                                 </Link>
                             ))}
-                            <div className="pt-6 border-t border-slate-100 flex flex-col gap-4">
+                            <div className="pt-4 border-t border-sky-800 grid grid-cols-2 gap-3 mt-4">
                                 <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                                    <button className="w-full py-4 text-slate-600 font-black uppercase tracking-widest">Connexion</button>
+                                    <button className="w-full py-4 text-white font-black uppercase tracking-widest text-[10px] border border-sky-800 rounded-2xl hover:bg-white/5">Connexion</button>
                                 </Link>
                                 <Link href="/auth/register" onClick={() => setIsMobileMenuOpen(false)}>
-                                    <button className="w-full py-4 bg-amber-400 text-slate-900 font-black rounded-2xl uppercase tracking-widest">Démarrer</button>
+                                    <button className="w-full py-4 bg-amber-400 text-sky-950 font-black rounded-2xl uppercase tracking-widest text-[10px] shadow-lg shadow-amber-500/20">Rejoindre</button>
                                 </Link>
                             </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </nav>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </motion.nav>
+        </header>
     );
 }

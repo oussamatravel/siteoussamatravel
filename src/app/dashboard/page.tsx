@@ -5,6 +5,7 @@ import {
     AlertCircle,
     Clock,
     FileCheck2,
+    FileText,
     FolderOpen,
     Plane,
     PlusCircle,
@@ -15,43 +16,240 @@ import {
     ShieldCheck,
     Globe2,
     Calendar,
-    Send
+    Send,
+    Loader2
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function DashboardOverview() {
     const [isNewRequestModalOpen, setIsNewRequestModalOpen] = useState(false);
     const [requestStep, setRequestStep] = useState(1);
     const [mounted, setMounted] = useState(false);
+    const [userProfile, setUserProfile] = useState<any>(null);
+    const [applications, setApplications] = useState<any[]>([]);
+
+    // Form state
+    const [selectedService, setSelectedService] = useState("");
+    const [targetCountry, setTargetCountry] = useState("");
+    const [targetDate, setTargetDate] = useState("");
+    const [selectedSession, setSelectedSession] = useState("");
+    const [visaCategory, setVisaCategory] = useState("");
+    const [isOtherCountry, setIsOtherCountry] = useState(false);
+    const [isOtherVisaCategory, setIsOtherVisaCategory] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [documents, setDocuments] = useState<any[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const supabase = createClient();
 
     useEffect(() => {
         setMounted(true);
+        fetchData();
     }, []);
 
+    const fetchData = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            // Fetch Profile
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+            setUserProfile(profile);
+
+            // Fetch Applications
+            const { data: apps } = await supabase
+                .from('applications')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+            setApplications(apps || []);
+
+            if (apps && apps.length > 0) {
+                fetchDocuments(user.id, apps[0].id);
+            }
+        }
+    };
+
+    const fetchDocuments = async (userId: string, appId: string) => {
+        const { data, error } = await supabase.storage
+            .from('client_documents')
+            .list(`${userId}/${appId}`);
+
+        if (error) {
+            console.error("Error fetching documents:", error);
+            return;
+        }
+        setDocuments(data || []);
+    };
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !applications[0]) return;
+
+        setUploading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Non authentifié");
+
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random()}.${fileExt}`;
+            const filePath = `${user.id}/${applications[0].id}/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('client_documents')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            // Logique optionnelle : Enregistrer la pièce dans une table 'documents' si nécessaire
+            // Pour l'instant on se base sur le listing du storage
+
+            fetchDocuments(user.id, applications[0].id);
+            alert("Document importé avec succès !");
+        } catch (error: any) {
+            alert("Erreur lors de l'importation : " + error.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleCreateRequest = async () => {
+        setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) return;
+
+        try {
+            const { error } = await supabase
+                .from('applications')
+                .insert([
+                    {
+                        user_id: user.id,
+                        service_type: selectedService,
+                        target_country: targetCountry,
+                        target_date: targetDate || null,
+                        session: selectedSession || null,
+                        visa_category: visaCategory || null,
+                        status: 'en_attente',
+                        reference_number: `OT-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
+                    }
+                ]);
+
+            if (error) throw error;
+
+            setIsNewRequestModalOpen(false);
+            setRequestStep(1);
+            setSelectedService("");
+            setTargetCountry("");
+            setTargetDate("");
+            setSelectedSession("");
+            setVisaCategory("");
+            setIsOtherCountry(false);
+            setIsOtherVisaCategory(false);
+            fetchData(); // Refresh list
+        } catch (err: any) {
+            alert("Erreur lors de la création de la demande : " + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const stats = [
-        { title: "Dossiers Actifs", value: "1", icon: <FolderOpen className="w-6 h-6 text-sky-500" />, bg: "bg-sky-50" },
-        { title: "Documents Validés", value: "3/5", icon: <FileCheck2 className="w-6 h-6 text-emerald-500" />, bg: "bg-emerald-50" },
-        { title: "Prochain Voyage", value: "À définir", icon: <Plane className="w-6 h-6 text-indigo-500" />, bg: "bg-indigo-50" },
+        { title: "Dossiers Actifs", value: applications.length.toString(), icon: <FolderOpen className="w-6 h-6 text-sky-500" />, bg: "bg-sky-50" },
+        { title: "Documents Validés", value: "0", icon: <FileCheck2 className="w-6 h-6 text-emerald-500" />, bg: "bg-emerald-50" },
+        { title: "Prochain Voyage", value: applications[0]?.target_country || "À définir", icon: <Plane className="w-6 h-6 text-indigo-500" />, bg: "bg-indigo-50" },
     ];
 
     const serviceOptions = [
         { id: "etudes", name: "Études à l'étranger", icon: <GraduationCap className="w-6 h-6" />, color: "text-sky-500 bg-sky-50" },
-        { id: "tourisme", name: "Visa Touriste / E-Visa", icon: <Plane className="w-6 h-6" />, color: "text-amber-500 bg-amber-50" },
-        { id: "immigration", name: "Immigration Express", icon: <ShieldCheck className="w-6 h-6" />, color: "text-emerald-500 bg-emerald-50" },
+        { id: "visa", name: "Visa Classique", icon: <ShieldCheck className="w-6 h-6" />, color: "text-blue-600 bg-blue-50" },
+        { id: "evisa", name: "E-Visa (Électronique)", icon: <Globe2 className="w-6 h-6" />, color: "text-amber-500 bg-amber-50" },
+        { id: "immigration", name: "Immigration Express", icon: <FileText className="w-6 h-6" />, color: "text-emerald-500 bg-emerald-50" },
         { id: "assistance", name: "Assistance Documents", icon: <FolderOpen className="w-6 h-6" />, color: "text-indigo-500 bg-indigo-50" },
     ];
 
+    const VISA_COUNTRIES = [
+        { name: "Espagne", flag: "🇪🇸" },
+        { name: "France", flag: "🇫🇷" },
+        { name: "Hollande", flag: "🇳🇱" },
+        { name: "Belgique", flag: "🇧🇪" },
+        { name: "Luxembourg", flag: "🇱🇺" },
+        { name: "Portugal", flag: "🇵🇹" },
+        { name: "Finlande", flag: "🇫🇮" },
+        { name: "Allemagne", flag: "🇩🇪" },
+        { name: "Lituanie", flag: "🇱🇹" },
+        { name: "Italie", flag: "🇮🇹" },
+        { name: "Croatie", flag: "🇭🇷" },
+        { name: "Autriche", flag: "🇦🇹" },
+        { name: "Slovénie", flag: "🇸🇮" },
+        { name: "Hongrie", flag: "🇭🇺" },
+        { name: "Lettonie", flag: "🇱🇻" },
+        { name: "Grèce", flag: "🇬🇷" },
+        { name: "Suisse", flag: "🇨🇭" },
+        { name: "Malte", flag: "🇲🇹" },
+        { name: "Pologne", flag: "🇵🇱" },
+        { name: "Suède", flag: "🇸🇪" },
+        { name: "Turquie", flag: "🇹🇷" },
+        { name: "USA", flag: "🇺🇸" },
+        { name: "Canada", flag: "🇨🇦" },
+        { name: "Royaume-Uni", flag: "🇬🇧" },
+    ];
+
+    const EVISA_COUNTRIES = [
+        { name: "Thaïlande", flag: "🇹🇭" },
+        { name: "Azerbaïdjan", flag: "🇦🇿" },
+        { name: "Égypte", flag: "🇪🇬" },
+        { name: "Oman", flag: "🇴🇲" },
+        { name: "Ouzbékistan", flag: "🇺🇿" },
+        { name: "Vietnam", flag: "🇻🇳" },
+        { name: "Turquie", flag: "🇹🇷" },
+        { name: "Qatar", flag: "🇶🇦" },
+        { name: "Sri Lanka", flag: "🇱🇰" },
+        { name: "Indonésie", flag: "🇮🇩" },
+        { name: "Singapour", flag: "🇸🇬" },
+        { name: "Arabie Saoudite (Omra)", flag: "🇸🇦" },
+        { name: "Arabie Saoudite (Touristique)", flag: "🇸🇦" },
+        { name: "Arménie", flag: "🇦🇲" },
+        { name: "Cambodge", flag: "🇰🇭" },
+        { name: "Chine (1ère demande)", flag: "🇨🇳" },
+        { name: "Chine (Renouvellement)", flag: "🇨🇳" },
+        { name: "Cuba", flag: "🇨🇺" },
+        { name: "Éthiopie", flag: "🇪🇹" },
+        { name: "Jordanie", flag: "🇯🇴" },
+        { name: "Liban", flag: "🇱🇧" },
+        { name: "Tanzanie", flag: "🇹🇿" },
+    ];
+
     if (!mounted) return null;
+
+    const activeDossier = applications[0];
+
+    const getCountryList = () => {
+        if (selectedService === "E-Visa (Électronique)") return EVISA_COUNTRIES;
+        return VISA_COUNTRIES;
+    };
 
     return (
         <div className="p-6 md:p-10 max-w-7xl mx-auto">
             <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 mb-1">Bonjour, Oussama 👋</h1>
+                    <h1 className="text-3xl font-extrabold text-gray-900 mb-1">
+                        Bonjour, {userProfile?.first_name || "Chargement..."} 👋
+                    </h1>
                     <p className="text-gray-500 font-medium tracking-tight">Bienvenue sur votre espace client. Voici l'état de vos demandes.</p>
                 </div>
                 <button
-                    onClick={() => { setIsNewRequestModalOpen(true); setRequestStep(1); }}
+                    onClick={() => {
+                        setIsNewRequestModalOpen(true);
+                        setRequestStep(1);
+                        setSelectedService("");
+                        setTargetCountry("");
+                        setIsOtherCountry(false);
+                    }}
                     className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-95"
                 >
                     <PlusCircle className="w-5 h-5" />
@@ -60,25 +258,24 @@ export default function DashboardOverview() {
             </div>
 
             {/* Alert / Notification Important */}
-            <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-8 p-6 bg-amber-50 border border-amber-100 rounded-[2rem] flex items-start gap-5 relative overflow-hidden"
-            >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-200/20 blur-3xl rounded-full"></div>
-                <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center shrink-0">
-                    <AlertCircle className="w-6 h-6 text-amber-500" />
-                </div>
-                <div className="flex-1">
-                    <h3 className="text-amber-900 font-black text-lg mb-1 uppercase tracking-tighter italic">Action Requise : Passeport Manquant</h3>
-                    <p className="text-amber-800/80 font-bold text-sm mb-4 leading-relaxed">
-                        Pour finaliser votre dossier de <strong className="text-amber-950 font-black uppercase">Visa d'Études Canada</strong>, nous avons besoin d'une copie claire de votre passeport valide.
-                    </p>
-                    <button className="bg-amber-500 text-white px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95">
-                        Transmettre le document
-                    </button>
-                </div>
-            </motion.div>
+            {activeDossier && activeDossier.status === 'en_attente' && (
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8 p-6 bg-amber-50 border border-amber-100 rounded-[2rem] flex items-start gap-5 relative overflow-hidden"
+                >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-200/20 blur-3xl rounded-full"></div>
+                    <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center shrink-0">
+                        <AlertCircle className="w-6 h-6 text-amber-500" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-amber-900 font-black text-lg mb-1 uppercase tracking-tighter italic">Dossier en attente de vérification</h3>
+                        <p className="text-amber-800/80 font-bold text-sm mb-4 leading-relaxed">
+                            Votre demande de <strong className="text-amber-950 font-black uppercase">{activeDossier.service_type}</strong> pour la destination <strong className="text-amber-950 font-black uppercase">{activeDossier.target_country}</strong> est en cours d'analyse.
+                        </p>
+                    </div>
+                </motion.div>
+            )}
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -103,84 +300,113 @@ export default function DashboardOverview() {
 
             {/* Active Dossier */}
             <div className="bg-white border border-slate-100 rounded-[3rem] p-8 md:p-12 shadow-sm mb-10">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-8 border-b border-slate-50">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500">
-                            <FolderOpen className="w-7 h-7" />
-                        </div>
-                        <div>
-                            <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Dossier en Cours</h2>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Référence: OT-2024-001</p>
-                        </div>
-                    </div>
-                    <span className="px-5 py-2 bg-sky-50 text-sky-600 border border-sky-100 font-black text-[10px] uppercase tracking-widest rounded-full flex items-center gap-2 self-start md:self-center">
-                        <Clock className="w-3 h-3" /> En Traitement par l'expert
-                    </span>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                    {/* Timeline / Progress */}
-                    <div className="space-y-8">
-                        <h3 className="font-black text-slate-900 text-xl tracking-tight italic">Visa d'Études - Canada</h3>
-
-                        <div className="relative pl-8 space-y-10 border-l-2 border-slate-100">
-                            {/* Step 1: Done */}
-                            <div className="relative">
-                                <div className="absolute -left-[41px] w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center border-4 border-white shadow-lg">
-                                    <CheckCircle2 className="w-4 h-4 text-white" />
+                {activeDossier ? (
+                    <>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-8 border-b border-slate-50">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500">
+                                    <FolderOpen className="w-7 h-7" />
                                 </div>
-                                <h4 className="font-black text-slate-900 text-sm uppercase tracking-tight">Ouverture du dossier</h4>
-                                <p className="text-xs font-bold text-slate-400 mt-1">Formulaire validé le 12 Mars 2024.</p>
-                            </div>
-
-                            {/* Step 2: Ongoing (Action Req) */}
-                            <div className="relative">
-                                <div className="absolute -left-[41px] w-8 h-8 bg-amber-500 rounded-xl flex items-center justify-center border-4 border-white shadow-lg shadow-amber-200">
-                                    <Clock className="w-4 h-4 text-white animate-pulse" />
+                                <div>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Dossier en Cours</h2>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Référence: {activeDossier.reference_number}</p>
                                 </div>
-                                <h4 className="font-black text-amber-600 text-sm uppercase tracking-tight italic">Analyse des documents</h4>
-                                <p className="text-xs font-bold text-slate-500 mt-1">En attente de votre passeport scanné.</p>
                             </div>
-
-                            {/* Step 3: Pending */}
-                            <div className="relative opacity-30 grayscale">
-                                <div className="absolute -left-[41px] w-8 h-8 bg-slate-200 rounded-xl flex items-center justify-center border-4 border-white"></div>
-                                <h4 className="font-black text-slate-400 text-sm uppercase tracking-tight">Soumission consulaire</h4>
-                                <p className="text-xs font-bold text-slate-300 mt-1">Prévu après validation documentaire.</p>
-                            </div>
+                            <span className="px-5 py-2 bg-sky-50 text-sky-600 border border-sky-100 font-black text-[10px] uppercase tracking-widest rounded-full flex items-center gap-2 self-start md:self-center">
+                                <Clock className="w-3 h-3" /> {activeDossier.status === 'en_attente' ? 'En attente' : 'En Traitement'}
+                            </span>
                         </div>
-                    </div>
 
-                    {/* Document Card Mini */}
-                    <div className="space-y-8">
-                        <h3 className="font-black text-slate-900 text-xl tracking-tight italic uppercase">Dernières Pièces</h3>
-                        <div className="space-y-4">
-                            <div className="p-5 border border-slate-100 bg-slate-50 rounded-2xl flex items-center justify-between hover:shadow-lg hover:bg-white transition-all cursor-pointer group">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center group-hover:text-emerald-500 transition-colors">
-                                        <FileCheck2 className="w-6 h-6" />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                            <div className="space-y-8">
+                                <h3 className="font-black text-slate-900 text-xl tracking-tight italic">{activeDossier.service_type} - {activeDossier.target_country}</h3>
+                                <div className="relative pl-8 space-y-10 border-l-2 border-slate-100">
+                                    <div className="relative">
+                                        <div className="absolute -left-[41px] w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center border-4 border-white shadow-lg">
+                                            <CheckCircle2 className="w-4 h-4 text-white" />
+                                        </div>
+                                        <h4 className="font-black text-slate-900 text-sm uppercase tracking-tight">Ouverture du dossier</h4>
+                                        <p className="text-xs font-bold text-slate-400 mt-1">Dossier créé le {new Date(activeDossier.created_at).toLocaleDateString()}.</p>
                                     </div>
-                                    <div>
-                                        <h4 className="font-black text-slate-800 text-sm">Diplôme Universitaire.pdf</h4>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase">Validé par l'agent Oussama</p>
+                                    <div className="relative">
+                                        <div className="absolute -left-[41px] w-8 h-8 bg-amber-500 rounded-xl flex items-center justify-center border-4 border-white shadow-lg shadow-amber-200">
+                                            <Clock className="w-4 h-4 text-white animate-pulse" />
+                                        </div>
+                                        <h4 className="font-black text-amber-600 text-sm uppercase tracking-tight italic">Analyse des documents</h4>
+                                        <p className="text-xs font-bold text-slate-500 mt-1">L'agent examine vos premières informations.</p>
                                     </div>
                                 </div>
-                                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                             </div>
+                            <div className="space-y-8">
+                                <h3 className="font-black text-slate-900 text-xl tracking-tight italic uppercase">Dernières Pièces</h3>
 
-                            <div className="p-5 border-2 border-dashed border-slate-200 bg-white rounded-2xl flex items-center justify-center hover:bg-slate-50 hover:border-sky-400 transition-all cursor-pointer text-slate-400 py-8 group">
-                                <div className="text-center">
-                                    <PlusCircle className="w-8 h-8 mx-auto mb-2 text-sky-500 group-hover:scale-110 transition-transform" />
-                                    <span className="font-black text-xs uppercase tracking-widest">Importer un document</span>
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    ref={fileInputRef}
+                                    onChange={handleUpload}
+                                    accept=".pdf,image/*"
+                                />
+
+                                <div className="space-y-4">
+                                    {/* Real documents from storage */}
+                                    {documents.length > 0 ? (
+                                        documents.map((doc, idx) => (
+                                            <div key={idx} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-sky-200 transition-all">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-sky-500">
+                                                        <FileText className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-black text-slate-900 truncate max-w-[150px]">{doc.name}</p>
+                                                        <p className="text-[10px] font-bold text-slate-400">Importé le {new Date(doc.created_at).toLocaleDateString()}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase tracking-widest rounded-lg">Reçu</span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center p-6 border border-slate-50 rounded-2xl">
+                                            <p className="text-xs font-bold text-slate-400 italic">Aucun document envoyé pour le moment.</p>
+                                        </div>
+                                    )}
+
+                                    <div
+                                        onClick={() => !uploading && fileInputRef.current?.click()}
+                                        className={`p-5 border-2 border-dashed border-slate-200 bg-white rounded-2xl flex items-center justify-center hover:bg-slate-50 hover:border-sky-400 transition-all cursor-pointer text-slate-400 py-8 group ${uploading ? 'opacity-50 cursor-wait' : ''}`}
+                                    >
+                                        <div className="text-center">
+                                            {uploading ? (
+                                                <Loader2 className="w-8 h-8 mx-auto mb-2 text-sky-500 animate-spin" />
+                                            ) : (
+                                                <PlusCircle className="w-8 h-8 mx-auto mb-2 text-sky-500 group-hover:scale-110 transition-transform" />
+                                            )}
+                                            <span className="font-black text-xs uppercase tracking-widest">
+                                                {uploading ? 'Envoi en cours...' : 'Importer un document'}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <button className="font-black text-sky-600 flex items-center gap-2 hover:text-sky-700 text-xs uppercase tracking-widest pt-4">
-                            Accéder au coffre-fort complet <ArrowRight className="w-4 h-4" />
+                    </>
+                ) : (
+                    <div className="text-center py-20">
+                        <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                            <PlusCircle className="w-10 h-10 text-slate-300" />
+                        </div>
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase mb-2">Aucun dossier actif</h2>
+                        <p className="text-slate-500 font-medium mb-8">Commencez vos démarches en créant votre première demande.</p>
+                        <button
+                            onClick={() => { setIsNewRequestModalOpen(true); setRequestStep(1); }}
+                            className="bg-amber-400 text-gray-900 px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-amber-500 transition-all shadow-xl shadow-amber-200 active:scale-95"
+                        >
+                            Nouvelle demande
                         </button>
                     </div>
-                </div>
+                )}
             </div>
 
             {/* New Request Modal */}
@@ -226,8 +452,8 @@ export default function DashboardOverview() {
                                             {serviceOptions.map((opt) => (
                                                 <button
                                                     key={opt.id}
-                                                    onClick={() => setRequestStep(2)}
-                                                    className="p-6 border border-slate-100 bg-slate-50 rounded-3xl flex flex-col items-center text-center gap-4 hover:shadow-xl hover:bg-white hover:border-amber-400 transition-all group"
+                                                    onClick={() => { setSelectedService(opt.name); setRequestStep(2); }}
+                                                    className={`p-6 border rounded-3xl flex flex-col items-center text-center gap-4 transition-all group ${selectedService === opt.name ? 'border-amber-400 bg-amber-50/50 shadow-inner' : 'border-slate-100 bg-slate-50 hover:shadow-xl hover:bg-white'}`}
                                                 >
                                                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${opt.color} group-hover:scale-110 transition-transform shadow-sm`}>
                                                         {opt.icon}
@@ -238,23 +464,153 @@ export default function DashboardOverview() {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="space-y-8">
+                                    <div className="space-y-8 overflow-y-auto max-h-[60vh] pr-2 custom-scrollbar">
                                         <h3 className="text-lg font-black text-slate-900 italic tracking-tight uppercase">Dites-nous en plus</h3>
                                         <div className="space-y-6">
-                                            <div className="space-y-2">
+                                            <div className="space-y-4">
                                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Pays de Destination</label>
                                                 <div className="relative group">
                                                     <Globe2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                                    <input type="text" placeholder="Ex: Canada, France, Turquie..." className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all font-bold text-slate-900" />
+                                                    <select
+                                                        value={isOtherCountry ? "autre" : targetCountry}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            if (val === "autre") {
+                                                                setIsOtherCountry(true);
+                                                                setTargetCountry("");
+                                                            } else {
+                                                                setIsOtherCountry(false);
+                                                                setTargetCountry(val);
+                                                            }
+                                                        }}
+                                                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all font-bold text-slate-900 appearance-none cursor-pointer"
+                                                    >
+                                                        <option value="" disabled>Sélectionnez un pays</option>
+                                                        {getCountryList().map((c) => (
+                                                            <option key={c.name} value={c.name}>{c.name} {c.flag}</option>
+                                                        ))}
+                                                        <option value="autre">Autre destination...</option>
+                                                    </select>
+                                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                        <PlusCircle className="w-4 h-4 text-slate-400 rotate-45" />
+                                                    </div>
                                                 </div>
+
+                                                {/* Champ manuel si "Autre" est sélectionné */}
+                                                <AnimatePresence>
+                                                    {isOtherCountry && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                                            animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                                                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                                            className="overflow-hidden"
+                                                        >
+                                                            <div className="relative">
+                                                                <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-500" />
+                                                                <input
+                                                                    type="text"
+                                                                    autoFocus
+                                                                    value={targetCountry}
+                                                                    onChange={(e) => setTargetCountry(e.target.value)}
+                                                                    placeholder="Précisez votre destination..."
+                                                                    className="w-full pl-12 pr-4 py-4 bg-amber-50/30 border border-amber-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all font-bold text-slate-900"
+                                                                />
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Date estimée de départ</label>
-                                                <div className="relative group">
-                                                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                                    <input type="date" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all font-bold text-slate-900 uppercase" />
+
+                                            {/* Champs spécifiques : Visa Classique */}
+                                            {selectedService === "Visa Classique" && (
+                                                <div className="space-y-4">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Catégorie de Visa</label>
+                                                    <div className="relative group">
+                                                        <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                                        <select
+                                                            value={isOtherVisaCategory ? "autre_cat" : visaCategory}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                if (val === "autre_cat") {
+                                                                    setIsOtherVisaCategory(true);
+                                                                    setVisaCategory("");
+                                                                } else {
+                                                                    setIsOtherVisaCategory(false);
+                                                                    setVisaCategory(val);
+                                                                }
+                                                            }}
+                                                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all font-bold text-slate-900 appearance-none cursor-pointer"
+                                                        >
+                                                            <option value="" disabled>Choisir une catégorie</option>
+                                                            <option value="Touristique">Touristique 🏖️</option>
+                                                            <option value="Affaire">Affaire 💼</option>
+                                                            <option value="autre_cat">Autre...</option>
+                                                        </select>
+                                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                            <PlusCircle className="w-4 h-4 text-slate-400 rotate-45" />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Champ manuel si "Autre" est sélectionné pour le Visa */}
+                                                    <AnimatePresence>
+                                                        {isOtherVisaCategory && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                                                animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                                                                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                                                className="overflow-hidden"
+                                                            >
+                                                                <div className="relative">
+                                                                    <PlusCircle className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-500" />
+                                                                    <input
+                                                                        type="text"
+                                                                        autoFocus
+                                                                        value={visaCategory}
+                                                                        onChange={(e) => setVisaCategory(e.target.value)}
+                                                                        placeholder="Quelle catégorie de visa ?"
+                                                                        className="w-full pl-12 pr-4 py-4 bg-amber-50/30 border border-amber-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all font-bold text-slate-900"
+                                                                    />
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
                                                 </div>
-                                            </div>
+                                            )}
+
+                                            {/* Champs spécifiques : Études */}
+                                            {selectedService === "Études à l'étranger" ? (
+                                                <div className="space-y-4">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Session d'admission souhaitée</label>
+                                                    <div className="relative group">
+                                                        <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                                        <select
+                                                            value={selectedSession}
+                                                            onChange={(e) => setSelectedSession(e.target.value)}
+                                                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all font-bold text-slate-900 appearance-none cursor-pointer"
+                                                        >
+                                                            <option value="" disabled>Choisir une session</option>
+                                                            <option value="Hiver">Hiver (Janvier) ❄️</option>
+                                                            <option value="Automne">Automne (Septembre) 🍂</option>
+                                                        </select>
+                                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                            <PlusCircle className="w-4 h-4 text-slate-400 rotate-45" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-4">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Date estimée de départ</label>
+                                                    <div className="relative group">
+                                                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                                        <input
+                                                            type="date"
+                                                            value={targetDate}
+                                                            onChange={(e) => setTargetDate(e.target.value)}
+                                                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all font-bold text-slate-900 uppercase"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -264,16 +620,16 @@ export default function DashboardOverview() {
                                 {requestStep === 2 ? (
                                     <button onClick={() => setRequestStep(1)} className="text-xs font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors">Retour</button>
                                 ) : <div />}
-                                <button
-                                    onClick={() => {
-                                        if (requestStep === 1) setRequestStep(2);
-                                        else setIsNewRequestModalOpen(false);
-                                    }}
-                                    className="px-10 py-4 bg-slate-900 text-white font-black text-xs rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 uppercase tracking-widest flex items-center gap-3"
-                                >
-                                    {requestStep === 1 ? "Suivant" : "Lancer la demande"}
-                                    {requestStep === 2 && <Send className="w-4 h-4" />}
-                                </button>
+
+                                {requestStep === 2 && (
+                                    <button
+                                        onClick={handleCreateRequest}
+                                        disabled={loading || !targetCountry}
+                                        className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-3 hover:bg-slate-800 transition-all disabled:opacity-50"
+                                    >
+                                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" /> Envoyer la demande</>}
+                                    </button>
+                                )}
                             </div>
                         </motion.div>
                     </div>

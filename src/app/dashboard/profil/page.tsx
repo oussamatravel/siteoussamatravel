@@ -17,34 +17,77 @@ import {
     Loader2
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ProfilPage() {
     const [mounted, setMounted] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const supabase = createClient();
 
     // Form States
     const [profileData, setProfileData] = useState({
-        name: "Oussama Travel",
-        email: "oussama@travel.dz",
-        phone: "+213 555 12 34 56",
-        city: "Alger / Bejaia",
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+        city: "Non renseigné",
         profilePic: null as string | null
     });
 
     useEffect(() => {
         setMounted(true);
+        fetchProfile();
     }, []);
 
-    const handleSave = () => {
+    const fetchProfile = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (profile) {
+                setProfileData({
+                    first_name: profile.first_name || "",
+                    last_name: profile.last_name || "",
+                    email: user.email || "",
+                    phone: profile.phone || "",
+                    city: "Alger / Bejaia", // Valeur par défaut si non en base
+                    profilePic: null
+                });
+            }
+        }
+    };
+
+    const handleSave = async () => {
         setIsSaving(true);
-        // Simulation d'enregistrement
-        setTimeout(() => {
-            setIsSaving(false);
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) return;
+
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    first_name: profileData.first_name,
+                    last_name: profileData.last_name,
+                    phone: profileData.phone,
+                })
+                .eq('id', user.id);
+
+            if (error) throw error;
+
             setShowSuccess(true);
             setTimeout(() => setShowSuccess(false), 3000);
-        }, 1500);
+        } catch (err: any) {
+            alert("Erreur lors de la mise à jour : " + err.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,17 +152,13 @@ export default function ProfilPage() {
                         </button>
                     </div>
 
-                    <h2 className="text-2xl font-extrabold text-gray-900 mb-1">{profileData.name}</h2>
-                    <p className="text-gray-500 font-medium mb-6">Client depuis Janvier 2024</p>
+                    <h2 className="text-2xl font-extrabold text-gray-900 mb-1">{profileData.first_name} {profileData.last_name}</h2>
+                    <p className="text-gray-500 font-medium mb-6">Client Oussama Travel</p>
 
                     <div className="w-full space-y-3">
                         <div className="flex items-center gap-3 p-3 bg-emerald-50 text-emerald-700 font-bold text-sm rounded-xl border border-emerald-100">
                             <ShieldCheck className="w-5 h-5" />
                             Compte Vérifié
-                        </div>
-                        <div className="flex items-center gap-3 p-3 bg-sky-50 text-sky-700 font-bold text-sm rounded-xl border border-sky-100">
-                            <Users className="w-5 h-5 text-sky-600" />
-                            Candidat - Canada
                         </div>
                     </div>
                 </div>
@@ -138,21 +177,30 @@ export default function ProfilPage() {
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Nom Complet</label>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Prénom</label>
                                 <input
                                     type="text"
-                                    value={profileData.name}
-                                    onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                                    value={profileData.first_name}
+                                    onChange={(e) => setProfileData({ ...profileData, first_name: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition-all font-medium text-gray-900"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Email</label>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Nom</label>
+                                <input
+                                    type="text"
+                                    value={profileData.last_name}
+                                    onChange={(e) => setProfileData({ ...profileData, last_name: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition-all font-medium text-gray-900"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Email (Non modifiable)</label>
                                 <input
                                     type="email"
+                                    disabled
                                     value={profileData.email}
-                                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition-all font-medium text-gray-900"
+                                    className="w-full px-4 py-3 bg-slate-100 border border-slate-100 rounded-xl font-medium text-gray-400 cursor-not-allowed"
                                 />
                             </div>
                             <div>
@@ -161,15 +209,6 @@ export default function ProfilPage() {
                                     type="tel"
                                     value={profileData.phone}
                                     onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition-all font-medium text-gray-900"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Ville de Résidence</label>
-                                <input
-                                    type="text"
-                                    value={profileData.city}
-                                    onChange={(e) => setProfileData({ ...profileData, city: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition-all font-medium text-gray-900"
                                 />
                             </div>
@@ -214,17 +253,6 @@ export default function ProfilPage() {
                                     </div>
                                 </div>
                                 <button className="px-4 py-2 border border-slate-200 text-gray-700 font-bold text-xs rounded-lg hover:bg-white transition-all uppercase tracking-wider">Changer</button>
-                            </div>
-
-                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 opacity-60 grayscale pointer-events-none">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white rounded-xl shadow-sm"><Bell className="w-5 h-5 text-gray-400" /></div>
-                                    <div>
-                                        <div className="font-bold text-gray-900 text-sm">Authentification à 2 Facteurs (2FA)</div>
-                                        <div className="text-xs text-red-500 font-bold italic">Désactivé</div>
-                                    </div>
-                                </div>
-                                <button className="px-4 py-2 bg-emerald-500 text-white font-bold text-xs rounded-lg hover:bg-emerald-600 transition-all uppercase tracking-wider">Activer</button>
                             </div>
                         </div>
                     </motion.div>

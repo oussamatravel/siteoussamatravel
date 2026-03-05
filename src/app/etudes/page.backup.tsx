@@ -29,87 +29,87 @@ export default function Etudes() {
         {
             code: "fr",
             country: "France",
-            desc: "Procédure administrative des étudiants algériens en France. Système d'excellence via l'Espace Campus France. Frais de scolarité abordables et subventionnés par l'Etat français. Accompagnement de A à Z : Admission, TCF/DELF, Hébergement, Visa.",
+            desc: "Espace Campus France : éducation d'excellence et frais de scolarité subventionnés.",
             icon: "🇫🇷",
             image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=800&auto=format&fit=crop",
             color: "text-blue-700",
             bg: "bg-blue-50",
-            programs: ["LMD (Licence/Master/Doctorat)", "Grandes Écoles", "Écoles d'Ingénieur", "BTS/DUT"]
+            programs: ["LMD (Licence/Master/Doctorat)", "Grandes Écoles", "Écoles d'Ingénieur"]
         },
         {
             code: "ca",
             country: "Canada",
-            desc: "Le Canada compte 96 universités très accueillantes pour les étudiants internationaux. Nous vous accompagnons pour l'admission (AEC, DEC, BAC, Maîtrise), le CAQ, et le Permis d'Études Canadien.",
+            desc: "Diplômes reconnus mondialement et excellentes opportunités de travail post-études.",
             icon: "🇨🇦",
             image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800&auto=format&fit=crop",
             color: "text-red-600",
             bg: "bg-red-50",
-            programs: ["DEC (Collégial)", "Bachelor (Universitaire)", "Maîtrise & Doctorat", "AEC"]
+            programs: ["DEC / AEC", "Bachelor (Baccalauréat)", "Maîtrise & MBA"]
         },
         {
             code: "es",
             country: "Espagne",
-            desc: "Idéal pour les étudiants internationaux souhaitant allier qualité de vie exceptionnelle, coût de scolarité accessible (via l'UNEDasiss) et grandes universités publiques (Barcelone, Madrid, Valence).",
+            desc: "Cadre de vie exceptionnel et universités de renommée internationale.",
             icon: "🇪🇸",
             image: "https://images.unsplash.com/photo-1509840144325-4b66ff5a0c63?q=80&w=800&auto=format&fit=crop",
             color: "text-yellow-600",
             bg: "bg-yellow-50",
-            programs: ["Grado Universitaire", "Programmes Master", "Doctorat"]
+            programs: ["Grado", "Master", "Doctorado"]
         },
         {
             code: "be",
             country: "Belgique",
-            desc: "Équivalence de diplômes souple et cadre francophone. Proximité directe avec les institutions européennes. Qualité d'enseignement supérieure à un tarif très avantageux.",
+            desc: "Au cœur de l'Europe, des programmes bilingues et une qualité d'enseignement supérieure.",
             icon: "🇧🇪",
             image: "https://images.unsplash.com/photo-1491557345352-5929e343eb89?q=80&w=800&auto=format&fit=crop",
             color: "text-red-700",
             bg: "bg-red-50",
-            programs: ["Bachelier", "Master", "Filières Ingénieur"]
+            programs: ["Bachelier", "Master", "Spécialisations"]
         },
         {
             code: "us",
             country: "États-Unis",
-            desc: "Le rêve américain s'ouvre à vous : les campus universitaires les plus avancés au monde et une grande diversité de cursus de prestige mondial (IVY League etc.).",
+            desc: "L'excellence académique américaine et des campus à la pointe de la technologie.",
             icon: "🇺🇸",
             image: "https://images.unsplash.com/photo-1550929989-9dd3872087be?q=80&w=800&auto=format&fit=crop",
             color: "text-blue-900",
             bg: "bg-blue-50",
-            programs: ["Bachelor's Degree", "Master (MS/MBA)", "Doctorat (PhD)"]
+            programs: ["Bachelor (4 ans)", "Master (MS/MBA)", "Doctorat (PhD)"]
         },
         {
             code: "my",
             country: "Malaisie",
-            desc: "L'alternative parfaite : hub éducatif asiatique en pleine expansion, proposant des diplômes internationaux anglo-saxons avec un coût de vie et de scolarité extrêmement réduit.",
+            desc: "Hub éducatif majeur en Asie avec des diplômes internationaux à prix compétitifs.",
             icon: "🇲🇾",
             image: "https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=800&auto=format&fit=crop",
             color: "text-emerald-800",
             bg: "bg-emerald-50",
-            programs: ["Bachelor (Twinning Programs)", "Master", "PhD"]
+            programs: ["Bachelor", "Master Research", "PhD"]
         },
         {
             code: "it",
             country: "Italie",
-            desc: "Berceau de la culture mondiale, l'Italie séduit par ses filières d'excellence (Architecture, Design, Médecine), avec des bourses régionales attractives (Isee).",
+            desc: "Berceau de l'art et de l'architecture, offrant des cursus prestigieux en design et sciences.",
             icon: "🇮🇹",
             image: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=800&auto=format&fit=crop",
             color: "text-green-700",
             bg: "bg-green-50",
-            programs: ["Laurea Triennale", "Laurea Magistrale", "MBA & Arts"]
+            programs: ["Laurea", "Laurea Magistrale", "Masters Spécialisés"]
         },
         {
             code: "tr",
             country: "Turquie",
-            desc: "Destination prisée grâce aux bourses Türkiye Bursları, ses universités dynamiques (Istanbul, Ankara) et de nombreuses filières enseignées 100% en anglais ou turc.",
+            desc: "Pont entre Orient et Occident, des bourses attractives et des universités dynamiques.",
             icon: "🇹🇷",
             image: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=800&auto=format&fit=crop",
             color: "text-red-600",
             bg: "bg-red-50",
-            programs: ["Licence (Lisans)", "Master (Yüksek Lisans)", "Année Prépa Langue"]
+            programs: ["Licence", "Master", "Cours de Langue (TÖMER)"]
         },
         {
             code: "ie",
             country: "Irlande",
-            desc: "Le hub européen de la Tech (siège de Google, Apple, Meta). Idéal pour les études anglophones post-Brexit avec d'excellentes opportunités de travail pendant et après les études.",
+            desc: "Terre d'innovation technologique et d'accueil chaleureux pour les étudiants.",
             icon: "🇮🇪",
             image: "https://images.unsplash.com/photo-1590089415225-401ed6f9db8e?q=80&w=800&auto=format&fit=crop",
             color: "text-green-800",
@@ -119,7 +119,7 @@ export default function Etudes() {
         {
             code: "cn",
             country: "Chine",
-            desc: "L'étoile montante de l'éducation mondiale. Des bourses du gouvernement chinois (CGS) très généreuses et des cursus technologiques/business de pointe enseignés en anglais.",
+            desc: "Nouvelle puissance éducative mondiale avec des opportunités uniques de carrière.",
             icon: "🇨🇳",
             image: "https://images.unsplash.com/photo-1547984609-4b137d17a4ad?q=80&w=800&auto=format&fit=crop",
             color: "text-red-700",
@@ -129,7 +129,7 @@ export default function Etudes() {
         {
             code: "cz",
             country: "Rép. Tchèque",
-            desc: "Qualité d'enseignement historique au centre de l'Europe. Un coût de la vie très abordable et des centaines de programmes enseignés entièrement en anglais (Médecine, IT).",
+            desc: "Qualité d'enseignement historique au centre de l'Europe à un coût très abordable.",
             icon: "🇨🇿",
             image: "https://images.unsplash.com/photo-1519677100203-ad0179511959?q=80&w=800&auto=format&fit=crop",
             color: "text-blue-800",
@@ -139,17 +139,17 @@ export default function Etudes() {
         {
             code: "ru",
             country: "Russie",
-            desc: "Tradition scientifique forte, très réputée pour l'accès simplifié aux cursus médicaux (Médecine, Pharmacie) et techniques sans concours draconiens. Cursus en Russe ou Anglais.",
+            desc: "Tradition scientifique forte et accès simplifié aux cursus médicaux et techniques.",
             icon: "🇷🇺",
             image: "https://images.unsplash.com/photo-1513326738677-b964603b136d?q=80&w=800&auto=format&fit=crop",
             color: "text-blue-600",
             bg: "bg-blue-50",
-            programs: ["Médecine", "Ingénierie", "Année Préparatoire (Langue)"]
+            programs: ["Médecine", "Ingénierie", "Langue Russe"]
         },
         {
             code: "de",
             country: "Allemagne",
-            desc: "Ingénierie et Technologie de pointe. Les études dans les universités publiques sont souvent gratuites ou très peu coûteuses. Forte demande sur le marché de l'emploi local.",
+            desc: "Ingénierie et Technologie de pointe. Études de renommée mondiale souvent gratuites.",
             icon: "🇩🇪",
             image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=800&auto=format&fit=crop",
             color: "text-amber-900",

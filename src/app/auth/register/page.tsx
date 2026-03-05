@@ -1,11 +1,55 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { User, Mail, Key, Globe2, ArrowRight, CheckCircle2, ShieldCheck, Phone } from "lucide-react";
+import { User, Mail, Key, ArrowRight, CheckCircle2, ShieldCheck, Phone, Loader2 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+    const supabase = createClient();
+
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const { error: signUpError } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        first_name: firstName,
+                        last_name: lastName,
+                        phone: phone,
+                    },
+                    emailRedirectTo: `${window.location.origin}/auth/callback`,
+                },
+            });
+
+            if (signUpError) throw signUpError;
+
+            // En mode démo/test on peut rediriger directement si l'auto-confirm est activé sur Supabase
+            // Sinon on prévient l'utilisateur de vérifier ses emails
+            alert("Compte créé avec succès ! Veuillez vérifier votre boîte email pour valider votre inscription.");
+            router.push("/auth/login");
+        } catch (err: any) {
+            setError(err.message || "Une erreur est survenue lors de l'inscription.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden">
             {/* Background Decor */}
@@ -31,7 +75,14 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="bg-white border border-slate-100 p-8 md:p-12 rounded-[2.5rem] shadow-2xl shadow-blue-500/5 mb-8">
-                    <form className="space-y-6">
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-sm font-bold flex items-center gap-3">
+                            <ShieldCheck className="w-5 h-5 shrink-0" />
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleRegister} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-widest px-1">Prénom</label>
@@ -39,6 +90,9 @@ export default function RegisterPage() {
                                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-amber-500 transition-colors" />
                                     <input
                                         type="text"
+                                        required
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
                                         placeholder="Prénom"
                                         className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/50 transition-all font-medium text-gray-900"
                                     />
@@ -50,6 +104,9 @@ export default function RegisterPage() {
                                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-amber-500 transition-colors" />
                                     <input
                                         type="text"
+                                        required
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
                                         placeholder="Nom"
                                         className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/50 transition-all font-medium text-gray-900"
                                     />
@@ -63,6 +120,9 @@ export default function RegisterPage() {
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-amber-500 transition-colors" />
                                 <input
                                     type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     placeholder="votre@email.com"
                                     className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/50 transition-all font-medium text-gray-900"
                                 />
@@ -75,7 +135,25 @@ export default function RegisterPage() {
                                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-amber-500 transition-colors" />
                                 <input
                                     type="tel"
+                                    required
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
                                     placeholder="05 55 00 00 00"
+                                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/50 transition-all font-medium text-gray-900"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-widest px-1">Choisir un Mot de passe</label>
+                            <div className="relative group">
+                                <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-amber-500 transition-colors" />
+                                <input
+                                    type="password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
                                     className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/50 transition-all font-medium text-gray-900"
                                 />
                             </div>
@@ -93,11 +171,18 @@ export default function RegisterPage() {
                         </div>
 
                         <button
-                            type="button"
-                            className="w-full py-5 bg-amber-400 text-gray-900 font-black text-lg rounded-2xl hover:bg-amber-500 shadow-xl shadow-amber-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-widest"
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-5 bg-amber-400 text-gray-900 font-black text-lg rounded-2xl hover:bg-amber-500 shadow-xl shadow-amber-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-widest disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            Créer Mon Compte
-                            <ArrowRight className="w-6 h-6" />
+                            {loading ? (
+                                <Loader2 className="w-6 h-6 animate-spin" />
+                            ) : (
+                                <>
+                                    Créer Mon Compte
+                                    <ArrowRight className="w-6 h-6" />
+                                </>
+                            )}
                         </button>
                     </form>
                 </div>

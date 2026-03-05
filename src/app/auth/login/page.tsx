@@ -1,11 +1,42 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mail, Key, Globe2, ArrowRight, Github, Chrome, ShieldCheck } from "lucide-react";
+import { Mail, Key, ArrowRight, Chrome, ShieldCheck, Loader2 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+    const supabase = createClient();
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const { error: loginError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (loginError) throw loginError;
+
+            router.push("/dashboard");
+            router.refresh(); // Pour forcer la mise à jour des Server Components
+        } catch (err: any) {
+            setError(err.message || "Identifiants invalides ou erreur de connexion.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-white flex items-center justify-center p-4 relative overflow-hidden">
             {/* Background Decor */}
@@ -31,13 +62,23 @@ export default function LoginPage() {
                 </div>
 
                 <div className="bg-white border border-slate-100 p-8 md:p-12 rounded-[2.5rem] shadow-2xl shadow-blue-500/5 mb-8">
-                    <form className="space-y-6">
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-sm font-bold flex items-center gap-3">
+                            <ShieldCheck className="w-5 h-5 shrink-0" />
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleLogin} className="space-y-6">
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-widest px-1">Email Personnel</label>
                             <div className="relative group">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-sky-500 transition-colors" />
                                 <input
                                     type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     placeholder="votre@email.com"
                                     className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500/50 transition-all font-medium text-gray-900"
                                 />
@@ -53,21 +94,29 @@ export default function LoginPage() {
                                 <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-sky-500 transition-colors" />
                                 <input
                                     type="password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
                                     className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500/50 transition-all font-medium text-gray-900"
                                 />
                             </div>
                         </div>
 
-                        <Link href="/dashboard" className="block pt-2">
-                            <button
-                                type="button"
-                                className="w-full py-5 bg-sky-600 text-white font-black text-lg rounded-2xl hover:bg-sky-700 shadow-xl shadow-sky-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-widest"
-                            >
-                                Connexion
-                                <ArrowRight className="w-6 h-6" />
-                            </button>
-                        </Link>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-5 bg-sky-600 text-white font-black text-lg rounded-2xl hover:bg-sky-700 shadow-xl shadow-sky-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-widest disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <Loader2 className="w-6 h-6 animate-spin" />
+                            ) : (
+                                <>
+                                    Connexion
+                                    <ArrowRight className="w-6 h-6" />
+                                </>
+                            )}
+                        </button>
                     </form>
 
                     <div className="relative my-10 flex items-center justify-center">
