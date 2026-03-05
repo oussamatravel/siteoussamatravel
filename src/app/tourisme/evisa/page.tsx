@@ -7,6 +7,7 @@ import Link from "next/link";
 const evisas = [
     {
         flag: "🇹🇭",
+        code: "th",
         country: "Thaïlande",
         type: "Visa 30 jours",
         delai: "15 à 25 jours ouvrables",
@@ -16,6 +17,7 @@ const evisas = [
     },
     {
         flag: "🇦🇿",
+        code: "az",
         country: "Azerbaïdjan",
         type: "Visa 30 jours",
         delai: "1 à 3 jours ouvrables",
@@ -25,6 +27,7 @@ const evisas = [
     },
     {
         flag: "🇪🇬",
+        code: "eg",
         country: "Égypte",
         type: "E-Visa",
         delai: "24 heures ouvrables",
@@ -34,6 +37,7 @@ const evisas = [
     },
     {
         flag: "🇴🇲",
+        code: "om",
         country: "Oman",
         type: "Visa 10 jours",
         delai: "2 jours ouvrables",
@@ -43,6 +47,7 @@ const evisas = [
     },
     {
         flag: "🇺🇿",
+        code: "uz",
         country: "Ouzbékistan",
         type: "Visa 1 mois",
         delai: "10 jours ouvrables",
@@ -52,6 +57,7 @@ const evisas = [
     },
     {
         flag: "🇻🇳",
+        code: "vn",
         country: "Vietnam",
         type: "Visa 30 jours",
         delai: "3 à 10 jours ouvrables",
@@ -61,6 +67,7 @@ const evisas = [
     },
     {
         flag: "🇹🇷",
+        code: "tr",
         country: "Turquie",
         type: "Visa 30 jours",
         delai: "24 heures ouvrables",
@@ -70,6 +77,7 @@ const evisas = [
     },
     {
         flag: "🇶🇦",
+        code: "qa",
         country: "Qatar",
         type: "Visa 1 mois",
         delai: "72 heures ouvrables",
@@ -79,6 +87,7 @@ const evisas = [
     },
     {
         flag: "🇱🇰",
+        code: "lk",
         country: "Sri Lanka",
         type: "Visa 30 jours",
         delai: "2 à 6 jours ouvrables",
@@ -88,6 +97,7 @@ const evisas = [
     },
     {
         flag: "🇮🇩",
+        code: "id",
         country: "Indonésie",
         type: "Visa 30 jours",
         delai: "8 à 12 jours ouvrables",
@@ -97,6 +107,7 @@ const evisas = [
     },
     {
         flag: "🇸🇬",
+        code: "sg",
         country: "Singapour",
         type: "Visa 30 jours",
         delai: "5 à 10 jours ouvrables",
@@ -106,6 +117,7 @@ const evisas = [
     },
     {
         flag: "🇸🇦",
+        code: "sa",
         country: "Arabie Saoudite – Omra",
         type: "Visa Omra 30 jours",
         delai: "5 jours ouvrables",
@@ -115,6 +127,7 @@ const evisas = [
     },
     {
         flag: "🇸🇦",
+        code: "sa",
         country: "Arabie Saoudite – Touristique",
         type: "Visa Touristique 90 jours",
         delai: "5 jours ouvrables",
@@ -124,6 +137,7 @@ const evisas = [
     },
     {
         flag: "🇦🇲",
+        code: "am",
         country: "Arménie",
         type: "Visa Touristique 30 jours",
         delai: "5 jours ouvrables",
@@ -133,6 +147,7 @@ const evisas = [
     },
     {
         flag: "🇰🇭",
+        code: "kh",
         country: "Cambodge",
         type: "Visa 30 jours",
         delai: "5 jours ouvrables",
@@ -142,6 +157,7 @@ const evisas = [
     },
     {
         flag: "🇨🇳",
+        code: "cn",
         country: "Chine – Première Demande",
         type: "Visa Touristique",
         delai: "7 jours ouvrables",
@@ -151,6 +167,7 @@ const evisas = [
     },
     {
         flag: "🇨🇳",
+        code: "cn",
         country: "Chine – Renouvellement",
         type: "Visa Touristique",
         delai: "7 jours ouvrables",
@@ -160,6 +177,7 @@ const evisas = [
     },
     {
         flag: "🇨🇺",
+        code: "cu",
         country: "Cuba",
         type: "Visa Touristique",
         delai: "24 heures ouvrables",
@@ -169,6 +187,7 @@ const evisas = [
     },
     {
         flag: "🇪🇹",
+        code: "et",
         country: "Éthiopie",
         type: "Visa 30 jours",
         delai: "7 jours ouvrables",
@@ -178,6 +197,7 @@ const evisas = [
     },
     {
         flag: "🇯🇴",
+        code: "jo",
         country: "Jordanie",
         type: "Visa 90 jours",
         delai: "24 heures ouvrables",
@@ -187,6 +207,7 @@ const evisas = [
     },
     {
         flag: "🇱🇧",
+        code: "lb",
         country: "Liban",
         type: "Visa 90 jours",
         delai: "7 jours ouvrables",
@@ -196,6 +217,7 @@ const evisas = [
     },
     {
         flag: "🇹🇿",
+        code: "tz",
         country: "Tanzanie",
         type: "Visa Touristique",
         delai: "7 jours ouvrables",
@@ -273,18 +295,33 @@ export default function EvisaPage() {
                                     className="bg-white rounded-[2.5rem] shadow-lg border border-slate-100 hover:shadow-2xl hover:border-sky-200 transition-all overflow-hidden group flex flex-col h-full"
                                 >
                                     {/* Header */}
-                                    <div className={`bg-gradient-to-br ${ev.color} p-8 flex items-center justify-between`}>
-                                        <div>
-                                            <span className="text-5xl">{ev.flag}</span>
-                                            <h3 className="text-white font-black text-xl mt-3 leading-tight">{ev.country}</h3>
-                                            <span className="text-white/80 text-xs font-bold uppercase tracking-widest">{ev.type}</span>
+                                    <div className={`relative h-56 bg-gradient-to-br ${ev.color} p-8 flex flex-col justify-end overflow-hidden`}>
+                                        <div className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay group-hover:opacity-40 transition-opacity duration-500">
+                                            <img
+                                                src={`https://flagcdn.com/w320/${ev.code}.png`}
+                                                alt={`Drapeau ${ev.country}`}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            />
                                         </div>
-                                        {ev.fast && (
-                                            <div className="flex flex-col items-center gap-1 bg-white/20 rounded-2xl px-3 py-2 backdrop-blur-sm">
-                                                <Zap className="w-5 h-5 text-yellow-300" />
-                                                <span className="text-white text-[9px] font-black uppercase tracking-widest">Express</span>
+                                        <div className="absolute top-4 right-4 z-10">
+                                            {ev.fast && (
+                                                <div className="flex flex-col items-center gap-1 bg-white/20 rounded-2xl px-3 py-2 backdrop-blur-md border border-white/20 shadow-lg">
+                                                    <Zap className="w-5 h-5 text-yellow-300" />
+                                                    <span className="text-white text-[9px] font-black uppercase tracking-widest">Express</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="relative z-10 mt-auto">
+                                            <div className="w-16 h-12 mb-4 rounded-lg overflow-hidden border border-white/30 shadow-2xl group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300">
+                                                <img
+                                                    src={`https://flagcdn.com/w160/${ev.code}.png`}
+                                                    alt={ev.country}
+                                                    className="w-full h-full object-cover"
+                                                />
                                             </div>
-                                        )}
+                                            <h3 className="text-white font-black text-2xl leading-tight drop-shadow-md mb-1">{ev.country}</h3>
+                                            <span className="text-white/90 text-[10px] font-black uppercase tracking-widest drop-shadow-md">{ev.type}</span>
+                                        </div>
                                     </div>
 
                                     {/* Body */}
