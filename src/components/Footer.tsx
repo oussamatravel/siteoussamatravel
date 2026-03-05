@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
     Facebook,
     Instagram,
@@ -23,10 +24,11 @@ export default function Footer() {
                     {/* Brand Section */}
                     <div className="space-y-8">
                         <Link href="/" className="inline-block">
-                            <div className="font-bold flex items-center gap-2">
-                                <span className="text-2xl tracking-wider font-black">OUSSAMA</span>
-                                <span className="text-3xl text-amber-500" style={{ fontFamily: 'cursive' }}>Travel</span>
-                            </div>
+                            <img
+                                src="/logo.png"
+                                alt="Oussama Travel"
+                                className="h-16 w-auto object-contain brightness-0 invert"
+                            />
                         </Link>
                         <p className="text-slate-400 font-medium leading-relaxed">
                             Votre agence de confiance pour le tourisme, les études et l'immigration. Nous transformons vos rêves internationaux en réalité.
@@ -46,9 +48,11 @@ export default function Footer() {
                         <ul className="space-y-4">
                             {[
                                 { name: "Accueil", href: "/" },
+                                { name: "À Propos", href: "/a-propos" },
                                 { name: "Services", href: "/#services" },
                                 { name: "Études", href: "/etudes" },
                                 { name: "Immigration", href: "/immigration" },
+                                { name: "Contact", href: "/contact" },
                                 { name: "Blog", href: "/blog" },
                             ].map((link) => (
                                 <li key={link.name}>
@@ -121,8 +125,8 @@ export default function Footer() {
                         © {new Date().getFullYear()} Oussama Travel Algeria. Tous droits réservés.
                     </p>
                     <div className="flex gap-8 text-slate-500 text-sm font-medium">
-                        <a href="#" className="hover:text-white transition-colors">Mentions Légales</a>
-                        <a href="#" className="hover:text-white transition-colors">Confidentialité</a>
+                        <Link href="/legal/mentions-legales" className="hover:text-white transition-colors">Mentions Légales</Link>
+                        <Link href="/legal/confidentialite" className="hover:text-white transition-colors">Confidentialité</Link>
                     </div>
                 </div>
             </div>

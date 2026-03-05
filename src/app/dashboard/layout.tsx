@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { LayoutDashboard, FolderOpen, FileCheck2, UserCircle, Bell, LogOut, Menu, X, CreditCard } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -24,9 +25,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Sidebar Desktop */}
             <aside className="hidden md:flex flex-col w-64 bg-slate-900 text-slate-300 border-r border-slate-800 fixed h-full z-40">
                 <div className="p-6 border-b border-slate-800">
-                    <Link href="/" className="flex items-center gap-2 text-white">
-                        <span className="text-xl font-bold tracking-wider">OUSSAMA</span>
-                        <span className="text-2xl text-amber-500" style={{ fontFamily: 'cursive' }}>Travel</span>
+                    <Link href="/" className="flex items-center gap-2">
+                        <img
+                            src="/logo.png"
+                            alt="Oussama Travel Logo"
+                            className="h-10 w-auto object-contain"
+                        />
                     </Link>
                 </div>
 
@@ -58,8 +62,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Header Mobile */}
             <div className="md:hidden fixed top-0 w-full bg-slate-900 text-white z-50 flex items-center justify-between p-4 border-b border-slate-800">
                 <Link href="/" className="flex items-center gap-2">
-                    <span className="text-lg font-bold tracking-wider">OUSSAMA</span>
-                    <span className="text-xl text-amber-500" style={{ fontFamily: 'cursive' }}>Travel</span>
+                    <img
+                        src="/logo.png"
+                        alt="Oussama Travel Logo"
+                        className="h-8 w-auto object-contain"
+                    />
                 </Link>
                 <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 bg-slate-800 rounded-lg">
                     {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

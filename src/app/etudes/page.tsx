@@ -13,7 +13,8 @@ import {
     CheckCircle2,
     Compass,
     Backpack,
-    School
+    School,
+    ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
 
@@ -26,31 +27,121 @@ export default function Etudes() {
 
     const destinations = [
         {
-            country: "Canada",
-            desc: "Accédez à un diplôme nord-américain reconnu mondialement et profitez du permis de travail post-diplôme.",
-            icon: "🍁",
-            image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800&auto=format&fit=crop",
-            color: "text-red-600",
-            bg: "bg-red-50",
-            programs: ["Admission Collège (DEC/AEC)", "Bachelor (Licence)", "Maîtrise & PhD"]
-        },
-        {
             country: "France",
-            desc: "Espace Campus France : bénéficiez d'une éducation de classe mondiale avec des frais de scolarité subventionnés.",
+            desc: "Espace Campus France : éducation d'excellence et frais de scolarité subventionnés.",
             icon: "🇫🇷",
             image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=800&auto=format&fit=crop",
             color: "text-blue-700",
             bg: "bg-blue-50",
-            programs: ["LMD (Licence/Master/Doctorat)", "Grandes Écoles de Commerce", "Écoles d'Ingénieur"]
+            programs: ["LMD (Licence/Master/Doctorat)", "Grandes Écoles", "Écoles d'Ingénieur"]
         },
         {
-            country: "Royaume-Uni",
-            desc: "Tradition d'excellence académique. Obtenez votre Master en seulement un an d'études intensives.",
-            icon: "🇬🇧",
-            image: "https://images.unsplash.com/photo-1486825586573-7131f7991bcc?q=80&w=800&auto=format&fit=crop",
-            color: "text-indigo-800",
-            bg: "bg-indigo-50",
-            programs: ["Foundation Course", "Undergraduate", "Postgraduate (Master)"]
+            country: "Canada",
+            desc: "Diplômes reconnus mondialement et excellentes opportunités de travail post-études.",
+            icon: "🇨🇦",
+            image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800&auto=format&fit=crop",
+            color: "text-red-600",
+            bg: "bg-red-50",
+            programs: ["DEC / AEC", "Bachelor (Baccalauréat)", "Maîtrise & MBA"]
+        },
+        {
+            country: "Espagne",
+            desc: "Cadre de vie exceptionnel et universités de renommée internationale.",
+            icon: "🇪🇸",
+            image: "https://images.unsplash.com/photo-1509840144325-4b66ff5a0c63?q=80&w=800&auto=format&fit=crop",
+            color: "text-yellow-600",
+            bg: "bg-yellow-50",
+            programs: ["Grado", "Master", "Doctorado"]
+        },
+        {
+            country: "Belgique",
+            desc: "Au cœur de l'Europe, des programmes bilingues et une qualité d'enseignement supérieure.",
+            icon: "🇧🇪",
+            image: "https://images.unsplash.com/photo-1491557345352-5929e343eb89?q=80&w=800&auto=format&fit=crop",
+            color: "text-red-700",
+            bg: "bg-red-50",
+            programs: ["Bachelier", "Master", "Spécialisations"]
+        },
+        {
+            country: "États-Unis",
+            desc: "L'excellence académique américaine et des campus à la pointe de la technologie.",
+            icon: "🇺🇸",
+            image: "https://images.unsplash.com/photo-1550929989-9dd3872087be?q=80&w=800&auto=format&fit=crop",
+            color: "text-blue-900",
+            bg: "bg-blue-50",
+            programs: ["Bachelor (4 ans)", "Master (MS/MBA)", "Doctorat (PhD)"]
+        },
+        {
+            country: "Malaisie",
+            desc: "Hub éducatif majeur en Asie avec des diplômes internationaux à prix compétitifs.",
+            icon: "🇲🇾",
+            image: "https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=800&auto=format&fit=crop",
+            color: "text-emerald-800",
+            bg: "bg-emerald-50",
+            programs: ["Bachelor", "Master Research", "PhD"]
+        },
+        {
+            country: "Italie",
+            desc: "Berceau de l'art et de l'architecture, offrant des cursus prestigieux en design et sciences.",
+            icon: "🇮🇹",
+            image: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=800&auto=format&fit=crop",
+            color: "text-green-700",
+            bg: "bg-green-50",
+            programs: ["Laurea", "Laurea Magistrale", "Masters Spécialisés"]
+        },
+        {
+            country: "Turquie",
+            desc: "Pont entre Orient et Occident, des bourses attractives et des universités dynamiques.",
+            icon: "🇹🇷",
+            image: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=800&auto=format&fit=crop",
+            color: "text-red-600",
+            bg: "bg-red-50",
+            programs: ["Licence", "Master", "Cours de Langue (TÖMER)"]
+        },
+        {
+            country: "Irlande",
+            desc: "Terre d'innovation technologique et d'accueil chaleureux pour les étudiants.",
+            icon: "🇮🇪",
+            image: "https://images.unsplash.com/photo-1590089415225-401ed6f9db8e?q=80&w=800&auto=format&fit=crop",
+            color: "text-green-800",
+            bg: "bg-green-50",
+            programs: ["Undergraduate", "Postgraduate", "Anglais Intensif"]
+        },
+        {
+            country: "Chine",
+            desc: "Nouvelle puissance éducative mondiale avec des opportunités uniques de carrière.",
+            icon: "🇨🇳",
+            image: "https://images.unsplash.com/photo-1547984609-4b137d17a4ad?q=80&w=800&auto=format&fit=crop",
+            color: "text-red-700",
+            bg: "bg-red-50",
+            programs: ["Bachelor", "Master", "Bourse du Gouvernement"]
+        },
+        {
+            country: "Rép. Tchèque",
+            desc: "Qualité d'enseignement historique au centre de l'Europe à un coût très abordable.",
+            icon: "🇨🇿",
+            image: "https://images.unsplash.com/photo-1519677100203-ad0179511959?q=80&w=800&auto=format&fit=crop",
+            color: "text-blue-800",
+            bg: "bg-blue-50",
+            programs: ["Programmes en Anglais", "Master", "PhD"]
+        },
+        {
+            country: "Russie",
+            desc: "Tradition scientifique forte et accès simplifié aux cursus médicaux et techniques.",
+            icon: "🇷🇺",
+            image: "https://images.unsplash.com/photo-1513326738677-b964603b136d?q=80&w=800&auto=format&fit=crop",
+            color: "text-blue-600",
+            bg: "bg-blue-50",
+            programs: ["Médecine", "Ingénierie", "Langue Russe"]
+        },
+        {
+            country: "Allemagne",
+            desc: "Ingénierie et Technologie de pointe. Études de renommée mondiale souvent gratuites.",
+            icon: "🇩🇪",
+            image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=800&auto=format&fit=crop",
+            color: "text-amber-900",
+            bg: "bg-amber-50",
+            programs: ["Studienkolleg", "Master Ingénierie", "Ausbildung"]
         }
     ];
 
@@ -133,7 +224,7 @@ export default function Etudes() {
             {/* Destinations Section */}
             <section className="py-24 -mt-20 relative z-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {destinations.map((dest, i) => (
                             <motion.div
                                 key={i}

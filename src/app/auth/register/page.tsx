@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { User, Mail, Key, Globe2, ArrowRight, CheckCircle2, ShieldCheck, Phone } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function RegisterPage() {
     return (
@@ -18,8 +19,12 @@ export default function RegisterPage() {
             >
                 <div className="text-center mb-10">
                     <Link href="/" className="inline-flex items-center gap-3 mb-8">
-                        <span className="text-3xl font-bold tracking-wider text-gray-900 uppercase">OUSSAMA</span>
-                        <span className="text-4xl text-amber-500" style={{ fontFamily: 'cursive' }}>Travel</span>
+                        <img
+                            src="/logo.png"
+                            alt="Oussama Travel Logo"
+                            className="h-16 w-auto object-contain"
+                            style={{ minWidth: '180px' }}
+                        />
                     </Link>
                     <h1 className="text-3xl font-black text-gray-900 mb-3 tracking-tight">Rejoignez-nous</h1>
                     <p className="text-gray-500 font-medium tracking-tight">Créez votre compte pour lancer vos premières démarches d'immigration et d'études.</p>

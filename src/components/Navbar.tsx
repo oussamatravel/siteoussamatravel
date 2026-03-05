@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, X, ArrowRight } from "lucide-react";
 
 export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const pathname = usePathname();
+    const isHome = pathname === "/";
 
     useEffect(() => {
         const handleScroll = () => {
@@ -18,24 +22,30 @@ export default function Navbar() {
     }, []);
 
     const navLinks = [
+        { name: "À Propos", href: "/a-propos" },
         { name: "Services", href: "/#services" },
         { name: "Tourisme", href: "/tourisme" },
         { name: "Études", href: "/etudes" },
         { name: "Immigration", href: "/immigration" },
         { name: "Actualités", href: "/blog" },
         { name: "Contact", href: "/contact" },
+        { name: "Espace Client", href: "/dashboard" },
     ];
 
     return (
-        <nav className={`fixed top-0 w-full z-[100] transition-all duration-300 ${isScrolled ? "bg-white/90 backdrop-blur-md shadow-sm h-20" : "bg-transparent h-24"
+        <nav className={`fixed top-0 w-full z-[100] transition-all duration-500 ${(isScrolled || !isHome)
+            ? "bg-white shadow-xl h-20 border-b border-slate-100"
+            : "bg-white/60 backdrop-blur-xl h-24 border-b border-white/20"
             }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-3 group">
-                    <div className="font-bold flex items-center gap-2 group-hover:scale-105 transition-transform">
-                        <span className={`text-2xl tracking-wider font-black ${isScrolled ? "text-slate-900" : "text-slate-900 md:text-white"}`}>OUSSAMA</span>
-                        <span className="text-3xl text-amber-500" style={{ fontFamily: 'cursive' }}>Travel</span>
-                    </div>
+                    <img
+                        src="/logo.png"
+                        alt="Oussama Travel Logo"
+                        className="h-12 md:h-16 w-auto object-contain group-hover:scale-105 transition-transform"
+                        style={{ minWidth: '150px' }}
+                    />
                 </Link>
 
                 {/* Desktop Menu */}
@@ -44,7 +54,9 @@ export default function Navbar() {
                         <Link
                             key={link.name}
                             href={link.href}
-                            className={`text-sm font-black uppercase tracking-widest transition-colors ${isScrolled ? "text-slate-600 hover:text-sky-600" : "text-slate-700 md:text-white/80 md:hover:text-white"
+                            className={`text-sm font-black uppercase tracking-widest transition-colors ${(isScrolled || !isHome)
+                                ? "text-slate-900 hover:text-sky-600"
+                                : "text-slate-900 md:text-white/90 md:hover:text-white"
                                 }`}
                         >
                             {link.name}
@@ -55,7 +67,9 @@ export default function Navbar() {
                 {/* Auth Buttons */}
                 <div className="hidden lg:flex items-center space-x-4">
                     <Link href="/auth/login">
-                        <button className={`px-6 py-2.5 text-sm font-black uppercase tracking-widest transition-all rounded-full ${isScrolled ? "text-slate-600 hover:bg-slate-50" : "text-white hover:bg-white/10"
+                        <button className={`px-6 py-2.5 text-sm font-black uppercase tracking-widest transition-all rounded-full ${(isScrolled || !isHome)
+                            ? "text-slate-900 hover:bg-slate-50 border border-slate-200"
+                            : "text-white hover:bg-white/10"
                             }`}>
                             Connexion
                         </button>

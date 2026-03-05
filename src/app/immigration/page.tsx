@@ -45,6 +45,20 @@ export default function Immigration() {
             icon: <Landmark className="w-8 h-8 text-emerald-500" />,
             color: "border-emerald-100 bg-emerald-50",
             status: "Expertise OTA"
+        },
+        {
+            title: "Passeport Talent - France",
+            desc: "Pour les profils hautement qualifiés, artistes ou investisseurs souhaitant s'installer en France.",
+            icon: <FileText className="w-8 h-8 text-blue-600" />,
+            color: "border-blue-100 bg-blue-50",
+            status: "Nouveau"
+        },
+        {
+            title: "Regroupement Familial",
+            desc: "Procédure d'immigration parrainée pour réunir les familles séparées par les frontières.",
+            icon: <Users className="w-8 h-8 text-rose-500" />,
+            color: "border-rose-100 bg-rose-50",
+            status: "Accompagnement"
         }
     ];
 
@@ -131,7 +145,7 @@ export default function Immigration() {
             {/* Programmes Grid */}
             <section className="py-24 -mt-20 relative z-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {programmes.map((prog, i) => (
                             <motion.div
                                 key={i}

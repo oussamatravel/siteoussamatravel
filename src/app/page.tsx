@@ -132,12 +132,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Partners Section */}
+      <section className="py-20 bg-white border-b border-slate-100 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-4">Ils nous soutiennent</h3>
+            <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-40 grayscale group hover:grayscale-0 transition-all duration-700">
+              {/* Simulated Partner Logos */}
+              {["Air Algérie", "Campus France", "IRCC Canada", "Emirates", "VFS Global"].map((partner, i) => (
+                <div key={i} className="font-black text-2xl tracking-tighter text-slate-900 flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs">OTA</div>
+                  {partner}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Trust & Stats */}
       <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
-        {/* Cercles décoratifs aux couleurs du logo */}
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-sky-500/10 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-amber-500/10 blur-[100px] rounded-full -translate-x-1/2 translate-y-1/2"></div>
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -182,6 +198,70 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Success Stories Section */}
+      <section className="py-24 bg-slate-50 overflow-hidden relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative rounded-[4rem] overflow-hidden shadow-2xl aspect-[4/5] md:aspect-auto md:h-[600px]"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop"
+                className="w-full h-full object-cover"
+                alt="Happy students"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+              <div className="absolute bottom-10 left-10 right-10 p-8 bg-white/10 backdrop-blur-xl rounded-[2.5rem] border border-white/20 text-white">
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
+                </div>
+                <p className="text-lg font-bold italic mb-4">"Grâce à Oussama Travel, je commence ma nouvelle vie à Montréal ce lundi. Le processus a été fluide et sans stress."</p>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-amber-400 flex items-center justify-center text-slate-900 font-black">Y</div>
+                  <div>
+                    <div className="font-black">Yacine Kherroubi</div>
+                    <div className="text-xs font-bold text-amber-400">Visa Résidence Permanente 2024</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <div className="space-y-10">
+              <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter leading-tight">
+                Plus qu'une Agence, <br />
+                <span className="text-sky-500 italic">Un Partenaire de Vie.</span>
+              </h2>
+              <div className="space-y-8">
+                {[
+                  { title: "Engagement Total", desc: "Nous ne dormons pas tant que votre visa n'est pas entre vos mains ou votre admission confirmée." },
+                  { title: "Réseau Mondial", desc: "Collaborations directes avec des universités au Canada, en France, en Espagne et en Malaisie." },
+                  { title: "Transparence Prix", desc: "Aucun frais caché. Chaque centime est justifié et sécurisé via notre plateforme." }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-6 group">
+                    <div className="w-14 h-14 rounded-2xl bg-white shadow-xl flex items-center justify-center text-sky-500 font-black group-hover:bg-slate-900 group-hover:text-white transition-all transform group-hover:scale-110">
+                      0{i + 1}
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-black text-slate-900 mb-2">{item.title}</h4>
+                      <p className="text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Link href="/contact" className="inline-block">
+                <button className="px-10 py-5 bg-sky-500 text-white rounded-full font-black text-lg hover:bg-sky-600 transition-all shadow-xl shadow-sky-500/20 active:scale-95">
+                  Prendre Rendez-vous
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* Testimonials Section */}
       <section className="py-24 bg-white overflow-hidden">

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Cinzel, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import ChatSupport from "@/components/ChatSupport";
 import Navbar from "@/components/Navbar";
@@ -15,6 +15,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const cinzel = Cinzel({
+  variable: "--font-cinzel",
+  subsets: ["latin"],
+  weight: ["400", "700", "900"],
+});
+
+const dancingScript = Dancing_Script({
+  variable: "--font-dancing",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
 export const metadata: Metadata = {
   title: "Oussama Travel | Partout dans le monde",
   description: "Agence de voyages, études et immigration. Votre avenir, notre expertise.",
@@ -28,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${cinzel.variable} ${dancingScript.variable} antialiased`}
       >
         <Navbar />
         {children}

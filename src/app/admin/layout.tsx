@@ -17,6 +17,7 @@ import {
     Search
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -36,9 +37,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Sidebar Admin (Couleur Darker - Indigo/Slate) */}
             <aside className="hidden lg:flex flex-col w-64 bg-slate-950 text-slate-400 border-r border-slate-800 fixed h-full z-40">
                 <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-                    <Link href="/" className="flex flex-col">
-                        <span className="text-white font-black text-lg tracking-tighter">ADMIN PANEL</span>
-                        <span className="text-[10px] text-amber-500 font-bold uppercase tracking-[0.2em]">Oussama Travel</span>
+                    <Link href="/" className="flex flex-col gap-1">
+                        <span className="text-white font-black text-xs tracking-tighter opacity-50">ADMIN PANEL</span>
+                        <img
+                            src="/logo.png"
+                            alt="Oussama Travel Logo"
+                            className="h-8 w-auto object-contain"
+                        />
                     </Link>
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                 </div>
@@ -49,8 +54,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         return (
                             <Link key={item.name} href={item.href}>
                                 <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                        ? "bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10"
-                                        : "hover:bg-slate-900 hover:text-white"
+                                    ? "bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10"
+                                    : "hover:bg-slate-900 hover:text-white"
                                     }`}>
                                     {item.icon}
                                     <span className="text-sm">{item.name}</span>
