@@ -14,7 +14,8 @@ import {
     X,
     ShieldCheck,
     Bell,
-    Search
+    Search,
+    CreditCard
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -29,6 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { name: "Vue Globale", href: "/admin", icon: <BarChart3 className="w-5 h-5" /> },
         { name: "Gestion Clients", href: "/admin/clients", icon: <Users className="w-5 h-5" /> },
         { name: "Validation Dossiers", href: "/admin/dossiers", icon: <Files className="w-5 h-5" /> },
+        { name: "Paiements", href: "/admin/paiements", icon: <CreditCard className="w-5 h-5" /> },
         { name: "Paramètres Services", href: "/admin/parametres", icon: <Settings className="w-5 h-5" /> },
     ];
 

@@ -23,6 +23,7 @@ import {
     Loader2
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AdminClientsPage() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -33,12 +34,71 @@ export default function AdminClientsPage() {
         setMounted(true);
     }, []);
 
-    const clients = [
-        { id: "CL-051", name: "Oussama Travel", email: "oussama@travel.dz", phone: "+213 555 12 34 56", country: "Algérie", registration: "12 Mars 2024", status: "Vérifié", dossiers: 2, lastLogin: "Il y a 10 min", address: "Bab Ezzouar, Alger" },
-        { id: "CL-050", name: "Sara Amrani", email: "sara@gmail.com", phone: "+213 666 44 22 11", country: "France", registration: "08 Mars 2024", status: "En attente", dossiers: 1, lastLogin: "Il y a 2h", address: "Paris, France" },
-        { id: "CL-049", name: "Karim Brahimi", email: "karim.b@outlook.fr", phone: "+213 777 88 99 00", country: "Canada", registration: "05 Mars 2024", status: "Vérifié", dossiers: 3, lastLogin: "Hier", address: "Montréal, QC" },
-        { id: "CL-048", name: "Mina Belkacem", email: "mina.b@gmail.com", phone: "+213 550 11 22 33", country: "Malaisie", registration: "01 Mars 2024", status: "Inactif", dossiers: 0, lastLogin: "3 jours", address: "Kuala Lumpur" },
-    ];
+    const [clients, setClients] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState({
+        total: 0,
+        verified: 0,
+        pending: 0,
+        new: 0
+    });
+    const supabase = createClient();
+
+    useEffect(() => {
+        fetchClients();
+    }, []);
+
+    const fetchClients = async () => {
+        setIsLoading(true);
+        try {
+            // 1. Fetch profiles
+            const { data: profiles, error } = await supabase
+                .from('profiles')
+                .select(`
+                    *,
+                    applications:applications(count)
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            // 2. Format profiles
+            const formattedClients = (profiles || []).map(p => ({
+                id: p.id.substring(0, 8).toUpperCase(),
+                realId: p.id,
+                name: `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Sans nom",
+                email: p.email || "Non renseigné",
+                phone: p.phone || "Non renseigné",
+                country: "Algérie",
+                registration: new Date(p.created_at).toLocaleDateString('fr-FR'),
+                rawCreatedAt: p.created_at,
+                status: p.role === 'admin' ? "Admin" : "Vérifié",
+                dossiers: p.applications?.[0]?.count || 0,
+                lastLogin: "Récemment",
+                address: "Non renseignée"
+            }));
+
+            setClients(formattedClients);
+
+            // 3. Stats Calculation
+            const now = new Date();
+            const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            setStats({
+                total: formattedClients.length,
+                verified: formattedClients.filter(c => c.status === "Vérifié" || c.status === "Admin").length,
+                pending: formattedClients.filter(c => c.status === "En attente").length,
+                new: formattedClients.filter(c => new Date(c.rawCreatedAt) > sevenDaysAgo).length
+            });
+
+            // 3. Simple Stats Calculation
+
+        } catch (err: any) {
+            console.error("Erreur fetch clients:", err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const filteredClients = clients.filter(c =>
         c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,10 +124,10 @@ export default function AdminClientsPage() {
             {/* Stats Summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {[
-                    { label: "Total Clients", value: "152", icon: <Users className="w-5 h-5 text-indigo-500" /> },
-                    { label: "Vérifiés", value: "128", icon: <ShieldCheck className="w-5 h-5 text-emerald-500" /> },
-                    { label: "En Attente", value: "14", icon: <Calendar className="w-5 h-5 text-amber-500" /> },
-                    { label: "Nouveaux (7j)", value: "+22", icon: <UserPlus className="w-5 h-5 text-sky-500" /> },
+                    { label: "Total Clients", value: stats.total.toString(), icon: <Users className="w-5 h-5 text-indigo-500" /> },
+                    { label: "Vérifiés", value: stats.verified.toString(), icon: <ShieldCheck className="w-5 h-5 text-emerald-500" /> },
+                    { label: "En Attente", value: stats.pending.toString(), icon: <Calendar className="w-5 h-5 text-amber-500" /> },
+                    { label: "Nouveaux (7j)", value: `+${stats.new}`, icon: <UserPlus className="w-5 h-5 text-sky-500" /> },
                 ].map((stat, i) => (
                     <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center">{stat.icon}</div>
@@ -116,9 +176,16 @@ export default function AdminClientsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {filteredClients.map((client, i) => (
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={5} className="px-8 py-20 text-center text-slate-400">
+                                        <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4" />
+                                        <p className="font-bold uppercase text-[10px] tracking-widest">Récupération des profils...</p>
+                                    </td>
+                                </tr>
+                            ) : filteredClients.map((client, i) => (
                                 <motion.tr
-                                    key={client.id}
+                                    key={client.realId}
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: i * 0.05 }}
@@ -190,7 +257,7 @@ export default function AdminClientsPage() {
                     </div>
                 )}
                 <div className="p-8 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Affichage de {filteredClients.length} clients sur 152</span>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Affichage de {filteredClients.length} clients sur {stats.total}</span>
                     <div className="flex gap-2">
                         <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-black text-slate-400 uppercase hover:bg-slate-100 transition-all">Précédent</button>
                         <button className="px-4 py-2 bg-slate-950 border border-slate-950 rounded-lg text-[10px] font-black text-white uppercase hover:opacity-90 transition-all">Suivant</button>
@@ -295,8 +362,25 @@ export default function AdminClientsPage() {
 
                             <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-3">
                                 <button className="px-6 py-3 border border-slate-200 text-slate-500 font-black text-xs rounded-xl hover:bg-white transition-all uppercase tracking-widest">Bloquer le Compte</button>
-                                <button className="px-8 py-3 bg-slate-900 text-white font-black text-xs rounded-xl hover:bg-slate-800 transition-all uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-slate-200">
-                                    Modifier Profil
+                                <button
+                                    onClick={async () => {
+                                        const newRole = selectedClient.status === "Admin" ? "client" : "admin";
+                                        if (!confirm(`Voulez-vous passer ce client en tant que ${newRole} ?`)) return;
+
+                                        const { error } = await supabase
+                                            .from('profiles')
+                                            .update({ role: newRole })
+                                            .eq('id', selectedClient.realId);
+
+                                        if (error) alert(error.message);
+                                        else {
+                                            await fetchClients();
+                                            setSelectedClient(null);
+                                        }
+                                    }}
+                                    className="px-8 py-3 bg-slate-900 text-white font-black text-xs rounded-xl hover:bg-slate-800 transition-all uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-slate-200"
+                                >
+                                    Changer de Rôle
                                     <ArrowRight className="w-4 h-4" />
                                 </button>
                             </div>

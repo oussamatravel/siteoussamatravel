@@ -1,8 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CalendarDays, CheckCircle2, ArrowRight, FileText, ShieldCheck, Clock, Users } from "lucide-react";
+import { CalendarDays, CheckCircle2, ArrowRight, FileText, ShieldCheck, Clock, Users, X, Send, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { AnimatePresence } from "framer-motion";
 
 const destinations = [
     { flag: "🇪🇸", code: "es", country: "Espagne", zone: "Schengen" },
@@ -60,8 +63,56 @@ const steps = [
 ];
 
 export default function RdvVisaPage() {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [user, setUser] = useState<any>(null);
+    const [formData, setFormData] = useState({
+        service_type: "Visa Touristique",
+        destination: "France",
+        preferred_date: "",
+        notes: ""
+    });
+    const [isSuccess, setIsSuccess] = useState(false);
+
+    const supabase = createClient();
     const schengen = destinations.filter(d => d.zone === "Schengen");
     const horsSchengen = destinations.filter(d => d.zone === "Hors-Schengen");
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+        };
+        checkUser();
+    }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user) {
+            alert("Veuillez vous connecter pour prendre rendez-vous.");
+            return;
+        }
+
+        setIsLoading(true);
+        const { error } = await supabase
+            .from('appointments')
+            .insert([{
+                user_id: user.id,
+                ...formData
+            }]);
+
+        if (!error) {
+            setIsSuccess(true);
+            setTimeout(() => {
+                setIsSuccess(false);
+                setIsModalOpen(false);
+                setFormData({ service_type: "Visa Touristique", destination: "France", preferred_date: "", notes: "" });
+            }, 3000);
+        } else {
+            alert("Erreur: " + error.message);
+        }
+        setIsLoading(false);
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
@@ -347,12 +398,13 @@ export default function RdvVisaPage() {
                             Créez votre dossier en ligne et notre équipe à Béjaïa vous contacte dans les 24h ouvrables.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-6 justify-center relative z-10">
-                            <Link href="/auth/register">
-                                <button className="px-10 py-5 bg-white text-slate-900 rounded-full font-black text-lg hover:bg-slate-50 transition-all flex items-center gap-3 shadow-xl">
-                                    Commencer ma demande
-                                    <ArrowRight className="w-5 h-5" />
-                                </button>
-                            </Link>
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="px-10 py-5 bg-white text-slate-900 rounded-full font-black text-lg hover:bg-slate-50 transition-all flex items-center gap-3 shadow-xl"
+                            >
+                                Prendre RDV maintenant
+                                <ArrowRight className="w-5 h-5" />
+                            </button>
                             <Link href="/contact">
                                 <button className="px-10 py-5 bg-amber-500 text-white rounded-full font-black text-lg hover:bg-amber-400 transition-all shadow-xl">
                                     Nous contacter
@@ -362,6 +414,125 @@ export default function RdvVisaPage() {
                     </div>
                 </div>
             </section>
+
+            {/* Appointment Modal */}
+            <AnimatePresence>
+                {isModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white rounded-[3rem] w-full max-w-xl overflow-hidden shadow-2xl transition-all"
+                        >
+                            {!isSuccess ? (
+                                <form onSubmit={handleSubmit} className="p-10 md:p-12">
+                                    <div className="flex items-center justify-between mb-10">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center shadow-inner">
+                                                <CalendarDays className="w-6 h-6" />
+                                            </div>
+                                            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Prendre RDV Visa</h2>
+                                        </div>
+                                        <button type="button" onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-50 rounded-full transition-all text-slate-400">
+                                            <X className="w-7 h-7" />
+                                        </button>
+                                    </div>
+
+                                    {!user && (
+                                        <div className="mb-8 p-6 bg-slate-900 rounded-3xl text-white">
+                                            <p className="font-bold text-sm mb-4">Vous n'êtes pas connecté. Veuillez vous identifier pour envoyer votre demande.</p>
+                                            <div className="flex gap-4">
+                                                <Link href="/auth/login" className="flex-1 py-3 bg-white text-slate-900 rounded-2xl font-black text-center text-xs">Connexion</Link>
+                                                <Link href="/auth/register" className="flex-1 py-3 bg-amber-500 text-white rounded-2xl font-black text-center text-xs">S'inscrire</Link>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Type de Visa</label>
+                                                <select
+                                                    value={formData.service_type}
+                                                    onChange={(e) => setFormData({ ...formData, service_type: e.target.value })}
+                                                    className="w-full px-5 py-3.5 bg-slate-50 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition-all font-bold text-slate-700"
+                                                >
+                                                    <option>Visa Touristique</option>
+                                                    <option>Visa d'Affaires</option>
+                                                    <option>Visa Visite Familiale</option>
+                                                    <option>Visa Études</option>
+                                                </select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Pays de Destination</label>
+                                                <select
+                                                    value={formData.destination}
+                                                    onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
+                                                    className="w-full px-5 py-3.5 bg-slate-50 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition-all font-bold text-slate-700"
+                                                >
+                                                    {destinations.map(d => (
+                                                        <option key={d.code} value={d.country}>{d.country}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Date préférée (Indicatif)</label>
+                                            <input
+                                                required
+                                                type="date"
+                                                value={formData.preferred_date}
+                                                onChange={(e) => setFormData({ ...formData, preferred_date: e.target.value })}
+                                                className="w-full px-5 py-3.5 bg-slate-50 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition-all font-bold text-slate-700"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Commentaires additionnels</label>
+                                            <textarea
+                                                value={formData.notes}
+                                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                                rows={3}
+                                                placeholder="Précisez votre cas particulier..."
+                                                className="w-full px-5 py-3.5 bg-slate-50 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition-all font-medium text-slate-600"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-10">
+                                        <button
+                                            disabled={isLoading || !user}
+                                            type="submit"
+                                            className="w-full py-5 bg-slate-950 text-white font-black rounded-[2rem] flex items-center justify-center gap-3 hover:bg-slate-900 transition-all shadow-xl shadow-slate-200 disabled:opacity-50"
+                                        >
+                                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 text-amber-500" />}
+                                            Envoyer ma demande de RDV
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div className="p-16 text-center space-y-6">
+                                    <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                                        <CheckCircle2 className="w-12 h-12" />
+                                    </div>
+                                    <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Demande Envoyée !</h2>
+                                    <p className="text-slate-500 font-medium">Votre demande de rendez-vous a bien été enregistrée. L'équipe d'Oussama Travel vous contactera sous peu.</p>
+                                    <div className="pt-4 h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: "100%" }}
+                                            transition={{ duration: 3 }}
+                                            className="h-full bg-emerald-500"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

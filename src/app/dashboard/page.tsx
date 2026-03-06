@@ -312,8 +312,15 @@ export default function DashboardOverview() {
                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Référence: {activeDossier.reference_number}</p>
                                 </div>
                             </div>
-                            <span className="px-5 py-2 bg-sky-50 text-sky-600 border border-sky-100 font-black text-[10px] uppercase tracking-widest rounded-full flex items-center gap-2 self-start md:self-center">
-                                <Clock className="w-3 h-3" /> {activeDossier.status === 'en_attente' ? 'En attente' : 'En Traitement'}
+                            <span className={`px-5 py-2 border font-black text-[10px] uppercase tracking-widest rounded-full flex items-center gap-2 self-start md:self-center ${activeDossier.status === 'valide' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                    activeDossier.status === 'rejete' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                                        'bg-sky-50 text-sky-600 border-sky-100'
+                                }`}>
+                                <Clock className="w-3 h-3" /> {
+                                    activeDossier.status === 'valide' ? 'Validé' :
+                                        activeDossier.status === 'rejete' ? 'Rejeté' :
+                                            activeDossier.status === 'en_attente' ? 'En attente' : 'En Traitement'
+                                }
                             </span>
                         </div>
 

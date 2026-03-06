@@ -1,41 +1,113 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bell, Clock, CheckCircle2, AlertCircle, Info, MoreHorizontal, Settings } from "lucide-react";
+import { Bell, Clock, CheckCircle2, AlertCircle, Info, MoreHorizontal, Settings, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function NotificationsPage() {
-    const notifications = [
-        {
-            id: 1,
-            type: "Action Requise",
-            title: "Passeport manquant pour votre dossier Canada",
-            desc: "Nous avons besoin d'une copie de votre passeport pour finaliser votre soumission.",
-            time: "Il y a 2 heures",
-            icon: <AlertCircle className="w-5 h-5 text-amber-500" />,
-            bg: "bg-amber-50 border-amber-100",
-            read: false
-        },
-        {
-            id: 2,
-            type: "Succès",
-            title: "Document validé : Diplôme Bachelor",
-            desc: "L'expert Oussama Travel a validé votre diplôme. Votre dossier avance à 60%.",
-            time: "Hier à 14:30",
-            icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />,
-            bg: "bg-emerald-50 border-emerald-100",
-            read: true
-        },
-        {
-            id: 3,
-            type: "Info",
-            title: "Mise à jour des tarifs Dubaï 2024",
-            desc: "Découvrez nos nouveaux packages pour le mois d'Avril dès maintenant.",
-            time: "25 Mars 2024",
-            icon: <Info className="w-5 h-5 text-sky-500" />,
-            bg: "bg-sky-50 border-sky-100",
-            read: true
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [filter, setFilter] = useState("Tout");
+    const supabase = createClient();
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data, error } = await supabase
+                .from('notifications')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            const formatted = (data || []).map(notif => ({
+                id: notif.id,
+                type: notif.type === 'success' ? 'Succès' : notif.type === 'error' ? 'Action Requise' : 'Info',
+                title: notif.title,
+                desc: notif.description,
+                time: formatTime(notif.created_at),
+                icon: getIcon(notif.type),
+                bg: getBg(notif.type),
+                read: notif.is_read
+            }));
+
+            setNotifications(formatted);
+        } catch (err: any) {
+            console.error("Error fetching notifications:", err.message);
+        } finally {
+            setIsLoading(false);
         }
-    ];
+    };
+
+    const markAsRead = async (id: string) => {
+        const { error } = await supabase
+            .from('notifications')
+            .update({ is_read: true })
+            .eq('id', id);
+
+        if (!error) {
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+        }
+    };
+
+    const markAllAsRead = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { error } = await supabase
+            .from('notifications')
+            .update({ is_read: true })
+            .eq('user_id', user.id)
+            .eq('is_read', false);
+
+        if (!error) {
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        }
+    };
+
+    const formatTime = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMin = Math.round(diffMs / 60000);
+        const diffHrs = Math.round(diffMs / 3600000);
+        const diffDays = Math.round(diffMs / 86400000);
+
+        if (diffMin < 60) return `Il y a ${diffMin} min`;
+        if (diffHrs < 24) return `Il y a ${diffHrs} h`;
+        return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    };
+
+    const getIcon = (type: string) => {
+        switch (type) {
+            case 'success': return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
+            case 'error': return <AlertCircle className="w-5 h-5 text-amber-500" />;
+            default: return <Info className="w-5 h-5 text-sky-500" />;
+        }
+    };
+
+    const getBg = (type: string) => {
+        switch (type) {
+            case 'success': return 'bg-emerald-50 border-emerald-100';
+            case 'error': return 'bg-amber-50 border-amber-100';
+            default: return 'bg-sky-50 border-sky-100';
+        }
+    };
+
+    const filteredNotifs = notifications.filter(n => {
+        if (filter === "Tout") return true;
+        if (filter === "Dossiers") return n.title.toLowerCase().includes("dossier");
+        return true;
+    });
 
     return (
         <div className="p-6 md:p-10 max-w-4xl mx-auto">
@@ -50,18 +122,30 @@ export default function NotificationsPage() {
             </div>
 
             <div className="flex gap-4 mb-8">
-                <button className="px-6 py-2 bg-slate-900 text-white font-bold rounded-full text-sm">Tout</button>
-                <button className="px-6 py-2 bg-white text-gray-600 border border-slate-200 font-bold rounded-full text-sm hover:bg-slate-50">Dossiers</button>
-                <button className="px-6 py-2 bg-white text-gray-600 border border-slate-200 font-bold rounded-full text-sm hover:bg-slate-50">Documents</button>
+                {["Tout", "Dossiers", "Documents"].map((f) => (
+                    <button
+                        key={f}
+                        onClick={() => setFilter(f)}
+                        className={`px-6 py-2 font-bold rounded-full text-sm transition-all ${filter === f ? "bg-slate-900 text-white shadow-lg" : "bg-white text-gray-600 border border-slate-200 hover:bg-slate-50"}`}
+                    >
+                        {f}
+                    </button>
+                ))}
             </div>
 
             <div className="space-y-4">
-                {notifications.map((notif, i) => (
+                {isLoading ? (
+                    <div className="text-center py-20 bg-white border border-slate-100 rounded-3xl">
+                        <Loader2 className="w-10 h-10 animate-spin text-sky-500 mx-auto mb-4" />
+                        <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Chargement des notifications...</p>
+                    </div>
+                ) : filteredNotifs.map((notif, i) => (
                     <motion.div
                         key={notif.id}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: i * 0.1 }}
+                        onClick={() => !notif.read && markAsRead(notif.id)}
                         className={`p-6 border rounded-3xl transition-all hover:shadow-lg group flex items-start gap-4 cursor-pointer translate-y-0 hover:-translate-y-1 ${notif.read ? "bg-white border-slate-100" : "bg-white border-blue-200 shadow-md ring-2 ring-blue-500/5 shadow-blue-500/10"
                             }`}
                     >
@@ -100,8 +184,11 @@ export default function NotificationsPage() {
             </div>
 
             <div className="mt-10 pt-10 border-t border-slate-100 text-center">
-                <button className="text-sm font-bold text-sky-600 hover:text-sky-700 hover:underline transition-all">
-                    Marquer tout comme lu
+                <button
+                    onClick={markAllAsRead}
+                    className="text-sm font-bold text-sky-600 hover:text-sky-700 hover:underline transition-all"
+                >
+                    Tout marquer comme lu
                 </button>
             </div>
         </div>

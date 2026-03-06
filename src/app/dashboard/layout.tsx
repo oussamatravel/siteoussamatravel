@@ -5,15 +5,49 @@ import { LayoutDashboard, FolderOpen, FileCheck2, UserCircle, Bell, LogOut, Menu
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
     const supabase = createClient();
+
+    useEffect(() => {
+        fetchUnreadCount();
+
+        // Real-time subscription
+        const channel = supabase
+            .channel('notifications_changes')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'notifications' },
+                () => fetchUnreadCount()
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
+
+    const fetchUnreadCount = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { count, error } = await supabase
+            .from('notifications')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('is_read', false);
+
+        if (!error && count !== null) {
+            setUnreadCount(count);
+        }
+    };
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -49,10 +83,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         const isActive = pathname === item.href;
                         return (
                             <Link key={item.name} href={item.href}>
-                                <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? "bg-amber-500 text-gray-900 font-bold shadow-lg shadow-amber-500/20" : "hover:bg-slate-800 hover:text-white"
+                                <div className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive ? "bg-amber-500 text-gray-900 font-bold shadow-lg shadow-amber-500/20" : "hover:bg-slate-800 hover:text-white"
                                     }`}>
-                                    {item.icon}
-                                    {item.name}
+                                    <div className="flex items-center gap-3">
+                                        {item.icon}
+                                        {item.name}
+                                    </div>
+                                    {item.name === "Notifications" && unreadCount > 0 && (
+                                        <div className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm animate-pulse">
+                                            {unreadCount}
+                                        </div>
+                                    )}
                                 </div>
                             </Link>
                         );
@@ -92,10 +133,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             const isActive = pathname === item.href;
                             return (
                                 <Link key={item.name} href={item.href} onClick={() => setIsMobileMenuOpen(false)}>
-                                    <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? "bg-amber-500 text-gray-900 font-bold" : "text-slate-300 hover:bg-slate-800"
+                                    <div className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive ? "bg-amber-500 text-gray-900 font-bold" : "text-slate-300 hover:bg-slate-800"
                                         }`}>
-                                        {item.icon}
-                                        {item.name}
+                                        <div className="flex items-center gap-3">
+                                            {item.icon}
+                                            {item.name}
+                                        </div>
+                                        {item.name === "Notifications" && unreadCount > 0 && (
+                                            <div className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                                                {unreadCount}
+                                            </div>
+                                        )}
                                     </div>
                                 </Link>
                             );

@@ -32,8 +32,9 @@ export default function ProfilPage() {
         last_name: "",
         email: "",
         phone: "",
-        city: "Non renseigné",
-        profilePic: null as string | null
+        city: "",
+        birth_date: "",
+        avatar_url: null as string | null
     });
 
     useEffect(() => {
@@ -56,8 +57,9 @@ export default function ProfilPage() {
                     last_name: profile.last_name || "",
                     email: user.email || "",
                     phone: profile.phone || "",
-                    city: "Alger / Bejaia", // Valeur par défaut si non en base
-                    profilePic: null
+                    city: profile.city || "",
+                    birth_date: profile.birth_date || "",
+                    avatar_url: profile.avatar_url || null
                 });
             }
         }
@@ -76,6 +78,8 @@ export default function ProfilPage() {
                     first_name: profileData.first_name,
                     last_name: profileData.last_name,
                     phone: profileData.phone,
+                    city: profileData.city,
+                    birth_date: profileData.birth_date || null,
                 })
                 .eq('id', user.id);
 
@@ -90,14 +94,43 @@ export default function ProfilPage() {
         }
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfileData({ ...profileData, profilePic: reader.result as string });
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        setIsSaving(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Non authentifié");
+
+            // 1. Upload to Storage
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${user.id}/${Math.random()}.${fileExt}`;
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(fileName, file, { upsert: true });
+
+            if (uploadError) throw uploadError;
+
+            // 2. Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(fileName);
+
+            // 3. Update Profile
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ avatar_url: publicUrl })
+                .eq('id', user.id);
+
+            if (updateError) throw updateError;
+
+            setProfileData({ ...profileData, avatar_url: publicUrl });
+            alert("Photo de profil mise à jour !");
+        } catch (err: any) {
+            alert("Erreur avatar : " + err.message);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -130,11 +163,16 @@ export default function ProfilPage() {
                 {/* Profile Card Left */}
                 <div className="lg:col-span-1 bg-white border border-slate-100 rounded-3xl p-8 shadow-sm flex flex-col items-center text-center sticky top-10">
                     <div className="relative group mb-6">
-                        <div className="w-32 h-32 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center border-4 border-white shadow-xl overflow-hidden">
-                            {profileData.profilePic ? (
-                                <img src={profileData.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                        <div className="w-32 h-32 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center border-4 border-white shadow-xl overflow-hidden relative">
+                            {profileData.avatar_url ? (
+                                <img src={profileData.avatar_url} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
                                 <UserCircle className="w-20 h-20" />
+                            )}
+                            {isSaving && (
+                                <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                                    <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+                                </div>
                             )}
                         </div>
                         <input
@@ -146,13 +184,14 @@ export default function ProfilPage() {
                         />
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="absolute bottom-0 right-0 p-2 bg-slate-900 text-white rounded-full border-4 border-white hover:scale-110 transition-transform shadow-lg"
+                            disabled={isSaving}
+                            className="absolute bottom-0 right-0 p-2 bg-slate-900 text-white rounded-full border-4 border-white hover:scale-110 transition-transform shadow-lg disabled:opacity-50"
                         >
                             <Camera className="w-4 h-4" />
                         </button>
                     </div>
 
-                    <h2 className="text-2xl font-extrabold text-gray-900 mb-1">{profileData.first_name} {profileData.last_name}</h2>
+                    <h2 className="text-2xl font-extrabold text-gray-900 mb-1">{profileData.first_name || "Utilisateur"} {profileData.last_name}</h2>
                     <p className="text-gray-500 font-medium mb-6">Client Oussama Travel</p>
 
                     <div className="w-full space-y-3">
@@ -160,6 +199,12 @@ export default function ProfilPage() {
                             <ShieldCheck className="w-5 h-5" />
                             Compte Vérifié
                         </div>
+                        {profileData.city && (
+                            <div className="flex items-center gap-3 p-3 bg-slate-50 text-slate-600 font-bold text-sm rounded-xl border border-slate-100">
+                                <MapPin className="w-5 h-5" />
+                                {profileData.city}
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -209,6 +254,25 @@ export default function ProfilPage() {
                                     type="tel"
                                     value={profileData.phone}
                                     onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition-all font-medium text-gray-900"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Ville</label>
+                                <input
+                                    type="text"
+                                    value={profileData.city}
+                                    onChange={(e) => setProfileData({ ...profileData, city: e.target.value })}
+                                    placeholder="Ex: Alger"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition-all font-medium text-gray-900"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Date de naissance</label>
+                                <input
+                                    type="date"
+                                    value={profileData.birth_date}
+                                    onChange={(e) => setProfileData({ ...profileData, birth_date: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition-all font-medium text-gray-900"
                                 />
                             </div>

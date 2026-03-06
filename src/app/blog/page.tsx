@@ -12,77 +12,52 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function BlogPage() {
     const [mounted, setMounted] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [articles, setArticles] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [activeCategory, setActiveCategory] = useState("Tous");
+
+    const supabase = createClient();
 
     useEffect(() => {
         setMounted(true);
+        fetchArticles();
     }, []);
 
-    const articles = [
-        {
-            id: 1,
-            title: "Nouvelles Directives Visa Études Canada 2024",
-            excerpt: "Tout ce qu'il faut savoir sur les changements récents concernant les permis d'études et les preuves de fonds.",
-            category: "Immigration",
-            date: "15 Janvier 2024",
-            author: "Expert Oussama Travel",
-            readTime: "5 min",
-            image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800&auto=format&fit=crop",
-            tag: "Canada"
-        },
-        {
-            id: 2,
-            title: "Top 5 des Destinations sans Visa pour les Algériens",
-            excerpt: "Préparez vos prochaines vacances avec notre sélection de pays magnifiques accessibles facilement cet été.",
-            category: "Tourisme",
-            date: "10 Janvier 2024",
-            author: "Conseiller Voyage",
-            readTime: "4 min",
-            image: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?q=80&w=800&auto=format&fit=crop",
-            tag: "Voyages"
-        },
-        {
-            id: 3,
-            title: "Réussir son Entretien Consulaire en 10 Étapes",
-            excerpt: "Les secrets pour convaincre l'officier consulaire lors de votre demande de visa pour la France ou l'Espagne.",
-            category: "Conseils",
-            date: "05 Janvier 2024",
-            author: "Oussama Travel Team",
-            readTime: "8 min",
-            image: "https://images.unsplash.com/photo-1521791136064-7986c2923216?q=80&w=800&auto=format&fit=crop",
-            tag: "Visa"
-        },
-        {
-            id: 4,
-            title: "Travailler à Dubaï : Le Guide Complet du Visa Travail",
-            excerpt: "Découvrez les opportunités professionnelles aux Émirats Arabes Unis et comment obtenir votre résidence.",
-            category: "Immigration",
-            date: "02 Janvier 2024",
-            author: "Expert Dubaï",
-            readTime: "12 min",
-            image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=800&auto=format&fit=crop",
-            tag: "Dubaï"
-        },
-        {
-            id: 5,
-            title: "Bourses d'Études en Europe : Comment Postuler ?",
-            excerpt: "Guide pratique pour dénicher les meilleures bourses et financer vos études supérieures en Europe.",
-            category: "Études",
-            date: "28 Décembre 2023",
-            author: "Consultante Académique",
-            readTime: "7 min",
-            image: "https://images.unsplash.com/photo-1523050335392-93851179ae22?q=80&w=800&auto=format&fit=crop",
-            tag: "Europe"
-        }
-    ];
+    const fetchArticles = async () => {
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('blog_posts')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-    const filteredArticles = articles.filter(article =>
-        article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        article.tag.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+        if (!error) {
+            const formatted = (data || []).map(post => ({
+                id: post.id,
+                title: post.title,
+                excerpt: post.excerpt,
+                category: post.category,
+                date: new Date(post.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+                author: "Expert Oussama Travel",
+                readTime: "5 min",
+                image: post.image_url || "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800&auto=format&fit=crop",
+                tag: post.category
+            }));
+            setArticles(formatted);
+        }
+        setIsLoading(false);
+    };
+
+    const filteredArticles = articles.filter(article => {
+        const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            article.tag.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = activeCategory === "Tous" || article.category === activeCategory;
+        return matchesSearch && matchesCategory;
+    });
 
     if (!mounted) return null;
 
@@ -119,10 +94,14 @@ export default function BlogPage() {
                         />
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto">
-                        {["Tous", "Immigration", "Études", "Tourisme"].map((cat) => (
+                        {["Tous", "Immigration", "Études", "Tourisme", "Conseils"].map((cat) => (
                             <button
                                 key={cat}
-                                className="px-6 py-3 bg-white border border-slate-200 rounded-full font-bold text-sm text-slate-600 hover:border-sky-500 hover:text-sky-600 transition-all whitespace-nowrap shadow-sm"
+                                onClick={() => setActiveCategory(cat)}
+                                className={`px-6 py-3 border rounded-full font-bold text-sm transition-all whitespace-nowrap shadow-sm ${activeCategory === cat
+                                        ? "bg-sky-500 text-white border-sky-500 shadow-sky-200"
+                                        : "bg-white text-slate-600 border-slate-200 hover:border-sky-500 hover:text-sky-600"
+                                    }`}
                             >
                                 {cat}
                             </button>
@@ -132,7 +111,16 @@ export default function BlogPage() {
 
                 {/* Articles Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {filteredArticles.map((article, i) => (
+                    {isLoading ? (
+                        [1, 2, 3].map((n) => (
+                            <div key={n} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm animate-pulse h-[400px]">
+                                <div className="bg-slate-100 h-48 rounded-2xl mb-6"></div>
+                                <div className="bg-slate-100 h-6 w-3/4 rounded mb-4"></div>
+                                <div className="bg-slate-100 h-4 w-full rounded mb-2"></div>
+                                <div className="bg-slate-100 h-4 w-1/2 rounded"></div>
+                            </div>
+                        ))
+                    ) : filteredArticles.map((article, i) => (
                         <motion.article
                             key={article.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -186,6 +174,12 @@ export default function BlogPage() {
                             </div>
                         </motion.article>
                     ))}
+
+                    {!isLoading && filteredArticles.length === 0 && (
+                        <div className="col-span-full text-center py-20 bg-white border-2 border-dashed border-slate-100 rounded-[3rem]">
+                            <p className="text-slate-400 font-bold">Aucun article trouvé pour cette recherche.</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Newsletter Section */}

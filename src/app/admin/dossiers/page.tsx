@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     FileSearch,
     Search,
@@ -28,90 +28,164 @@ import {
     Mail
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
+import ApplicationChat from "@/components/ApplicationChat";
 
 export default function AdminDossiersPage() {
     const [selectedDossier, setSelectedDossier] = useState<any>(null);
+    const [selectedChat, setSelectedChat] = useState<string | null>(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
+    const [showInvoiceForm, setShowInvoiceForm] = useState(false);
+    const [invoiceAmount, setInvoiceAmount] = useState("");
+    const [invoiceDesc, setInvoiceDesc] = useState("");
     const [mounted, setMounted] = useState(false);
+    const [dossiers, setDossiers] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const supabase = createClient();
 
     useEffect(() => {
         setMounted(true);
+        fetchDossiers();
     }, []);
 
-    const [dossiers, setDossiers] = useState([
-        {
-            id: "OT-24-001",
-            client: "Oussama Travel",
-            email: "directeur.ota@gmail.com",
-            type: "Visa Études",
-            dest: "Canada",
-            date: "12 Mars 2024",
-            status: "Prioritaire",
-            color: "bg-rose-50 text-rose-600 border-rose-100",
-            icon: <GraduationCap className="w-4 h-4" />,
-            documents: [
-                { id: 1, name: "Passeport_Scan.pdf", size: "1.2MB", status: "Validé" },
-                { id: 2, name: "Diplome_Bac.pdf", size: "2.4MB", status: "À vérifier" },
-                { id: 3, name: "Relevé_Note.pdf", size: "3.1MB", status: "À vérifier" }
-            ]
-        },
-        {
-            id: "OT-24-002",
-            client: "Sara Amrani",
-            email: "sara.amrani@gmail.com",
-            type: "Visa Touriste",
-            dest: "Dubaï",
-            date: "14 Mars 2024",
-            status: "Nouveau",
-            color: "bg-sky-50 text-sky-600 border-sky-100",
-            icon: <Globe2 className="w-4 h-4" />,
-            documents: [
-                { id: 4, name: "Passeport_Sara.pdf", size: "1.5MB", status: "Nouveau" },
-                { id: 5, name: "Photo_Identite.jpg", size: "0.8MB", status: "Nouveau" }
-            ]
-        },
-        {
-            id: "OT-24-003",
-            client: "Karim Brahimi",
-            email: "karim.br@live.fr",
-            type: "Visa Études",
-            dest: "France",
-            date: "10 Mars 2024",
-            status: "À Valider",
-            color: "bg-amber-50 text-amber-600 border-amber-100",
-            icon: <GraduationCap className="w-4 h-4" />,
-            documents: [
-                { id: 6, name: "Dossier_Complet.zip", size: "12.5MB", status: "Prêt" }
-            ]
-        },
-        {
-            id: "OT-24-004",
-            client: "Mourad Yazid",
-            email: "mourad.yazid@outlook.com",
-            type: "Immigration",
-            dest: "Canada",
-            date: "08 Mars 2024",
-            status: "Incomplet",
-            color: "bg-slate-50 text-slate-400 border-slate-100",
-            icon: <Users className="w-4 h-4" />,
-            documents: [
-                { id: 7, name: "Certificat_Langue.pdf", size: "1.1MB", status: "Manquant" }
-            ]
-        }
-    ]);
+    const fetchDossiers = async () => {
+        setIsLoading(true);
+        try {
+            const { data: apps, error } = await supabase
+                .from('applications')
+                .select(`
+                    *,
+                    profiles:user_id (
+                        first_name,
+                        last_name,
+                        phone
+                    )
+                `)
+                .order('created_at', { ascending: false });
 
-    const handleAction = (status: string) => {
+            if (error) throw error;
+
+            const dossiersWithDocs = await Promise.all((apps || []).map(async (app) => {
+                const { data: files } = await supabase.storage
+                    .from('client_documents')
+                    .list(`${app.user_id}/${app.id}`);
+
+                return {
+                    ...app,
+                    client: `${app.profiles?.first_name} ${app.profiles?.last_name}`,
+                    email: app.profiles?.phone || "Non renseigné",
+                    type: app.service_type,
+                    dest: app.target_country,
+                    date: new Date(app.created_at).toLocaleDateString('fr-FR'),
+                    statusLabel: mapStatus(app.status),
+                    color: getStatusColor(app.status),
+                    icon: getServiceIcon(app.service_type),
+                    documents: (files || []).map(f => ({
+                        id: f.id || f.name,
+                        name: f.name,
+                        size: f.metadata ? `${(f.metadata.size / (1024 * 1024)).toFixed(2)}MB` : "0MB",
+                        status: "Reçu"
+                    }))
+                };
+            }));
+
+            setDossiers(dossiersWithDocs);
+        } catch (err: any) {
+            console.error("Erreur fetch admin dossiers:", err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const mapStatus = (status: string) => {
+        const statusMap: any = {
+            'en_attente': 'En attente',
+            'en_cours': 'En Traitement',
+            'valide': 'Validé',
+            'rejete': 'Rejeté'
+        };
+        return statusMap[status] || status;
+    };
+
+    const getStatusColor = (status: string) => {
+        if (status === 'valide') return "bg-emerald-50 text-emerald-600 border-emerald-100";
+        if (status === 'rejete') return "bg-rose-50 text-rose-600 border-rose-100";
+        if (status === 'en_cours') return "bg-sky-50 text-sky-600 border-sky-100";
+        return "bg-amber-50 text-amber-600 border-amber-100";
+    };
+
+    const getServiceIcon = (type: string) => {
+        if (type.includes('Études')) return <GraduationCap className="w-4 h-4" />;
+        if (type.includes('Visa')) return <Globe2 className="w-4 h-4" />;
+        return <Users className="w-4 h-4" />;
+    };
+
+    const handleAction = async (newStatus: string) => {
+        if (!selectedDossier) return;
         setIsActionLoading(true);
-        setTimeout(() => {
-            setDossiers(dossiers.map(d => d.id === selectedDossier.id ? {
-                ...d,
-                status,
-                color: status === "Validé" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"
-            } : d));
-            setIsActionLoading(false);
+        try {
+            const dbStatus = newStatus === 'Validé' ? 'valide' : 'rejete';
+            const { error } = await supabase
+                .from('applications')
+                .update({ status: dbStatus })
+                .eq('id', selectedDossier.id);
+
+            if (error) throw error;
+
+            await fetchDossiers();
             setSelectedDossier(null);
-        }, 1000);
+        } catch (err: any) {
+            alert("Erreur lors de la mise à jour : " + err.message);
+        } finally {
+            setIsActionLoading(false);
+        }
+    };
+
+    const handleCreateInvoice = async () => {
+        if (!selectedDossier || !invoiceAmount) return;
+        setIsActionLoading(true);
+        try {
+            const { error } = await supabase
+                .from('invoices')
+                .insert({
+                    user_id: selectedDossier.user_id,
+                    application_id: selectedDossier.id,
+                    amount: parseFloat(invoiceAmount),
+                    description: invoiceDesc || `Frais ${selectedDossier.type} - ${selectedDossier.dest}`,
+                    status: 'en_attente',
+                    due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                });
+
+            if (error) throw error;
+
+            alert("Facture générée avec succès !");
+            setShowInvoiceForm(false);
+            setInvoiceAmount("");
+            setInvoiceDesc("");
+        } catch (err: any) {
+            alert("Erreur lors de la création de la facture : " + err.message);
+        } finally {
+            setIsActionLoading(false);
+        }
+    };
+
+    const downloadDocument = async (fileName: string) => {
+        if (!selectedDossier) return;
+        try {
+            const { data, error } = await supabase.storage
+                .from('client_documents')
+                .download(`${selectedDossier.user_id}/${selectedDossier.id}/${fileName}`);
+
+            if (error) throw error;
+
+            const url = URL.createObjectURL(data);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+        } catch (err: any) {
+            alert("Erreur lors du téléchargement : " + err.message);
+        }
     };
 
     if (!mounted) return null;
@@ -123,20 +197,6 @@ export default function AdminDossiersPage() {
                     <h1 className="text-3xl font-black text-slate-900 tracking-tight">Validation des Dossiers</h1>
                     <p className="text-slate-500 font-medium">Examinez les pièces justificatives et validez les étapes consulaires.</p>
                 </div>
-                <div className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-400 font-bold text-xs uppercase tracking-widest">
-                    <AlertCircle className="w-4 h-4 text-rose-500" />
-                    8 Dossiers URGENTS
-                </div>
-            </div>
-
-            {/* Grid Filter Options */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
-                {["Tout", "Canada", "France", "Dubaï", "Études", "Immigration"].map((filt, i) => (
-                    <button key={i} className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm border ${filt === "Tout" ? "bg-slate-950 text-white border-slate-950 shadow-sky-500/10" : "bg-white text-slate-400 border-slate-100 hover:border-amber-400 hover:text-amber-500"
-                        }`}>
-                        {filt}
-                    </button>
-                ))}
             </div>
 
             {/* Table Interface */}
@@ -149,73 +209,79 @@ export default function AdminDossiersPage() {
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Client / Type</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Destination</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Statut</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions de Validation</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {dossiers.map((dossier, i) => (
-                                <motion.tr
-                                    key={dossier.id}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    onClick={() => setSelectedDossier(dossier)}
-                                    className="hover:bg-slate-50 transition-colors group cursor-pointer"
-                                >
-                                    <td className="px-8 py-6">
-                                        <div className="text-sm font-black text-slate-900">{dossier.id}</div>
-                                        <div className="text-[10px] font-bold text-slate-400 uppercase">Reçu le {dossier.date.split(' ')[0]}</div>
+                            {isLoading ? (
+                                <tr>
+                                    <td className="px-8 py-12 text-center" colSpan={5}>
+                                        <div className="flex flex-col items-center gap-4 text-slate-400">
+                                            <Loader2 className="w-10 h-10 animate-spin" />
+                                            <p className="font-black text-xs uppercase tracking-widest">Chargement des dossiers...</p>
+                                        </div>
                                     </td>
-
-                                    <td className="px-8 py-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-950 flex items-center justify-center font-black text-[10px] group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors uppercase">
-                                                {dossier.client.substring(0, 2)}
-                                            </div>
-                                            <div>
-                                                <div className="font-black text-slate-900 text-sm whitespace-nowrap">{dossier.client}</div>
-                                                <div className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-tighter">
-                                                    {dossier.icon}
-                                                    {dossier.type}
+                                </tr>
+                            ) : dossiers.length > 0 ? (
+                                dossiers.map((dossier, i) => (
+                                    <motion.tr
+                                        key={dossier.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.05 }}
+                                        onClick={() => setSelectedDossier(dossier)}
+                                        className="hover:bg-slate-50 transition-colors group cursor-pointer"
+                                    >
+                                        <td className="px-8 py-6">
+                                            <div className="text-sm font-black text-slate-900">{dossier.id.substring(0, 8)}</div>
+                                            <div className="text-[10px] font-bold text-slate-400 uppercase">Reçu le {dossier.date}</div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-950 flex items-center justify-center font-black text-[10px] group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors uppercase">
+                                                    {dossier.client.substring(0, 2)}
+                                                </div>
+                                                <div>
+                                                    <div className="font-black text-slate-900 text-sm whitespace-nowrap">{dossier.client}</div>
+                                                    <div className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-tighter">
+                                                        {dossier.icon}
+                                                        {dossier.type}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-700 shadow-sm uppercase tracking-widest">
+                                                <Globe2 className="w-3 h-3 text-sky-500" />
+                                                {dossier.dest}
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm ${dossier.color}`}>
+                                                {dossier.statusLabel}
+                                            </span>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center justify-end gap-2 pr-2">
+                                                <div className="p-2 bg-white border border-slate-100 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg shadow-sm transition-all">
+                                                    <Eye className="w-4 h-4" />
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </motion.tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td className="px-8 py-12 text-center" colSpan={5}>
+                                        <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Aucun dossier trouvé.</p>
                                     </td>
-
-                                    <td className="px-8 py-6">
-                                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-700 shadow-sm uppercase tracking-widest">
-                                            <Globe2 className="w-3 h-3 text-sky-500" />
-                                            {dossier.dest}
-                                        </div>
-                                    </td>
-
-                                    <td className="px-8 py-6">
-                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm ${dossier.color}`}>
-                                            {dossier.status}
-                                        </span>
-                                    </td>
-
-                                    <td className="px-8 py-6">
-                                        <div className="flex items-center justify-end gap-2 pr-2">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); setSelectedDossier(dossier); }}
-                                                className="p-2 bg-white border border-slate-100 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg shadow-sm transition-all"
-                                            >
-                                                <Eye className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </motion.tr>
-                            ))}
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
-                <div className="p-10 bg-slate-50 border-t border-slate-100 text-center">
-                    <button className="px-10 py-4 bg-white border-2 border-dashed border-slate-200 rounded-2xl font-black text-xs text-slate-300 uppercase tracking-[0.3em] hover:text-slate-500 hover:border-slate-300 transition-all">
-                        Charger 25 dossiers supplémentaires
-                    </button>
-                </div>
             </div>
+
             {/* Dossier Detail Modal */}
             <AnimatePresence>
                 {selectedDossier && (
@@ -240,7 +306,7 @@ export default function AdminDossiersPage() {
                                         {selectedDossier.icon}
                                     </div>
                                     <div>
-                                        <h2 className="text-xl font-black text-slate-900">{selectedDossier.id}</h2>
+                                        <h2 className="text-xl font-black text-slate-900">{selectedDossier.id.substring(0, 8)}</h2>
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{selectedDossier.type} - {selectedDossier.dest}</p>
                                     </div>
                                 </div>
@@ -254,95 +320,133 @@ export default function AdminDossiersPage() {
                             </div>
 
                             <div className="overflow-y-auto p-8 space-y-8">
-                                {/* Client Info Section */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
                                         <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Informations Client</div>
-                                        <div className="space-y-4">
+                                        <div className="space-y-4 font-sans">
                                             <div>
                                                 <div className="text-xs font-bold text-slate-400">Nom</div>
-                                                <div className="text-sm font-black text-slate-900">{selectedDossier.client}</div>
+                                                <div className="text-sm font-black text-slate-900 uppercase">{selectedDossier.client}</div>
                                             </div>
                                             <div>
-                                                <div className="text-xs font-bold text-slate-400">Email</div>
-                                                <div className="text-sm font-black text-slate-900 flex items-center gap-2">
+                                                <div className="text-xs font-bold text-slate-400">Contact</div>
+                                                <div className="text-sm font-black text-slate-900">
                                                     {selectedDossier.email}
-                                                    <Mail className="w-3 h-3 text-sky-500" />
                                                 </div>
                                             </div>
+
+                                            <button
+                                                onClick={() => setShowInvoiceForm(!showInvoiceForm)}
+                                                className={`w-full mt-4 p-4 border rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest transition-all shadow-sm ${showInvoiceForm ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-900 border-slate-200 hover:bg-slate-50'}`}
+                                            >
+                                                <Plus className={`w-4 h-4 transition-transform ${showInvoiceForm ? 'rotate-45' : ''}`} />
+                                                Générer Facture
+                                            </button>
                                         </div>
                                     </div>
 
-                                    <div className="md:col-span-2 p-6 border-2 border-dashed border-slate-100 rounded-3xl space-y-4">
-                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Pièces Jointes Reçues</div>
-                                        <div className="space-y-3">
-                                            {selectedDossier.documents.map((doc: any) => (
-                                                <div key={doc.id} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:shadow-lg transition-all group cursor-pointer">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 bg-sky-50 text-sky-500 rounded-xl flex items-center justify-center">
-                                                            <FileText className="w-5 h-5" />
-                                                        </div>
-                                                        <div>
-                                                            <div className="text-sm font-black text-slate-900 group-hover:text-sky-600 transition-colors">{doc.name}</div>
-                                                            <div className="text-[10px] font-bold text-slate-400 uppercase">{doc.size}</div>
-                                                        </div>
+                                    <div className="md:col-span-2">
+                                        {showInvoiceForm ? (
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                className="p-8 bg-amber-50/50 border-2 border-amber-200 rounded-[2rem] space-y-6"
+                                            >
+                                                <div className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em]">Paramètres de Facturation</div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+                                                    <div>
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Montant (DA)</label>
+                                                        <input
+                                                            type="number"
+                                                            value={invoiceAmount}
+                                                            onChange={(e) => setInvoiceAmount(e.target.value)}
+                                                            className="w-full p-4 rounded-xl border border-amber-200 focus:ring-4 ring-amber-500/10 outline-none text-sm font-black"
+                                                            placeholder="Ex: 5000"
+                                                        />
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-2">{doc.status}</span>
-                                                        <button className="p-2 bg-slate-50 text-slate-400 hover:text-sky-500 rounded-lg transition-all">
-                                                            <Download className="w-4 h-4" />
-                                                        </button>
-                                                        <button className="p-2 bg-slate-50 text-slate-400 hover:text-amber-500 rounded-lg transition-all">
-                                                            <ExternalLink className="w-4 h-4" />
-                                                        </button>
+                                                    <div>
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Libellé</label>
+                                                        <input
+                                                            type="text"
+                                                            value={invoiceDesc}
+                                                            onChange={(e) => setInvoiceDesc(e.target.value)}
+                                                            className="w-full p-4 rounded-xl border border-amber-200 focus:ring-4 ring-amber-500/10 outline-none text-sm font-black"
+                                                            placeholder="Ex: Frais de traitement"
+                                                        />
                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
+                                                <button
+                                                    onClick={handleCreateInvoice}
+                                                    disabled={isActionLoading || !invoiceAmount}
+                                                    className="w-full py-4 bg-slate-900 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl hover:bg-slate-800 transition-all disabled:opacity-50 shadow-xl shadow-slate-900/10"
+                                                >
+                                                    {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Envoyer la facture au client"}
+                                                </button>
+                                            </motion.div>
+                                        ) : (
+                                            <div className="p-8 bg-white border-2 border-dashed border-slate-100 rounded-[2rem] space-y-4 font-sans h-full min-h-[300px]">
+                                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Pièces Jointes Reçues</div>
+                                                <div className="space-y-3">
+                                                    {selectedDossier.documents.length > 0 ? (
+                                                        selectedDossier.documents.map((doc: any) => (
+                                                            <div key={doc.id} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:shadow-lg transition-all group">
+                                                                <div className="flex items-center gap-4 font-sans">
+                                                                    <div className="w-10 h-10 bg-sky-50 text-sky-500 rounded-xl flex items-center justify-center">
+                                                                        <FileText className="w-5 h-5" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="text-sm font-black text-slate-900 uppercase tracking-tight">{doc.name}</div>
+                                                                        <div className="text-[10px] font-bold text-slate-400 uppercase">{doc.size}</div>
+                                                                    </div>
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => downloadDocument(doc.name)}
+                                                                    className="p-3 bg-slate-50 text-slate-400 hover:text-sky-500 hover:bg-sky-50 rounded-xl transition-all"
+                                                                >
+                                                                    <Download className="w-5 h-5" />
+                                                                </button>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="py-20 text-center text-slate-300 text-[10px] font-black uppercase tracking-widest">
+                                                            Aucun document joint
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-
-                                {/* Status Card */}
-                                <div className="p-6 bg-slate-950 rounded-3xl text-white relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/10 blur-3xl rounded-full"></div>
-                                    <div className="flex items-center gap-4 mb-4">
-                                        <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-amber-400">
-                                            <ShieldCheck className="w-6 h-6" />
-                                        </div>
-                                        <div>
-                                            <div className="text-xs font-bold text-slate-400 uppercase">Statut Actuel</div>
-                                            <div className="text-lg font-black">{selectedDossier.status}</div>
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-slate-400 leading-relaxed italic">"Vérification finale avant dépôt au consulat."</p>
                                 </div>
                             </div>
 
                             {/* Modal Footer Actions */}
-                            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                                <button className="flex items-center gap-2 px-6 py-3 text-slate-400 hover:text-slate-600 font-bold text-sm uppercase tracking-widest transition-all">
-                                    <MessageSquare className="w-4 h-4" />
-                                    Commentaire
+                            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between font-sans">
+                                <button
+                                    onClick={() => setSelectedChat(selectedDossier.id)}
+                                    className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-200 text-sky-600 hover:bg-sky-50 font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all shadow-sm active:scale-95"
+                                >
+                                    <MessageSquare className="w-5 h-5" />
+                                    Support Client
                                 </button>
                                 <div className="flex items-center gap-3">
                                     <button
                                         onClick={() => handleAction("Rejeté")}
                                         disabled={isActionLoading}
-                                        className="px-6 py-3 bg-white border border-rose-200 text-rose-500 font-black text-xs rounded-xl hover:bg-rose-50 transition-all uppercase tracking-[0.2em] shadow-sm disabled:opacity-50"
+                                        className="px-8 py-4 bg-white border border-rose-200 text-rose-500 font-black text-[10px] rounded-2xl hover:bg-rose-50 transition-all uppercase tracking-[0.2em] shadow-sm disabled:opacity-50"
                                     >
                                         Rejeter
                                     </button>
                                     <button
                                         onClick={() => handleAction("Validé")}
                                         disabled={isActionLoading}
-                                        className="px-8 py-3 bg-emerald-500 text-white font-black text-xs rounded-xl hover:opacity-90 transition-all uppercase tracking-[0.2em] shadow-lg shadow-emerald-200 flex items-center gap-2 disabled:opacity-50"
+                                        className="px-10 py-4 bg-emerald-500 text-white font-black text-[10px] rounded-2xl hover:opacity-90 transition-all uppercase tracking-[0.2em] shadow-xl shadow-emerald-200 flex items-center gap-2 disabled:opacity-50"
                                     >
                                         {isActionLoading ? (
-                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            <Loader2 className="w-5 h-5 animate-spin" />
                                         ) : (
-                                            <Check className="w-4 h-4" />
+                                            <CheckCircle2 className="w-5 h-5" />
                                         )}
-                                        Valider le Dossier
+                                        Valider le dossier
                                     </button>
                                 </div>
                             </div>
@@ -350,6 +454,15 @@ export default function AdminDossiersPage() {
                     </div>
                 )}
             </AnimatePresence>
-        </div >
+
+            <AnimatePresence>
+                {selectedChat && (
+                    <ApplicationChat
+                        applicationId={selectedChat}
+                        onClose={() => setSelectedChat(null)}
+                    />
+                )}
+            </AnimatePresence>
+        </div>
     );
 }

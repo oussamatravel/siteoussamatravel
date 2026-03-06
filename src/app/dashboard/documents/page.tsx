@@ -40,27 +40,43 @@ export default function DocumentsPage() {
         if (!user) return;
 
         try {
-            const { data, error } = await supabase.storage
-                .from('client_documents')
-                .list(user.id, {
-                    limit: 100,
-                    offset: 0,
-                    sortBy: { column: 'name', order: 'desc' },
-                });
+            // 1. Récupérer les applications pour connaître les dossiers
+            const { data: apps, error: appsError } = await supabase
+                .from('applications')
+                .select('id, reference_number')
+                .eq('user_id', user.id);
 
-            if (error) throw error;
+            if (appsError) throw appsError;
 
-            const formattedDocs = data.map((file) => ({
-                id: file.id,
-                name: file.name,
-                size: `${(file.metadata.size / (1024 * 1024)).toFixed(2)} MB`,
-                date: new Date(file.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
-                status: "En Attente", // Par défaut, Supabase Storage n'a pas de status
-                statusColor: "text-amber-600 bg-amber-50 border-amber-100",
-                icon: <AlertCircle className="w-4 h-4 text-amber-500" />
-            }));
+            let allFiles: any[] = [];
 
-            setDocuments(formattedDocs);
+            // 2. Pour chaque application, lister les fichiers dans son dossier
+            for (const app of (apps || [])) {
+                const { data: files, error: storageError } = await supabase.storage
+                    .from('client_documents')
+                    .list(`${user.id}/${app.id}`);
+
+                if (storageError) {
+                    console.error(`Erreur storage pour ${app.id}:`, storageError.message);
+                    continue;
+                }
+
+                const formattedFiles = files.map(file => ({
+                    id: file.id,
+                    name: file.name,
+                    appRef: app.reference_number,
+                    appId: app.id,
+                    size: `${(file.metadata.size / (1024 * 1024)).toFixed(2)} MB`,
+                    date: new Date(file.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+                    status: "Reçu",
+                    statusColor: "text-emerald-600 bg-emerald-50 border-emerald-100",
+                    icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                }));
+
+                allFiles = [...allFiles, ...formattedFiles];
+            }
+
+            setDocuments(allFiles);
         } catch (err: any) {
             console.error("Erreur fetch docs:", err.message);
         } finally {
@@ -96,14 +112,14 @@ export default function DocumentsPage() {
         }
     };
 
-    const downloadDocument = async (fileName: string) => {
+    const downloadDocument = async (fileName: string, doc: any) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
         try {
             const { data, error } = await supabase.storage
                 .from('client_documents')
-                .download(`${user.id}/${fileName}`);
+                .download(`${user.id}/${doc.appId}/${fileName}`);
 
             if (error) throw error;
 
@@ -117,7 +133,7 @@ export default function DocumentsPage() {
         }
     };
 
-    const deleteDocument = async (fileName: string) => {
+    const deleteDocument = async (fileName: string, appId: string) => {
         if (!confirm("Voulez-vous vraiment supprimer ce document ?")) return;
 
         const { data: { user } } = await supabase.auth.getUser();
@@ -126,7 +142,7 @@ export default function DocumentsPage() {
         try {
             const { error } = await supabase.storage
                 .from('client_documents')
-                .remove([`${user.id}/${fileName}`]);
+                .remove([`${user.id}/${appId}/${fileName}`]);
 
             if (error) throw error;
             fetchDocuments();
@@ -210,10 +226,13 @@ export default function DocumentsPage() {
                             </div>
 
                             <h3 className="text-lg font-bold text-gray-900 mb-1 truncate">{doc.name}</h3>
-                            <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+                            <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
                                 <span>{doc.size}</span>
                                 <span>•</span>
                                 <span>{doc.date}</span>
+                            </div>
+                            <div className="text-[10px] font-black text-sky-500 uppercase tracking-widest mb-4">
+                                Réf: {doc.appRef}
                             </div>
 
                             <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${doc.statusColor} mb-8`}>
@@ -223,14 +242,14 @@ export default function DocumentsPage() {
 
                             <div className="flex items-center gap-3 pt-6 border-t border-slate-50">
                                 <button
-                                    onClick={() => downloadDocument(doc.name)}
+                                    onClick={() => downloadDocument(doc.name, doc)}
                                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 text-gray-700 font-bold rounded-xl hover:bg-slate-200 transition-all text-sm"
                                 >
                                     <Download className="w-4 h-4" />
                                     Télécharger
                                 </button>
                                 <button
-                                    onClick={() => deleteDocument(doc.name)}
+                                    onClick={() => deleteDocument(doc.name, doc.appId)}
                                     className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
                                 >
                                     <Trash2 className="w-5 h-5" />
