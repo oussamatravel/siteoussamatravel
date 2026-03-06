@@ -14,7 +14,7 @@ interface Message {
         first_name: string;
         last_name: string;
         role: string;
-    };
+    } | null;
 }
 
 export default function ApplicationChat({ applicationId, onClose }: { applicationId: string, onClose: () => void }) {
@@ -35,8 +35,21 @@ export default function ApplicationChat({ applicationId, onClose }: { applicatio
                 schema: 'public',
                 table: 'messages',
                 filter: `application_id=eq.${applicationId}`
-            }, (payload) => {
-                setMessages(prev => [...prev, payload.new as Message]);
+            }, async (payload) => {
+                const newMessage = payload.new as Message;
+
+                // Fetch basic profile to identify sender role/name in real-time
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('first_name, last_name, role')
+                    .eq('id', newMessage.sender_id)
+                    .single();
+
+                setMessages(prev => {
+                    // Prevent duplicate if already in state (though rare with INSERT only)
+                    if (prev.find(m => m.id === newMessage.id)) return prev;
+                    return [...prev, { ...newMessage, profiles: profile }];
+                });
             })
             .subscribe();
 
@@ -81,11 +94,14 @@ export default function ApplicationChat({ applicationId, onClose }: { applicatio
 
         setIsSending(true);
         try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Session expirée. Veuillez vous reconnecter.");
+
             const { error } = await supabase
                 .from('messages')
                 .insert({
                     application_id: applicationId,
-                    sender_id: currentUser.id,
+                    sender_id: user.id,
                     content: newMessage.trim()
                 });
 
@@ -161,12 +177,12 @@ export default function ApplicationChat({ applicationId, onClose }: { applicatio
                                     <div className="max-w-[80%] space-y-1">
                                         {!isMe && (
                                             <div className="text-[10px] font-black text-slate-400 px-2 uppercase tracking-tighter">
-                                                {isStaff ? 'Conseiller Oussama Travel' : 'Moi'}
+                                                {isStaff ? 'Conseiller Oussama Travel' : (msg.profiles?.first_name ? `${msg.profiles.first_name} ${msg.profiles.last_name}` : 'Utilisateur')}
                                             </div>
                                         )}
                                         <div className={`p-4 rounded-3xl text-sm font-medium shadow-sm border ${isMe
-                                                ? 'bg-slate-900 text-white border-slate-900 rounded-br-none'
-                                                : 'bg-white text-slate-700 border-slate-100 rounded-bl-none'
+                                            ? 'bg-slate-900 text-white border-slate-900 rounded-br-none'
+                                            : 'bg-white text-slate-700 border-slate-100 rounded-bl-none'
                                             }`}>
                                             {msg.content}
                                         </div>

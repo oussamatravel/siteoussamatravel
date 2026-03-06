@@ -17,10 +17,12 @@ import {
     Globe2,
     Calendar,
     Send,
-    Loader2
+    Loader2,
+    MessageSquare
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import ApplicationChat from "@/components/ApplicationChat";
 
 export default function DashboardOverview() {
     const [isNewRequestModalOpen, setIsNewRequestModalOpen] = useState(false);
@@ -28,6 +30,7 @@ export default function DashboardOverview() {
     const [mounted, setMounted] = useState(false);
     const [userProfile, setUserProfile] = useState<any>(null);
     const [applications, setApplications] = useState<any[]>([]);
+    const [selectedChat, setSelectedChat] = useState<string | null>(null);
 
     // Form state
     const [selectedService, setSelectedService] = useState("");
@@ -313,8 +316,8 @@ export default function DashboardOverview() {
                                 </div>
                             </div>
                             <span className={`px-5 py-2 border font-black text-[10px] uppercase tracking-widest rounded-full flex items-center gap-2 self-start md:self-center ${activeDossier.status === 'valide' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                    activeDossier.status === 'rejete' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                                        'bg-sky-50 text-sky-600 border-sky-100'
+                                activeDossier.status === 'rejete' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                                    'bg-sky-50 text-sky-600 border-sky-100'
                                 }`}>
                                 <Clock className="w-3 h-3" /> {
                                     activeDossier.status === 'valide' ? 'Validé' :
@@ -322,6 +325,13 @@ export default function DashboardOverview() {
                                             activeDossier.status === 'en_attente' ? 'En attente' : 'En Traitement'
                                 }
                             </span>
+                            <button
+                                onClick={() => setSelectedChat(activeDossier.id)}
+                                className="flex items-center gap-2 px-6 py-2 px-4 bg-sky-50 text-sky-600 font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-sky-600 hover:text-white transition-all shadow-sm active:scale-95 ml-auto"
+                            >
+                                <MessageSquare className="w-4 h-4" />
+                                Contacter le Support
+                            </button>
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -640,6 +650,15 @@ export default function DashboardOverview() {
                             </div>
                         </motion.div>
                     </div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {selectedChat && (
+                    <ApplicationChat
+                        applicationId={selectedChat}
+                        onClose={() => setSelectedChat(null)}
+                    />
                 )}
             </AnimatePresence>
         </div>
