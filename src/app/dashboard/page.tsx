@@ -202,6 +202,40 @@ export default function DashboardOverview() {
         { name: "Royaume-Uni", flag: "🇬🇧" },
     ];
 
+    const IMMIGRATION_COUNTRIES = [
+        { name: "Canada", flag: "🇨🇦" },
+        { name: "France", flag: "🇫🇷" },
+        { name: "USA", flag: "🇺🇸" },
+        { name: "Royaume-Uni", flag: "🇬🇧" },
+    ];
+
+    const IMMIGRATION_PROGRAMS: Record<string, string[]> = {
+        "Canada": [
+            "Entrée Express (Express Entry)",
+            "Programmes des Candidats des Provinces (PCP/PNP)",
+            "Regroupement Familial",
+            "Visa Étudiant / Travailleur"
+        ],
+        "France": [
+            "Passeport Talent",
+            "Regroupement Familial",
+            "Visiteur & Retraités",
+            "Études en France"
+        ],
+        "USA": [
+            "Visas de Travail (H-1B, L-1)",
+            "Résidence Permanente (Green Card)",
+            "Loterie Diversité (DV Lottery)",
+            "Études (F-1 / M-1)"
+        ],
+        "Royaume-Uni": [
+            "Skilled Worker Visa",
+            "Global Talent Visa",
+            "Innovator Founder Visa",
+            "Student Visa"
+        ]
+    };
+
     const EVISA_COUNTRIES = [
         { name: "Thaïlande", flag: "🇹🇭" },
         { name: "Azerbaïdjan", flag: "🇦🇿" },
@@ -232,6 +266,7 @@ export default function DashboardOverview() {
     const activeDossier = applications[0];
 
     const getCountryList = () => {
+        if (selectedService === "Immigration Express") return IMMIGRATION_COUNTRIES;
         if (selectedService === "E-Visa (Électronique)") return EVISA_COUNTRIES;
         return VISA_COUNTRIES;
     };
@@ -450,7 +485,7 @@ export default function DashboardOverview() {
                                     </div>
                                     <div>
                                         <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Nouvelle Demande</h2>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest italic">Étape {requestStep} sur 2</p>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest italic">Étape {requestStep} sur {selectedService === "Immigration Express" ? "3" : "2"}</p>
                                     </div>
                                 </div>
                                 <button
@@ -513,7 +548,6 @@ export default function DashboardOverview() {
                                                     </div>
                                                 </div>
 
-                                                {/* Champ manuel si "Autre" est sélectionné */}
                                                 <AnimatePresence>
                                                     {isOtherCountry && (
                                                         <motion.div
@@ -536,6 +570,33 @@ export default function DashboardOverview() {
                                                         </motion.div>
                                                     )}
                                                 </AnimatePresence>
+
+                                                {selectedService === "Immigration Express" && targetCountry && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        className="mt-8 space-y-4"
+                                                    >
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Programme d'Immigration</label>
+                                                        <div className="relative group">
+                                                            <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                                            <select
+                                                                value={visaCategory}
+                                                                onChange={(e) => setVisaCategory(e.target.value)}
+                                                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all font-bold text-slate-900 appearance-none cursor-pointer"
+                                                            >
+                                                                <option value="" disabled>Sélectionnez un programme</option>
+                                                                {IMMIGRATION_PROGRAMS[targetCountry]?.map((p) => (
+                                                                    <option key={p} value={p}>{p}</option>
+                                                                ))}
+                                                                <option value="Autre / Conseil">Autre / Conseil personnalisé</option>
+                                                            </select>
+                                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                                <PlusCircle className="w-4 h-4 text-slate-400 rotate-45" />
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                )}
                                             </div>
 
                                             {/* Champs spécifiques : Visa Classique */}
@@ -641,7 +702,7 @@ export default function DashboardOverview() {
                                 {requestStep === 2 && (
                                     <button
                                         onClick={handleCreateRequest}
-                                        disabled={loading || !targetCountry}
+                                        disabled={loading || !targetCountry || (selectedService === "Immigration Express" && !visaCategory)}
                                         className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-3 hover:bg-slate-800 transition-all disabled:opacity-50"
                                     >
                                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" /> Envoyer la demande</>}
