@@ -32,6 +32,8 @@ export default function AdminPaiementsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isActionLoading, setIsActionLoading] = useState(false);
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [isCheckingRole, setIsCheckingRole] = useState(true);
 
     // Form state
     const [newInvoice, setNewInvoice] = useState({
@@ -44,9 +46,23 @@ export default function AdminPaiementsPage() {
     const supabase = createClient();
 
     useEffect(() => {
-        fetchInvoices();
-        fetchClients();
-    }, []);
+        const checkRoleAndFetchData = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+                if (data) setUserRole(data.role);
+            }
+            setIsCheckingRole(false);
+
+            // Only fetch financial data if the user is an admin
+            if (userRole !== 'employee') {
+                fetchInvoices();
+                fetchClients();
+            }
+        };
+
+        checkRoleAndFetchData();
+    }, [userRole]);
 
     const fetchInvoices = async () => {
         setIsLoading(true);
@@ -191,6 +207,18 @@ export default function AdminPaiementsPage() {
                 return "bg-amber-50 text-amber-600 border-amber-100";
         }
     };
+
+    if (isCheckingRole) return null;
+
+    if (userRole === 'employee') {
+        return (
+            <div className="max-w-7xl mx-auto py-32 text-center space-y-4">
+                <Ban className="w-20 h-20 text-rose-500 mx-auto mb-6" />
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Espace Financier Sécurisé</h1>
+                <p className="text-slate-500 font-medium max-w-md mx-auto">L'accès aux factures et aux paiements est strictement réservé à la direction.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-7xl mx-auto space-y-10 font-sans">

@@ -194,6 +194,8 @@ export default function AdminBlogPage() {
     const [editingPost, setEditingPost] = useState<any>(null);
     const [tab, setTab] = useState<"edit" | "preview">("edit");
     const [saved, setSaved] = useState(false);
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [isCheckingRole, setIsCheckingRole] = useState(true);
     const [formData, setFormData] = useState({
         title: "",
         excerpt: "",
@@ -206,7 +208,22 @@ export default function AdminBlogPage() {
 
     const supabase = createClient();
 
-    useEffect(() => { fetchPosts(); }, []);
+    useEffect(() => {
+        const checkRoleAndFetchData = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+                if (data) setUserRole(data.role);
+            }
+            setIsCheckingRole(false);
+
+            if (userRole !== 'employee') {
+                fetchPosts();
+            }
+        };
+
+        checkRoleAndFetchData();
+    }, [userRole]);
 
     const fetchPosts = async () => {
         setIsLoading(true);
@@ -274,6 +291,18 @@ export default function AdminBlogPage() {
         const matchCat = filterCat === "Tous" || p.category === filterCat;
         return matchSearch && matchCat;
     });
+
+    if (isCheckingRole) return null;
+
+    if (userRole === 'employee') {
+        return (
+            <div className="max-w-7xl mx-auto py-32 text-center space-y-4">
+                <ShieldCheck className="w-20 h-20 text-rose-500 mx-auto mb-6" />
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Accès Restreint</h1>
+                <p className="text-slate-500 font-medium max-w-md mx-auto">La rédaction et la publication d'articles de blog sont réservées à la direction.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-7xl mx-auto space-y-8 font-sans pb-20">

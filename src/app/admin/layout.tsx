@@ -30,6 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [counts, setCounts] = useState({ clients: 0, dossiers: 0, rdv: 0, paiements: 0, messages: 0, contacts: 0 });
+    const [userRole, setUserRole] = useState<string | null>(null);
     const supabase = createClient();
 
     useEffect(() => {
@@ -52,6 +53,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 supabase.from('contacts').select('*', { count: 'exact', head: true }).eq('is_read', false)
             ]);
 
+            const { data: userData } = await supabase.auth.getUser();
+            if (userData.user) {
+                const { data: profile } = await supabase.from('profiles').select('role').eq('id', userData.user.id).single();
+                if (profile) setUserRole(profile.role);
+            }
+
             setCounts({
                 clients: clientsCount || 0,
                 dossiers: dossiersCount || 0,
@@ -68,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         return () => clearInterval(interval);
     }, []);
 
-    const navigation = [
+    const allNavigation = [
         { name: "Vue Globale", href: "/admin", icon: <BarChart3 className="w-5 h-5" /> },
         { name: "Gestion Clients", href: "/admin/clients", icon: <Users className="w-5 h-5" /> },
         { name: "Validation Dossiers", href: "/admin/dossiers", icon: <Files className="w-5 h-5" /> },
@@ -79,6 +86,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { name: "Rendez-vous", href: "/admin/rdv", icon: <CalendarCheck className="w-5 h-5" /> },
         { name: "Paramètres Services", href: "/admin/parametres", icon: <Settings className="w-5 h-5" /> },
     ];
+
+    const navigation = allNavigation.filter(item => {
+        if (userRole === 'employee') {
+            return !["Paiements", "Blog", "Paramètres Services"].includes(item.name);
+        }
+        return true;
+    });
 
     return (
         <div className="min-h-screen bg-slate-100 flex font-sans">
@@ -132,8 +146,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className="p-4 space-y-4">
                     <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800">
                         <div className="flex items-center gap-2 text-white text-xs font-bold mb-2">
-                            <ShieldCheck className="w-3 h-3 text-amber-500" />
-                            ADMIN MODE
+                            <ShieldCheck className={`w-3 h-3 ${userRole === 'admin' ? 'text-amber-500' : 'text-sky-500'}`} />
+                            {userRole === 'admin' ? 'ADMIN MODE' : 'STAFF MODE'}
                         </div>
                         <p className="text-[10px] leading-relaxed text-slate-500">Toutes les actions sont enregistrées dans le journal d'audit.</p>
                     </div>
@@ -166,8 +180,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         </button>
                         <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
                             <div className="text-right hidden sm:block">
-                                <div className="text-sm font-black text-slate-900 leading-none">Admin Oussama</div>
-                                <div className="text-[10px] text-amber-600 font-bold uppercase mt-1">Super Utilisateur</div>
+                                <div className="text-sm font-black text-slate-900 leading-none">{userRole === 'admin' ? 'Admin Oussama' : 'Collaborateur'}</div>
+                                <div className={`text-[10px] uppercase mt-1 font-bold ${userRole === 'admin' ? 'text-amber-600' : 'text-sky-600'}`}>
+                                    {userRole === 'admin' ? 'Super Utilisateur' : 'Support Client'}
+                                </div>
                             </div>
                             <div className="w-10 h-10 rounded-xl bg-slate-950 flex items-center justify-center text-white font-black text-xs border border-slate-800">
                                 OA

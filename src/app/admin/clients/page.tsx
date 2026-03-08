@@ -72,7 +72,7 @@ export default function AdminClientsPage() {
                 country: "Algérie",
                 registration: new Date(p.created_at).toLocaleDateString('fr-FR'),
                 rawCreatedAt: p.created_at,
-                status: p.role === 'admin' ? "Admin" : "Vérifié",
+                status: p.role === 'admin' ? "Admin" : p.role === 'employee' ? "Staff" : "Vérifié",
                 dossiers: p.applications?.[0]?.count || 0,
                 lastLogin: "Récemment",
                 address: "Non renseignée"
@@ -360,29 +360,43 @@ export default function AdminClientsPage() {
                                 </div>
                             </div>
 
-                            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-3">
-                                <button className="px-6 py-3 border border-slate-200 text-slate-500 font-black text-xs rounded-xl hover:bg-white transition-all uppercase tracking-widest">Bloquer le Compte</button>
-                                <button
-                                    onClick={async () => {
-                                        const newRole = selectedClient.status === "Admin" ? "client" : "admin";
-                                        if (!confirm(`Voulez-vous passer ce client en tant que ${newRole} ?`)) return;
-
-                                        const { error } = await supabase
-                                            .from('profiles')
-                                            .update({ role: newRole })
-                                            .eq('id', selectedClient.realId);
-
-                                        if (error) alert(error.message);
-                                        else {
-                                            await fetchClients();
-                                            setSelectedClient(null);
-                                        }
-                                    }}
-                                    className="px-8 py-3 bg-slate-900 text-white font-black text-xs rounded-xl hover:bg-slate-800 transition-all uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-slate-200"
-                                >
-                                    Changer de Rôle
-                                    <ArrowRight className="w-4 h-4" />
-                                </button>
+                            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-end gap-3">
+                                {selectedClient.status !== "Staff" && (
+                                    <button
+                                        onClick={async () => {
+                                            if (!confirm(`Promouvoir ce client en Employé/Support ?`)) return;
+                                            const { error } = await supabase.from('profiles').update({ role: "employee" }).eq('id', selectedClient.realId);
+                                            if (error) alert(error.message); else { await fetchClients(); setSelectedClient(null); }
+                                        }}
+                                        className="px-6 py-3 bg-sky-50 text-sky-600 font-black text-xs rounded-xl hover:bg-sky-100 transition-all uppercase tracking-widest"
+                                    >
+                                        Nommer Employé
+                                    </button>
+                                )}
+                                {selectedClient.status !== "Admin" && (
+                                    <button
+                                        onClick={async () => {
+                                            if (!confirm(`Promouvoir ce client en Administrateur ?`)) return;
+                                            const { error } = await supabase.from('profiles').update({ role: "admin" }).eq('id', selectedClient.realId);
+                                            if (error) alert(error.message); else { await fetchClients(); setSelectedClient(null); }
+                                        }}
+                                        className="px-6 py-3 bg-amber-50 text-amber-600 font-black text-xs rounded-xl hover:bg-amber-100 transition-all uppercase tracking-widest"
+                                    >
+                                        Nommer Admin
+                                    </button>
+                                )}
+                                {(selectedClient.status === "Admin" || selectedClient.status === "Staff") && (
+                                    <button
+                                        onClick={async () => {
+                                            if (!confirm(`Rétrograder cet utilisateur en Client normal ?`)) return;
+                                            const { error } = await supabase.from('profiles').update({ role: "client" }).eq('id', selectedClient.realId);
+                                            if (error) alert(error.message); else { await fetchClients(); setSelectedClient(null); }
+                                        }}
+                                        className="px-6 py-3 bg-slate-950 text-white font-black text-xs rounded-xl hover:bg-slate-800 transition-all uppercase tracking-widest"
+                                    >
+                                        Rétrograder Client
+                                    </button>
+                                )}
                             </div>
                         </motion.div>
                     </div>

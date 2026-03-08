@@ -21,12 +21,25 @@ import {
     CheckCircle2
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AdminParametresPage() {
     const [activeTab, setActiveTab] = useState("Services & Tarifs");
     const [mounted, setMounted] = useState(false);
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [isCheckingRole, setIsCheckingRole] = useState(true);
+    const supabase = createClient();
 
     useEffect(() => {
+        const checkRole = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+                if (data) setUserRole(data.role);
+            }
+            setIsCheckingRole(false);
+        };
+        checkRole();
         setMounted(true);
     }, []);
 
@@ -38,7 +51,17 @@ export default function AdminParametresPage() {
         { name: "Base de Données", icon: <Database className="w-5 h-5" /> }
     ];
 
-    if (!mounted) return null;
+    if (!mounted || isCheckingRole) return null;
+
+    if (userRole === 'employee') {
+        return (
+            <div className="max-w-7xl mx-auto py-32 text-center space-y-4">
+                <ShieldCheck className="w-20 h-20 text-rose-500 mx-auto mb-6" />
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Accès Restreint</h1>
+                <p className="text-slate-500 font-medium max-w-md mx-auto">Votre niveau d'accès "Employé" ne vous permet pas de consulter ou de modifier les paramètres du système.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-7xl mx-auto space-y-10 font-sans pb-20">

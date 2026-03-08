@@ -162,7 +162,7 @@ export default function ApplicationChat({ applicationId, onClose }: { applicatio
                     ) : (
                         messages.map((msg) => {
                             const isMe = msg.sender_id === currentUser?.id;
-                            const isStaff = msg.profiles?.role === 'admin';
+                            const isStaff = msg.profiles?.role === 'admin' || msg.profiles?.role === 'employee';
 
                             return (
                                 <div
