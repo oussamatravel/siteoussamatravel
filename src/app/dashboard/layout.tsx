@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { LayoutDashboard, FolderOpen, FileCheck2, UserCircle, Bell, LogOut, Menu, X, CreditCard, MessageSquare } from "lucide-react";
+import { LayoutDashboard, FolderOpen, FileCheck2, UserCircle, Bell, LogOut, Menu, X, CreditCard, MessageSquare, Calendar } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -58,6 +58,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const navigation = [
         { name: "Tableau de Bord", href: "/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
         { name: "Mes Dossiers", href: "/dashboard/dossiers", icon: <FolderOpen className="w-5 h-5" /> },
+        { name: "Mes Rendez-vous", href: "/dashboard/rdv", icon: <Calendar className="w-5 h-5" /> },
         { name: "Messagerie", href: "/dashboard/messages", icon: <MessageSquare className="w-5 h-5" /> },
         { name: "Mes Documents", href: "/dashboard/documents", icon: <FileCheck2 className="w-5 h-5" /> },
         { name: "Paiements", href: "/dashboard/paiements", icon: <CreditCard className="w-5 h-5" /> },

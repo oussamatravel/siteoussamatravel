@@ -100,7 +100,13 @@ export default function AdminDossiersPage() {
     const mapStatus = (status: string) => {
         const statusMap: any = {
             'en_attente': 'En attente',
+            'receptionner': 'Réceptionné',
             'en_cours': 'En Traitement',
+            'manque_documents': 'Manque de documents',
+            'termine': 'Terminé',
+            'admission_recu': 'Admission reçue',
+            'admission_refusee': 'Admission refusée',
+            'etape_visa': 'Étape Visa',
             'valide': 'Validé',
             'rejete': 'Rejeté'
         };
@@ -108,10 +114,11 @@ export default function AdminDossiersPage() {
     };
 
     const getStatusColor = (status: string) => {
-        if (status === 'valide') return "bg-emerald-50 text-emerald-600 border-emerald-100";
-        if (status === 'rejete') return "bg-rose-50 text-rose-600 border-rose-100";
-        if (status === 'en_cours') return "bg-sky-50 text-sky-600 border-sky-100";
-        return "bg-amber-50 text-amber-600 border-amber-100";
+        if (status === 'valide' || status === 'termine' || status === 'admission_recu') return "bg-emerald-50 text-emerald-600 border-emerald-100";
+        if (status === 'rejete' || status === 'admission_refusee') return "bg-rose-50 text-rose-600 border-rose-100";
+        if (status === 'en_cours' || status === 'receptionner' || status === 'etape_visa') return "bg-sky-50 text-sky-600 border-sky-100";
+        if (status === 'manque_documents') return "bg-amber-50 text-amber-600 border-amber-100";
+        return "bg-slate-50 text-slate-600 border-slate-100";
     };
 
     const getServiceIcon = (type: string) => {
@@ -124,10 +131,9 @@ export default function AdminDossiersPage() {
         if (!selectedDossier) return;
         setIsActionLoading(true);
         try {
-            const dbStatus = newStatus === 'Validé' ? 'valide' : 'rejete';
             const { error } = await supabase
                 .from('applications')
-                .update({ status: dbStatus })
+                .update({ status: newStatus })
                 .eq('id', selectedDossier.id);
 
             if (error) throw error;
@@ -429,25 +435,31 @@ export default function AdminDossiersPage() {
                                     Support Client
                                 </button>
                                 <div className="flex items-center gap-3">
-                                    <button
-                                        onClick={() => handleAction("Rejeté")}
-                                        disabled={isActionLoading}
-                                        className="px-8 py-4 bg-white border border-rose-200 text-rose-500 font-black text-[10px] rounded-2xl hover:bg-rose-50 transition-all uppercase tracking-[0.2em] shadow-sm disabled:opacity-50"
-                                    >
-                                        Rejeter
-                                    </button>
-                                    <button
-                                        onClick={() => handleAction("Validé")}
-                                        disabled={isActionLoading}
-                                        className="px-10 py-4 bg-emerald-500 text-white font-black text-[10px] rounded-2xl hover:opacity-90 transition-all uppercase tracking-[0.2em] shadow-xl shadow-emerald-200 flex items-center gap-2 disabled:opacity-50"
-                                    >
-                                        {isActionLoading ? (
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                        ) : (
-                                            <CheckCircle2 className="w-5 h-5" />
-                                        )}
-                                        Valider le dossier
-                                    </button>
+                                    <div className="flex flex-col gap-1 items-end">
+                                        <div className="text-[9px] font-black text-slate-400 mb-1 uppercase tracking-widest">Modifier d'état du traitement</div>
+                                        <select
+                                            disabled={isActionLoading}
+                                            value={selectedDossier.status}
+                                            onChange={(e) => handleAction(e.target.value)}
+                                            className="px-6 py-4 bg-white border border-slate-200 text-slate-900 font-black text-[10px] rounded-2xl outline-none focus:ring-2 focus:ring-amber-400 transition-all uppercase tracking-[0.2em] shadow-sm disabled:opacity-50 appearance-none cursor-pointer"
+                                        >
+                                            <option value="en_attente">⏳ En attente</option>
+                                            <option value="receptionner">📩 Réceptionné</option>
+                                            <option value="en_cours">⚙️ En Traitement</option>
+                                            <option value="manque_documents">⚠️ Documents manquants</option>
+                                            <option value="termine">✅ Terminé</option>
+                                            <hr />
+                                            <optgroup label="Études (Spécifique)">
+                                                <option value="admission_recu">🎓 Admission reçue</option>
+                                                <option value="admission_refusee">❌ Admission refusée</option>
+                                                <option value="etape_visa">🛂 Étape Visa</option>
+                                            </optgroup>
+                                            <hr />
+                                            <option value="valide">✨ Dossier Validé</option>
+                                            <option value="rejete">🚫 Dossier Rejeté</option>
+                                        </select>
+                                    </div>
+                                    {isActionLoading && <Loader2 className="w-6 h-6 animate-spin text-amber-500" />}
                                 </div>
                             </div>
                         </motion.div>

@@ -101,8 +101,8 @@ export default function Footer() {
                                     <MapPin className="w-5 h-5 text-emerald-400" />
                                 </div>
                                 <p className="text-slate-400 text-sm font-medium leading-relaxed">
-                                    Cité des Bananiers, Bab Ezzouar<br />
-                                    Alger, Algérie
+                                    Coopérative Scala, en face la gare routière<br />
+                                    Béjaïa, Algérie
                                 </p>
                             </li>
                             <li className="flex gap-4 group cursor-pointer" onClick={() => window.open("tel:+213770419460")}>

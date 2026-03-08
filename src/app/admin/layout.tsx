@@ -16,23 +16,67 @@ import {
     Bell,
     Search,
     CreditCard,
-    MessageSquare
+    MessageSquare,
+    BookOpen,
+    CalendarCheck
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [counts, setCounts] = useState({ clients: 0, dossiers: 0, rdv: 0, paiements: 0, messages: 0, contacts: 0 });
+    const supabase = createClient();
+
+    useEffect(() => {
+        const fetchCounts = async () => {
+            const oneDayAgo = new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString();
+
+            const [
+                { count: clientsCount },
+                { count: dossiersCount },
+                { count: rdvCount },
+                { count: paiementsCount },
+                { count: messagesCount },
+                { count: contactsCount }
+            ] = await Promise.all([
+                supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'client').gte('created_at', oneDayAgo),
+                supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'en_attente'),
+                supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('status', 'en_attente'),
+                supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('status', 'en_attente'),
+                supabase.from('messages').select('*', { count: 'exact', head: true }).eq('is_read', false),
+                supabase.from('contacts').select('*', { count: 'exact', head: true }).eq('is_read', false)
+            ]);
+
+            setCounts({
+                clients: clientsCount || 0,
+                dossiers: dossiersCount || 0,
+                rdv: rdvCount || 0,
+                paiements: paiementsCount || 0,
+                messages: messagesCount || 0,
+                contacts: contactsCount || 0
+            });
+        };
+
+        fetchCounts();
+        // Polling chaque 30 secondes pour mettre à jour les compteurs
+        const interval = setInterval(fetchCounts, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
     const navigation = [
         { name: "Vue Globale", href: "/admin", icon: <BarChart3 className="w-5 h-5" /> },
         { name: "Gestion Clients", href: "/admin/clients", icon: <Users className="w-5 h-5" /> },
         { name: "Validation Dossiers", href: "/admin/dossiers", icon: <Files className="w-5 h-5" /> },
         { name: "Messagerie", href: "/admin/messages", icon: <MessageSquare className="w-5 h-5" /> },
+        { name: "Contacts Publics", href: "/admin/contacts", icon: <Bell className="w-5 h-5" /> },
         { name: "Paiements", href: "/admin/paiements", icon: <CreditCard className="w-5 h-5" /> },
+        { name: "Blog", href: "/admin/blog", icon: <BookOpen className="w-5 h-5" /> },
+        { name: "Rendez-vous", href: "/admin/rdv", icon: <CalendarCheck className="w-5 h-5" /> },
         { name: "Paramètres Services", href: "/admin/parametres", icon: <Settings className="w-5 h-5" /> },
     ];
 
@@ -55,14 +99,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <nav className="flex-1 py-8 px-4 space-y-1 overflow-y-auto">
                     {navigation.map((item) => {
                         const isActive = pathname === item.href;
+
+                        let badgeCount = 0;
+                        if (item.name === "Gestion Clients") badgeCount = counts.clients;
+                        else if (item.name === "Validation Dossiers") badgeCount = counts.dossiers;
+                        else if (item.name === "Rendez-vous") badgeCount = counts.rdv;
+                        else if (item.name === "Paiements") badgeCount = counts.paiements;
+                        else if (item.name === "Messagerie") badgeCount = counts.messages;
+                        else if (item.name === "Contacts Publics") badgeCount = counts.contacts;
+
                         return (
                             <Link key={item.name} href={item.href}>
-                                <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
+                                <div className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive
                                     ? "bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10"
                                     : "hover:bg-slate-900 hover:text-white"
                                     }`}>
-                                    {item.icon}
-                                    <span className="text-sm">{item.name}</span>
+                                    <div className="flex items-center gap-3">
+                                        {item.icon}
+                                        <span className="text-sm">{item.name}</span>
+                                    </div>
+                                    {badgeCount > 0 && (
+                                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full shadow-md ${isActive ? 'bg-slate-950 text-amber-500' : 'bg-red-500 text-white'}`}>
+                                            {badgeCount}
+                                        </span>
+                                    )}
                                 </div>
                             </Link>
                         );

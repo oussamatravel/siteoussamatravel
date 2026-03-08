@@ -35,7 +35,7 @@ export default function MentionsLegales() {
                             </div>
                             <div className="p-6 bg-slate-50 rounded-2xl">
                                 <p className="font-black text-slate-900 mb-2 uppercase text-xs tracking-widest text-sky-600">Adresse Siège</p>
-                                <p>Cité des Bananiers, Lot 14, Bab Ezzouar, Alger, Algérie</p>
+                                <p>Coopérative Scala, en face la gare routière, Béjaïa, Algérie</p>
                             </div>
                             <div className="p-6 bg-slate-50 rounded-2xl">
                                 <p className="font-black text-slate-900 mb-2 uppercase text-xs tracking-widest text-sky-600">Capital Social</p>

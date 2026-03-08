@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ContactPage() {
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -29,16 +30,23 @@ export default function ContactPage() {
         service: "Tourisme",
         message: ""
     });
+    const supabase = createClient();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setStatus("loading");
 
-        // Simulation d'envoi
-        setTimeout(() => {
+        try {
+            const { error } = await supabase.from('contacts').insert([formData]);
+            if (error) throw error;
+
             setStatus("success");
             setFormData({ name: "", email: "", phone: "", service: "Tourisme", message: "" });
-        }, 1500);
+        } catch (err: any) {
+            console.error("Erreur d'envoi:", err);
+            setStatus("error");
+            alert("Une erreur est survenue lors de l'envoi de votre message.");
+        }
     };
 
     const services = [
@@ -134,8 +142,8 @@ export default function ContactPage() {
                                             type="button"
                                             onClick={() => setFormData({ ...formData, service: s })}
                                             className={`py-4 px-4 rounded-2xl text-[10px] font-black uppercase tracking-tighter border transition-all ${formData.service === s
-                                                    ? "bg-slate-900 border-slate-900 text-white shadow-xl"
-                                                    : "bg-white border-slate-200 text-slate-500 hover:border-sky-500"
+                                                ? "bg-slate-900 border-slate-900 text-white shadow-xl"
+                                                : "bg-white border-slate-200 text-slate-500 hover:border-sky-500"
                                                 }`}
                                         >
                                             {s}
@@ -213,8 +221,8 @@ export default function ContactPage() {
                                 </div>
                                 <div className="space-y-2">
                                     <div className="font-black text-slate-400 text-[10px] uppercase tracking-[0.2em]">Siège Central</div>
-                                    <div className="text-2xl font-black text-slate-900">Bab Ezzouar, Alger</div>
-                                    <div className="text-slate-500 font-bold text-xs uppercase">Cité des Bananiers, Algérie</div>
+                                    <div className="text-2xl font-black text-slate-900">Coopérative Scala</div>
+                                    <div className="text-slate-500 font-bold text-xs uppercase">En face la gare routière, Béjaïa, Algérie</div>
                                 </div>
                             </div>
                         </div>

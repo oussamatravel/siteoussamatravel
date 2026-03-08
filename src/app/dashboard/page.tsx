@@ -261,6 +261,43 @@ export default function DashboardOverview() {
         { name: "Tanzanie", flag: "🇹🇿" },
     ];
 
+    const FRANCE_STUDY_PROCEDURES = [
+        "Campus France (CEF)",
+        "Universités Non-Connectées (ex: Paris-Saclay)",
+        "Écoles Privées / Grandes Écoles",
+        "Parcoursup / Formation Professionnelle"
+    ];
+
+    const BELGIQUE_STUDY_PROCEDURES = [
+        "Université (Enseignement Académique)",
+        "Haute École (Enseignement Pratique)",
+        "École des Arts / Conservatoire"
+    ];
+
+    const USA_STUDY_PROCEDURES = [
+        "University (Admission Directe)",
+        "Community College (2 ans + Transfert)",
+        "Language Program (Anglais Intensif)"
+    ];
+
+    const ITALIE_STUDY_PROCEDURES = [
+        "Pack Premium Licence (Admission + Bourse + Visa)",
+        "Pack Premium Master/Doctorat (Admission + Bourse + Visa)"
+    ];
+
+    const DUBAI_STUDY_PROCEDURES = [
+        "Admission Directe (Campus Internationaux)",
+        "Pack Cours de Langue + Admission",
+        "Assistance Visa Résidence Étudiant"
+    ];
+
+    const ETUDE_LEVELS = [
+        "Licence / Bachelor (Bac+3)",
+        "Master (Bac+5)",
+        "Doctorat (PhD)",
+        "Autre"
+    ];
+
     if (!mounted) return null;
 
     const activeDossier = applications[0];
@@ -656,26 +693,129 @@ export default function DashboardOverview() {
                                             )}
 
                                             {/* Champs spécifiques : Études */}
-                                            {selectedService === "Études à l'étranger" ? (
-                                                <div className="space-y-4">
-                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Session d'admission souhaitée</label>
-                                                    <div className="relative group">
-                                                        <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                                        <select
-                                                            value={selectedSession}
-                                                            onChange={(e) => setSelectedSession(e.target.value)}
-                                                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all font-bold text-slate-900 appearance-none cursor-pointer"
-                                                        >
-                                                            <option value="" disabled>Choisir une session</option>
-                                                            <option value="Hiver">Hiver (Janvier) ❄️</option>
-                                                            <option value="Automne">Automne (Septembre) 🍂</option>
-                                                        </select>
-                                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                            <PlusCircle className="w-4 h-4 text-slate-400 rotate-45" />
+                                            {selectedService === "Études à l'étranger" && (
+                                                <div className="space-y-6">
+                                                    {targetCountry === "France" && (
+                                                        <div className="space-y-4">
+                                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Type de procédure</label>
+                                                            <div className="grid grid-cols-1 gap-3">
+                                                                {FRANCE_STUDY_PROCEDURES.map((proc) => (
+                                                                    <button
+                                                                        key={proc}
+                                                                        onClick={() => setSelectedSession(proc)}
+                                                                        className={`p-4 rounded-2xl border-2 transition-all text-left font-black text-[10px] uppercase tracking-widest ${selectedSession === proc ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-inner' : 'border-slate-50 hover:border-slate-200 text-slate-500 bg-slate-50/50'}`}
+                                                                    >
+                                                                        {proc}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {targetCountry === "Belgique" && (
+                                                        <div className="space-y-4">
+                                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Type d'établissement</label>
+                                                            <div className="grid grid-cols-1 gap-3">
+                                                                {BELGIQUE_STUDY_PROCEDURES.map((proc) => (
+                                                                    <button
+                                                                        key={proc}
+                                                                        onClick={() => setSelectedSession(proc)}
+                                                                        className={`p-4 rounded-2xl border-2 transition-all text-left font-black text-[10px] uppercase tracking-widest ${selectedSession === proc ? 'border-red-600 bg-red-50 text-red-700 shadow-inner' : 'border-slate-50 hover:border-slate-200 text-slate-500 bg-slate-50/50'}`}
+                                                                    >
+                                                                        {proc}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {targetCountry === "USA" && (
+                                                        <div className="space-y-4">
+                                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Type de programme</label>
+                                                            <div className="grid grid-cols-1 gap-3">
+                                                                {USA_STUDY_PROCEDURES.map((proc) => (
+                                                                    <button
+                                                                        key={proc}
+                                                                        onClick={() => setSelectedSession(proc)}
+                                                                        className={`p-4 rounded-2xl border-2 transition-all text-left font-black text-[10px] uppercase tracking-widest ${selectedSession === proc ? 'border-blue-900 bg-blue-50 text-blue-900 shadow-inner' : 'border-slate-50 hover:border-slate-200 text-slate-500 bg-slate-50/50'}`}
+                                                                    >
+                                                                        {proc}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {targetCountry === "Italie" && (
+                                                        <div className="space-y-4">
+                                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Choisir votre Pack</label>
+                                                            <div className="grid grid-cols-1 gap-3">
+                                                                {ITALIE_STUDY_PROCEDURES.map((proc) => (
+                                                                    <button
+                                                                        key={proc}
+                                                                        onClick={() => setSelectedSession(proc)}
+                                                                        className={`p-4 rounded-2xl border-2 transition-all text-left font-black text-[10px] uppercase tracking-widest ${selectedSession === proc ? 'border-green-600 bg-green-50 text-green-700 shadow-inner' : 'border-slate-50 hover:border-slate-200 text-slate-500 bg-slate-50/50'}`}
+                                                                    >
+                                                                        {proc}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {targetCountry === "Dubaï" && (
+                                                        <div className="space-y-4">
+                                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Options Dubaï</label>
+                                                            <div className="grid grid-cols-1 gap-3">
+                                                                {DUBAI_STUDY_PROCEDURES.map((proc) => (
+                                                                    <button
+                                                                        key={proc}
+                                                                        onClick={() => setSelectedSession(proc)}
+                                                                        className={`p-4 rounded-2xl border-2 transition-all text-left font-black text-[10px] uppercase tracking-widest ${selectedSession === proc ? 'border-slate-900 bg-amber-50 text-slate-900 shadow-inner' : 'border-slate-50 hover:border-slate-200 text-slate-500 bg-slate-50/50'}`}
+                                                                    >
+                                                                        {proc}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="space-y-4">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Niveau d'études actuel</label>
+                                                        <div className="grid grid-cols-1 gap-3">
+                                                            {ETUDE_LEVELS.map((level) => (
+                                                                <button
+                                                                    key={level}
+                                                                    onClick={() => setVisaCategory(level)}
+                                                                    className={`p-4 rounded-2xl border-2 transition-all text-left font-black text-[10px] uppercase tracking-widest ${visaCategory === level ? 'border-sky-600 bg-sky-50 text-sky-700 shadow-inner' : 'border-slate-50 hover:border-slate-200 text-slate-500 bg-slate-50/50'}`}
+                                                                >
+                                                                    {level}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-4">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Session souhaitée</label>
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <button
+                                                                onClick={() => setSelectedSession("Hiver")}
+                                                                className={`p-4 rounded-2xl border-2 transition-all font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 ${selectedSession === "Hiver" ? 'border-sky-600 bg-sky-50 text-sky-700 shadow-inner' : 'border-slate-50 text-slate-400 bg-slate-50/50'}`}
+                                                            >
+                                                                Hiver ❄️
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setSelectedSession("Automne")}
+                                                                className={`p-4 rounded-2xl border-2 transition-all font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 ${selectedSession === "Automne" ? 'border-sky-600 bg-sky-50 text-sky-700 shadow-inner' : 'border-slate-50 text-slate-400 bg-slate-50/50'}`}
+                                                            >
+                                                                Automne 🍂
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            ) : (
+                                            )}
+
+                                            {selectedService !== "Études à l'étranger" && (
                                                 <div className="space-y-4">
                                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Date estimée de départ</label>
                                                     <div className="relative group">

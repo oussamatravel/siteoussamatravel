@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CalendarDays, CheckCircle2, ArrowRight, FileText, ShieldCheck, Clock, Users, X, Send, Loader2 } from "lucide-react";
+import { CalendarDays, CheckCircle2, ArrowRight, FileText, ShieldCheck, Clock, Users, X, Send, Loader2, Search } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -66,17 +66,23 @@ export default function RdvVisaPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [user, setUser] = useState<any>(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const [formData, setFormData] = useState({
-        service_type: "Visa Touristique",
+        type: "Visa Touristique",
         destination: "France",
         preferred_date: "",
-        notes: ""
+        client_notes: ""
     });
     const [isSuccess, setIsSuccess] = useState(false);
 
     const supabase = createClient();
-    const schengen = destinations.filter(d => d.zone === "Schengen");
-    const horsSchengen = destinations.filter(d => d.zone === "Hors-Schengen");
+
+    const filteredDestinations = destinations.filter(d =>
+        d.country.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const schengen = filteredDestinations.filter(d => d.zone === "Schengen");
+    const horsSchengen = filteredDestinations.filter(d => d.zone === "Hors-Schengen");
 
     useEffect(() => {
         const checkUser = async () => {
@@ -106,7 +112,7 @@ export default function RdvVisaPage() {
             setTimeout(() => {
                 setIsSuccess(false);
                 setIsModalOpen(false);
-                setFormData({ service_type: "Visa Touristique", destination: "France", preferred_date: "", notes: "" });
+                setFormData({ type: "Visa Touristique", destination: "France", preferred_date: "", client_notes: "" });
             }, 3000);
         } else {
             alert("Erreur: " + error.message);
@@ -208,15 +214,40 @@ export default function RdvVisaPage() {
                 <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-amber-500/5 blur-[120px] rounded-full pointer-events-none" />
 
                 <div className="max-w-7xl mx-auto relative z-10">
-                    <div className="text-center mb-20">
-                        <p className="text-[10px] font-black text-amber-400 uppercase tracking-[0.3em] mb-4">24 pays disponibles</p>
-                        <h2 className="text-5xl md:text-6xl font-black text-white tracking-tighter mb-5 leading-none">
+                    <div className="text-center mb-12">
+                        <p className="text-[10px] font-black text-amber-400 uppercase tracking-[0.3em] mb-4">{destinations.length} pays disponibles</p>
+                        <h2 className="text-5xl md:text-6xl font-black text-white tracking-tighter mb-8 leading-none">
                             Nos <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200 italic">Destinations</span>
                         </h2>
-                        <p className="text-slate-500 text-lg font-medium max-w-lg mx-auto">
-                            Nous traitons vos visas pour les pays suivants, à des délais record.
-                        </p>
+
+                        {/* Barre de Recherche Dynamique */}
+                        <div className="max-w-md mx-auto relative group">
+                            <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+                                <Search className="w-5 h-5 text-slate-500 group-focus-within:text-amber-400 transition-colors" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Rechercher un pays..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-16 pr-6 text-white font-bold placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500/30 transition-all backdrop-blur-sm"
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery("")}
+                                    className="absolute inset-y-0 right-6 flex items-center text-slate-500 hover:text-white transition-colors"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
                     </div>
+
+                    {filteredDestinations.length === 0 && (
+                        <div className="text-center py-20">
+                            <p className="text-slate-500 font-bold uppercase tracking-widest italic">Aucune destination trouvée pour "{searchQuery}"</p>
+                        </div>
+                    )}
 
                     {/* ─── Schengen ─── */}
                     <div className="mb-20">
@@ -454,8 +485,8 @@ export default function RdvVisaPage() {
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Type de Visa</label>
                                                 <select
-                                                    value={formData.service_type}
-                                                    onChange={(e) => setFormData({ ...formData, service_type: e.target.value })}
+                                                    value={formData.type}
+                                                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                                                     className="w-full px-5 py-3.5 bg-slate-50 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition-all font-bold text-slate-700"
                                                 >
                                                     <option>Visa Touristique</option>
@@ -492,8 +523,8 @@ export default function RdvVisaPage() {
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Commentaires additionnels</label>
                                             <textarea
-                                                value={formData.notes}
-                                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                                value={formData.client_notes}
+                                                onChange={(e) => setFormData({ ...formData, client_notes: e.target.value })}
                                                 rows={3}
                                                 placeholder="Précisez votre cas particulier..."
                                                 className="w-full px-5 py-3.5 bg-slate-50 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition-all font-medium text-slate-600"

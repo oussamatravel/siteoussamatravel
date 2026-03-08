@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { FolderOpen, Search, Filter, PlusCircle, MoreVertical, Clock, CheckCircle2, AlertCircle, Loader2, MessageSquare } from "lucide-react";
+import { FolderOpen, Search, Filter, PlusCircle, MoreVertical, Clock, CheckCircle2, AlertCircle, Loader2, MessageSquare, Inbox, GraduationCap, Globe2, XCircle, FileSearch, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
@@ -39,13 +39,25 @@ export default function DossiersPage() {
     };
 
     const getStatusStyle = (status: string) => {
-        switch (status?.toLowerCase()) {
-            case 'valide':
-                return { color: "text-emerald-600 bg-emerald-50 border-emerald-100", label: "Validé", icon: <CheckCircle2 className="w-4 h-4" /> };
-            case 'rejete':
-                return { color: "text-rose-600 bg-rose-50 border-rose-100", label: "Rejeté", icon: <AlertCircle className="w-4 h-4" /> };
+        const s = status?.toLowerCase();
+        switch (s) {
+            case 'receptionner':
+                return { color: "text-blue-600 bg-blue-50 border-blue-100", label: "Réceptionné", icon: <Inbox className="w-4 h-4" /> };
             case 'en_cours':
                 return { color: "text-blue-600 bg-blue-50 border-blue-100", label: "En Traitement", icon: <Clock className="w-4 h-4" /> };
+            case 'manque_documents':
+                return { color: "text-amber-600 bg-amber-50 border-amber-100", label: "Documents manquants", icon: <FileSearch className="w-4 h-4" /> };
+            case 'termine':
+            case 'valide':
+                return { color: "text-emerald-600 bg-emerald-50 border-emerald-100", label: s === 'termine' ? "Terminé" : "Validé", icon: <CheckCircle2 className="w-4 h-4" /> };
+            case 'admission_recu':
+                return { color: "text-emerald-600 bg-emerald-50 border-emerald-100", label: "Admission Reçue", icon: <GraduationCap className="w-4 h-4" /> };
+            case 'admission_refusee':
+                return { color: "text-rose-600 bg-rose-50 border-rose-100", label: "Admission Refusée", icon: <XCircle className="w-4 h-4" /> };
+            case 'etape_visa':
+                return { color: "text-blue-600 bg-blue-50 border-blue-100", label: "Étape Visa", icon: <Globe2 className="w-4 h-4" /> };
+            case 'rejete':
+                return { color: "text-rose-600 bg-rose-50 border-rose-100", label: "Rejeté", icon: <AlertCircle className="w-4 h-4" /> };
             default:
                 return { color: "text-amber-600 bg-amber-50 border-amber-100", label: "En Attente", icon: <Clock className="w-4 h-4" /> };
         }
