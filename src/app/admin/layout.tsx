@@ -19,7 +19,8 @@ import {
     MessageSquare,
     BookOpen,
     CalendarCheck,
-    Crown
+    Crown,
+    Home
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -154,9 +155,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <p className="text-[10px] leading-relaxed text-slate-500">Toutes les actions sont enregistrées dans le journal d'audit.</p>
                     </div>
                     <Link href="/">
-                        <button className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-400/10 rounded-xl transition-all w-full text-sm font-bold">
-                            <LogOut className="w-5 h-5" />
-                            Quitter l'Admin
+                        <button className="flex items-center gap-3 px-4 py-3 text-sky-400 hover:bg-sky-400/10 hover:text-sky-300 rounded-xl transition-all w-full text-sm font-bold border border-sky-500/10">
+                            <Home className="w-5 h-5" />
+                            Retour au Site
                         </button>
                     </Link>
                 </div>
@@ -215,8 +216,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="flex items-center gap-3 px-4 py-3 mt-4 text-red-400 border border-red-500/20 rounded-xl w-full text-left"
                         >
-                            <LogOut className="w-5 h-5" />
-                            Quitter l'Admin
+                            <Home className="w-5 h-5" />
+                            Retour au Site
                         </Link>
                     </nav>
                 </div>
