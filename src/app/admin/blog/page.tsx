@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     Plus, Search, Edit, Trash2, Image as ImageIcon, FileText,
     Eye, Save, X, Loader2, Bold, Italic, List, Heading2,
-    Heading3, Link2, Quote, AlignLeft, Upload, CheckCircle2, Tag
+    Heading3, Link2, Quote, AlignLeft, Upload, CheckCircle2, Tag, ShieldCheck
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
