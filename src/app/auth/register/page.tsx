@@ -73,11 +73,25 @@ export default function RegisterPage() {
             });
 
             if (signUpError) {
-                // Ne pas exposer les détails techniques - messages génériques
-                if (signUpError.message.includes('already registered') || signUpError.message.includes('already exists')) {
-                    throw new Error("Un compte avec cet email existe déjà. Veuillez vous connecter.");
+                // Traduction des erreurs fréquentes de Supabase
+                const msgLower = signUpError.message.toLowerCase();
+                let errorMessage = "Inscription impossible : " + signUpError.message; // Message par défaut avec le détail réel
+
+                if (msgLower.includes('already registered') || msgLower.includes('already exists')) {
+                    errorMessage = "Un compte avec cet email existe déjà. Veuillez vous connecter.";
+                } else if (msgLower.includes('rate limit')) {
+                    errorMessage = "Trop de tentatives d'inscription depuis votre réseau. Veuillez réessayer plus tard.";
+                } else if (msgLower.includes('password contains')) {
+                    errorMessage = "Le mot de passe ne respecte pas les critères de sécurité de la base de données.";
+                } else if (msgLower.includes('invalid email') || msgLower.includes('not a valid email')) {
+                    errorMessage = "L'adresse email fournie n'a pas un format valide.";
+                } else if (msgLower.includes('network error') || msgLower.includes('fetch')) {
+                    errorMessage = "Erreur de connexion aux serveurs. Vérifiez votre connexion internet.";
+                } else if (msgLower.includes('security check')) {
+                    errorMessage = "Inscription bloquée par les mesures de sécurité. Veuillez désactiver votre VPN et réessayer.";
                 }
-                throw new Error("Inscription impossible. Veuillez vérifier vos informations et réessayer.");
+
+                throw new Error(errorMessage);
             }
 
             alert("Compte créé avec succès ! Veuillez vérifier votre boîte email pour valider votre inscription.");
