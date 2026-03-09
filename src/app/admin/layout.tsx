@@ -24,16 +24,23 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const router = useRouter();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [counts, setCounts] = useState({ clients: 0, dossiers: 0, rdv: 0, paiements: 0, messages: 0, contacts: 0 });
     const [userRole, setUserRole] = useState<string | null>(null);
     const supabase = createClient();
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push("/auth/login");
+        router.refresh();
+    };
 
     useEffect(() => {
         const fetchCounts = async () => {
@@ -155,11 +162,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <p className="text-[10px] leading-relaxed text-slate-500">Toutes les actions sont enregistrées dans le journal d'audit.</p>
                     </div>
                     <Link href="/">
-                        <button className="flex items-center gap-3 px-4 py-3 text-sky-400 hover:bg-sky-400/10 hover:text-sky-300 rounded-xl transition-all w-full text-sm font-bold border border-sky-500/10">
+                        <button className="flex items-center gap-3 px-4 py-3 text-sky-400 hover:bg-sky-400/10 hover:text-sky-300 rounded-xl transition-all w-full text-sm font-bold border border-sky-500/10 mb-2">
                             <Home className="w-5 h-5" />
                             Retour au Site
                         </button>
                     </Link>
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-400/10 hover:text-red-300 rounded-xl transition-all w-full text-sm font-bold border border-red-500/10"
+                    >
+                        <LogOut className="w-5 h-5" />
+                        Déconnexion
+                    </button>
                 </div>
             </aside>
 
@@ -211,14 +225,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 </Link>
                             );
                         })}
-                        <Link
-                            href="/"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 mt-4 text-red-400 border border-red-500/20 rounded-xl w-full text-left"
-                        >
-                            <Home className="w-5 h-5" />
-                            Retour au Site
-                        </Link>
+                        <div className="pt-4 border-t border-slate-800 space-y-2 mt-4">
+                            <Link
+                                href="/"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="flex items-center gap-3 px-4 py-3 text-sky-400 border border-sky-500/20 rounded-xl w-full text-left font-bold bg-sky-500/5 mb-2"
+                            >
+                                <Home className="w-5 h-5" />
+                                Retour au Site
+                            </Link>
+                            <button
+                                onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
+                                className="flex items-center gap-3 px-4 py-3 text-red-400 border border-red-500/20 rounded-xl w-full text-left font-bold"
+                            >
+                                <LogOut className="w-5 h-5" />
+                                Déconnexion
+                            </button>
+                        </div>
                     </nav>
                 </div>
             )}

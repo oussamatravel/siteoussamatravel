@@ -136,7 +136,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* Mobile Menu Dropdown */}
             {isMobileMenuOpen && (
-                <div className="md:hidden fixed inset-0 top-[73px] bg-slate-900 z-40 p-4 border-t border-slate-800">
+                <div className="md:hidden fixed inset-0 top-[73px] bg-slate-900 z-40 p-4 border-t border-slate-800 overflow-y-auto pb-24">
                     <nav className="space-y-2">
                         {navigation.map((item) => {
                             const isActive = pathname === item.href;
