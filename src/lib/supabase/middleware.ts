@@ -35,25 +35,54 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    // Proteger l'espace client (dashboard)
-    if (
-        !user &&
-        request.nextUrl.pathname.startsWith('/dashboard')
-    ) {
+    const pathname = request.nextUrl.pathname
+
+    // 1. Protéger /dashboard contre les non-authentifiés
+    if (!user && pathname.startsWith('/dashboard')) {
         const url = request.nextUrl.clone()
         url.pathname = '/auth/login'
         return NextResponse.redirect(url)
     }
 
-    // Rediriger du login vers dashboard si deja connecte
+    // 2. CRITIQUE: Protéger /admin côté serveur pour les non-authentifiés
+    if (!user && pathname.startsWith('/admin')) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/auth/login'
+        return NextResponse.redirect(url)
+    }
+
+    // 3. CRITIQUE: Protéger /admin — vérifier le rôle côté serveur
+    // Un client authentifié ne doit pas pouvoir accéder aux routes /admin
+    if (user && pathname.startsWith('/admin')) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+        if (!profile || (profile.role !== 'admin' && profile.role !== 'employee')) {
+            // Client normal qui tente d'accéder à /admin → rediriger vers /dashboard
+            const url = request.nextUrl.clone()
+            url.pathname = '/dashboard'
+            return NextResponse.redirect(url)
+        }
+    }
+
+    // 4. Rediriger depuis /auth/login vers /dashboard si déjà connecté
     if (
         user &&
-        (request.nextUrl.pathname.startsWith('/auth/login') || request.nextUrl.pathname.startsWith('/auth/register'))
+        (pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register'))
     ) {
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'
         return NextResponse.redirect(url)
     }
 
+    // 5. Si un admin/employé atterrit sur /dashboard, le rediriger vers /admin
+    if (user && pathname === '/dashboard') {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+        if (profile && (profile.role === 'admin' || profile.role === 'employee')) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/admin'
+            return NextResponse.redirect(url)
+        }
+    }
+
     return supabaseResponse
 }
+

@@ -23,24 +23,52 @@ export default function RegisterPage() {
         setLoading(true);
         setError(null);
 
+        // Validation côté client : force du mot de passe
+        if (password.length < 8) {
+            setError("Le mot de passe doit contenir au moins 8 caractères.");
+            setLoading(false);
+            return;
+        }
+        if (!/[A-Z]/.test(password)) {
+            setError("Le mot de passe doit contenir au moins une lettre majuscule.");
+            setLoading(false);
+            return;
+        }
+        if (!/[0-9]/.test(password)) {
+            setError("Le mot de passe doit contenir au moins un chiffre.");
+            setLoading(false);
+            return;
+        }
+
+        // Validation nom/prénom
+        if (firstName.trim().length < 2 || lastName.trim().length < 2) {
+            setError("Veuillez entrer un prénom et un nom valides.");
+            setLoading(false);
+            return;
+        }
+
         try {
             const { error: signUpError } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {
                     data: {
-                        first_name: firstName,
-                        last_name: lastName,
-                        phone: phone,
+                        first_name: firstName.trim(),
+                        last_name: lastName.trim(),
+                        phone: phone.trim(),
                     },
                     emailRedirectTo: `${window.location.origin}/auth/callback`,
                 },
             });
 
-            if (signUpError) throw signUpError;
+            if (signUpError) {
+                // Ne pas exposer les détails techniques - messages génériques
+                if (signUpError.message.includes('already registered') || signUpError.message.includes('already exists')) {
+                    throw new Error("Un compte avec cet email existe déjà. Veuillez vous connecter.");
+                }
+                throw new Error("Inscription impossible. Veuillez vérifier vos informations et réessayer.");
+            }
 
-            // En mode démo/test on peut rediriger directement si l'auto-confirm est activé sur Supabase
-            // Sinon on prévient l'utilisateur de vérifier ses emails
             alert("Compte créé avec succès ! Veuillez vérifier votre boîte email pour valider votre inscription.");
             router.push("/auth/login");
         } catch (err: any) {
@@ -49,6 +77,7 @@ export default function RegisterPage() {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden">

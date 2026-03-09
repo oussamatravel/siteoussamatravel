@@ -93,13 +93,29 @@ export default function DashboardOverview() {
         const file = e.target.files?.[0];
         if (!file || !applications[0]) return;
 
+        // Validation côté client : taille max 10 MB
+        const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+        if (file.size > MAX_SIZE_BYTES) {
+            alert("Fichier trop volumineux. La taille maximale est de 10 MB.");
+            return;
+        }
+
+        // Validation du type MIME (réel, pas seulement l'extension)
+        const ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            alert("Type de fichier non autorisé. Seuls les fichiers PDF et images (JPEG, PNG, WEBP) sont acceptés.");
+            return;
+        }
+
         setUploading(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Non authentifié");
 
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Math.random()}.${fileExt}`;
+            // Utiliser un nom de fichier aléatoire sécurisé (pas Math.random)
+            const fileExt = file.name.split('.').pop()?.toLowerCase() || 'bin';
+            const safeExt = ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'heic'].includes(fileExt) ? fileExt : 'bin';
+            const fileName = `${crypto.randomUUID()}.${safeExt}`;
             const filePath = `${user.id}/${applications[0].id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
@@ -108,17 +124,17 @@ export default function DashboardOverview() {
 
             if (uploadError) throw uploadError;
 
-            // Logique optionnelle : Enregistrer la pièce dans une table 'documents' si nécessaire
-            // Pour l'instant on se base sur le listing du storage
-
             fetchDocuments(user.id, applications[0].id);
             alert("Document importé avec succès !");
         } catch (error: any) {
-            alert("Erreur lors de l'importation : " + error.message);
+            // Ne pas exposer les détails de l'erreur interne
+            console.error("Upload error:", error);
+            alert("Erreur lors de l'importation. Veuillez réessayer.");
         } finally {
             setUploading(false);
         }
     };
+
 
     const handleCreateRequest = async () => {
         setLoading(true);

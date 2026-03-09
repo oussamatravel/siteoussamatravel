@@ -26,16 +26,36 @@ export default function LoginPage() {
                 password,
             });
 
-            if (loginError) throw loginError;
+            if (loginError) {
+                // Message générique sécurisé
+                throw new Error("Email ou mot de passe incorrect.");
+            }
 
-            router.push("/dashboard");
-            router.refresh(); // Pour forcer la mise à jour des Server Components
+            // Lire le rôle après connexion pour rediriger directement
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile?.role === 'admin' || profile?.role === 'employee') {
+                    router.push('/admin');
+                } else {
+                    router.push('/dashboard');
+                }
+            } else {
+                router.push('/dashboard');
+            }
+            router.refresh();
         } catch (err: any) {
-            setError(err.message || "Identifiants invalides ou erreur de connexion.");
+            setError(err.message || "Identifiants invalides. Veuillez réessayer.");
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen bg-white flex items-center justify-center p-4 relative overflow-hidden">

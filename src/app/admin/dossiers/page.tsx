@@ -40,13 +40,21 @@ export default function AdminDossiersPage() {
     const [invoiceDesc, setInvoiceDesc] = useState("");
     const [mounted, setMounted] = useState(false);
     const [dossiers, setDossiers] = useState<any[]>([]);
+    const [agents, setAgents] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [filterAgent, setFilterAgent] = useState<string>("all");
     const supabase = createClient();
 
     useEffect(() => {
         setMounted(true);
+        fetchAgents();
         fetchDossiers();
     }, []);
+
+    const fetchAgents = async () => {
+        const { data } = await supabase.from('profiles').select('id, first_name, last_name, role').in('role', ['admin', 'employee']);
+        if (data) setAgents(data);
+    };
 
     const fetchDossiers = async () => {
         setIsLoading(true);
@@ -70,6 +78,8 @@ export default function AdminDossiersPage() {
                     .from('client_documents')
                     .list(`${app.user_id}/${app.id}`);
 
+                const assignedAgent = agents.find(a => a.id === app.assigned_to);
+
                 return {
                     ...app,
                     client: `${app.profiles?.first_name} ${app.profiles?.last_name}`,
@@ -80,6 +90,7 @@ export default function AdminDossiersPage() {
                     statusLabel: mapStatus(app.status),
                     color: getStatusColor(app.status),
                     icon: getServiceIcon(app.service_type),
+                    assignedName: assignedAgent ? `${assignedAgent.first_name} ${assignedAgent.last_name}` : "Non assigné",
                     documents: (files || []).map(f => ({
                         id: f.id || f.name,
                         name: f.name,
@@ -125,6 +136,32 @@ export default function AdminDossiersPage() {
         if (type.includes('Études')) return <GraduationCap className="w-4 h-4" />;
         if (type.includes('Visa')) return <Globe2 className="w-4 h-4" />;
         return <Users className="w-4 h-4" />;
+    };
+
+    const handleAssign = async (agentId: string) => {
+        if (!selectedDossier) return;
+        setIsActionLoading(true);
+        try {
+            const newAgentId = agentId === "unassigned" ? null : agentId;
+            const { error } = await supabase
+                .from('applications')
+                .update({ assigned_to: newAgentId })
+                .eq('id', selectedDossier.id);
+            if (error) throw error;
+
+            // Notification ? 
+            if (newAgentId && newAgentId !== selectedDossier.assigned_to) {
+                // Just log it for now
+                console.log("Assigned to", newAgentId);
+            }
+
+            await fetchDossiers();
+            setSelectedDossier((prev: any) => ({ ...prev, assigned_to: newAgentId }));
+        } catch (err: any) {
+            alert("Erreur lors de l'attribution : " + err.message);
+        } finally {
+            setIsActionLoading(false);
+        }
     };
 
     const handleAction = async (newStatus: string) => {
@@ -203,6 +240,20 @@ export default function AdminDossiersPage() {
                     <h1 className="text-3xl font-black text-slate-900 tracking-tight">Validation des Dossiers</h1>
                     <p className="text-slate-500 font-medium">Examinez les pièces justificatives et validez les étapes consulaires.</p>
                 </div>
+                <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Filtrer par agent :</div>
+                    <select
+                        value={filterAgent}
+                        onChange={(e) => setFilterAgent(e.target.value)}
+                        className="bg-slate-50 border-none text-sm font-bold text-slate-700 rounded-xl px-4 py-2 outline-none cursor-pointer"
+                    >
+                        <option value="all">Tous les dossiers</option>
+                        <option value="unassigned">Non assignés</option>
+                        {agents.map(a => (
+                            <option key={a.id} value={a.id}>{a.first_name} {a.last_name}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             {/* Table Interface */}
@@ -214,6 +265,7 @@ export default function AdminDossiersPage() {
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Réf. Dossier</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Client / Type</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Destination</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Agent</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Statut</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
                             </tr>
@@ -228,8 +280,8 @@ export default function AdminDossiersPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : dossiers.length > 0 ? (
-                                dossiers.map((dossier, i) => (
+                            ) : dossiers.filter(d => filterAgent === "all" ? true : filterAgent === "unassigned" ? !d.assigned_to : d.assigned_to === filterAgent).length > 0 ? (
+                                dossiers.filter(d => filterAgent === "all" ? true : filterAgent === "unassigned" ? !d.assigned_to : d.assigned_to === filterAgent).map((dossier, i) => (
                                     <motion.tr
                                         key={dossier.id}
                                         initial={{ opacity: 0, y: 10 }}
@@ -263,6 +315,16 @@ export default function AdminDossiersPage() {
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${dossier.assigned_to ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
+                                                    {dossier.assigned_to ? dossier.assignedName.substring(0, 2).toUpperCase() : '?'}
+                                                </div>
+                                                <span className={`text-xs font-bold ${dossier.assigned_to ? 'text-slate-900' : 'text-slate-400 italic'}`}>
+                                                    {dossier.assignedName}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6">
                                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm ${dossier.color}`}>
                                                 {dossier.statusLabel}
                                             </span>
@@ -278,8 +340,8 @@ export default function AdminDossiersPage() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td className="px-8 py-12 text-center" colSpan={5}>
-                                        <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Aucun dossier trouvé.</p>
+                                    <td className="px-8 py-12 text-center" colSpan={6}>
+                                        <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Aucun dossier trouvé pour ces critères.</p>
                                     </td>
                                 </tr>
                             )}
@@ -425,15 +487,31 @@ export default function AdminDossiersPage() {
                                 </div>
                             </div>
 
-                            {/* Modal Footer Actions */}
-                            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between font-sans">
-                                <button
-                                    onClick={() => setSelectedChat(selectedDossier.id)}
-                                    className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-200 text-sky-600 hover:bg-sky-50 font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all shadow-sm active:scale-95"
-                                >
-                                    <MessageSquare className="w-5 h-5" />
-                                    Support Client
-                                </button>
+                            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between font-sans gap-4">
+                                <div className="flex items-center gap-4">
+                                    <button
+                                        onClick={() => setSelectedChat(selectedDossier.id)}
+                                        className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-200 text-sky-600 hover:bg-sky-50 font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all shadow-sm active:scale-95"
+                                    >
+                                        <MessageSquare className="w-5 h-5" />
+                                        Support Client
+                                    </button>
+
+                                    <div className="flex flex-col gap-1 border-l border-slate-200 pl-4">
+                                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Conseiller en charge</div>
+                                        <select
+                                            disabled={isActionLoading}
+                                            value={selectedDossier.assigned_to || "unassigned"}
+                                            onChange={(e) => handleAssign(e.target.value)}
+                                            className="bg-transparent border-none text-sm font-bold text-indigo-600 outline-none cursor-pointer hover:bg-indigo-50 px-2 py-1 rounded"
+                                        >
+                                            <option value="unassigned">-- Non assigné --</option>
+                                            {agents.map(a => (
+                                                <option key={a.id} value={a.id}>{a.first_name} {a.last_name} ({a.role})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
                                 <div className="flex items-center gap-3">
                                     <div className="flex flex-col gap-1 items-end">
                                         <div className="text-[9px] font-black text-slate-400 mb-1 uppercase tracking-widest">Modifier d'état du traitement</div>

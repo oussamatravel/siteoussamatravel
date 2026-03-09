@@ -42,9 +42,18 @@ export default function AdminClientsPage() {
         pending: 0,
         new: 0
     });
+    const [currentUserRole, setCurrentUserRole] = useState<string>('client');
     const supabase = createClient();
 
     useEffect(() => {
+        const fetchUserRole = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+                if (data) setCurrentUserRole(data.role);
+            }
+        };
+        fetchUserRole();
         fetchClients();
     }, []);
 
@@ -56,7 +65,7 @@ export default function AdminClientsPage() {
                 .from('profiles')
                 .select(`
                     *,
-                    applications:applications(count)
+                    applications:applications!user_id(count)
                 `)
                 .order('created_at', { ascending: false });
 
@@ -361,41 +370,45 @@ export default function AdminClientsPage() {
                             </div>
 
                             <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-end gap-3">
-                                {selectedClient.status !== "Staff" && (
-                                    <button
-                                        onClick={async () => {
-                                            if (!confirm(`Promouvoir ce client en Employé/Support ?`)) return;
-                                            const { error } = await supabase.from('profiles').update({ role: "employee" }).eq('id', selectedClient.realId);
-                                            if (error) alert(error.message); else { await fetchClients(); setSelectedClient(null); }
-                                        }}
-                                        className="px-6 py-3 bg-sky-50 text-sky-600 font-black text-xs rounded-xl hover:bg-sky-100 transition-all uppercase tracking-widest"
-                                    >
-                                        Nommer Employé
-                                    </button>
-                                )}
-                                {selectedClient.status !== "Admin" && (
-                                    <button
-                                        onClick={async () => {
-                                            if (!confirm(`Promouvoir ce client en Administrateur ?`)) return;
-                                            const { error } = await supabase.from('profiles').update({ role: "admin" }).eq('id', selectedClient.realId);
-                                            if (error) alert(error.message); else { await fetchClients(); setSelectedClient(null); }
-                                        }}
-                                        className="px-6 py-3 bg-amber-50 text-amber-600 font-black text-xs rounded-xl hover:bg-amber-100 transition-all uppercase tracking-widest"
-                                    >
-                                        Nommer Admin
-                                    </button>
-                                )}
-                                {(selectedClient.status === "Admin" || selectedClient.status === "Staff") && (
-                                    <button
-                                        onClick={async () => {
-                                            if (!confirm(`Rétrograder cet utilisateur en Client normal ?`)) return;
-                                            const { error } = await supabase.from('profiles').update({ role: "client" }).eq('id', selectedClient.realId);
-                                            if (error) alert(error.message); else { await fetchClients(); setSelectedClient(null); }
-                                        }}
-                                        className="px-6 py-3 bg-slate-950 text-white font-black text-xs rounded-xl hover:bg-slate-800 transition-all uppercase tracking-widest"
-                                    >
-                                        Rétrograder Client
-                                    </button>
+                                {currentUserRole === 'admin' && (
+                                    <>
+                                        {selectedClient.status !== "Staff" && (
+                                            <button
+                                                onClick={async () => {
+                                                    if (!confirm(`Promouvoir ce client en Employé/Support ?`)) return;
+                                                    const { error } = await supabase.from('profiles').update({ role: "employee" }).eq('id', selectedClient.realId);
+                                                    if (error) alert(error.message); else { await fetchClients(); setSelectedClient((prev: any) => ({ ...prev, status: "Staff" })); }
+                                                }}
+                                                className="px-6 py-3 bg-sky-50 text-sky-600 font-black text-xs rounded-xl hover:bg-sky-100 transition-all uppercase tracking-widest"
+                                            >
+                                                Nommer Employé
+                                            </button>
+                                        )}
+                                        {selectedClient.status !== "Admin" && (
+                                            <button
+                                                onClick={async () => {
+                                                    if (!confirm(`Promouvoir ce client en Administrateur ?`)) return;
+                                                    const { error } = await supabase.from('profiles').update({ role: "admin" }).eq('id', selectedClient.realId);
+                                                    if (error) alert(error.message); else { await fetchClients(); setSelectedClient((prev: any) => ({ ...prev, status: "Admin" })); }
+                                                }}
+                                                className="px-6 py-3 bg-amber-50 text-amber-600 font-black text-xs rounded-xl hover:bg-amber-100 transition-all uppercase tracking-widest"
+                                            >
+                                                Nommer Admin
+                                            </button>
+                                        )}
+                                        {(selectedClient.status === "Admin" || selectedClient.status === "Staff") && (
+                                            <button
+                                                onClick={async () => {
+                                                    if (!confirm(`Rétrograder cet utilisateur en Client normal ?`)) return;
+                                                    const { error } = await supabase.from('profiles').update({ role: "client" }).eq('id', selectedClient.realId);
+                                                    if (error) alert(error.message); else { await fetchClients(); setSelectedClient((prev: any) => ({ ...prev, status: "Vérifié" })); }
+                                                }}
+                                                className="px-6 py-3 bg-slate-950 text-white font-black text-xs rounded-xl hover:bg-slate-800 transition-all uppercase tracking-widest"
+                                            >
+                                                Rétrograder Client
+                                            </button>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </motion.div>

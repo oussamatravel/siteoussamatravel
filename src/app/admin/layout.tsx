@@ -18,7 +18,8 @@ import {
     CreditCard,
     MessageSquare,
     BookOpen,
-    CalendarCheck
+    CalendarCheck,
+    Crown
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -84,12 +85,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { name: "Paiements", href: "/admin/paiements", icon: <CreditCard className="w-5 h-5" /> },
         { name: "Blog", href: "/admin/blog", icon: <BookOpen className="w-5 h-5" /> },
         { name: "Rendez-vous", href: "/admin/rdv", icon: <CalendarCheck className="w-5 h-5" /> },
+        { name: "Gestion Rôles", href: "/admin/roles", icon: <Crown className="w-5 h-5" />, adminOnly: true },
         { name: "Paramètres Services", href: "/admin/parametres", icon: <Settings className="w-5 h-5" /> },
     ];
 
     const navigation = allNavigation.filter(item => {
         if (userRole === 'employee') {
-            return !["Paiements", "Blog", "Paramètres Services"].includes(item.name);
+            return !["Paiements", "Blog", "Paramètres Services", "Gestion Rôles"].includes(item.name);
         }
         return true;
     });

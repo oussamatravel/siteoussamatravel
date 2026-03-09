@@ -92,6 +92,13 @@ export default function ApplicationChat({ applicationId, onClose }: { applicatio
         e.preventDefault();
         if (!newMessage.trim() || isSending) return;
 
+        // Validation : limite de taille du message
+        const MAX_MSG_LENGTH = 500;
+        if (newMessage.trim().length > MAX_MSG_LENGTH) {
+            alert(`Le message ne peut pas dépasser ${MAX_MSG_LENGTH} caractères.`);
+            return;
+        }
+
         setIsSending(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
@@ -102,17 +109,20 @@ export default function ApplicationChat({ applicationId, onClose }: { applicatio
                 .insert({
                     application_id: applicationId,
                     sender_id: user.id,
-                    content: newMessage.trim()
+                    content: newMessage.trim().substring(0, MAX_MSG_LENGTH) // Double protection
                 });
 
             if (error) throw error;
             setNewMessage("");
         } catch (err: any) {
-            alert("Erreur d'envoi : " + err.message);
+            // Erreur générique pour ne pas exposer les détails
+            console.error("Send message error:", err);
+            alert("Impossible d'envoyer le message. Veuillez réessayer.");
         } finally {
             setIsSending(false);
         }
     };
+
 
     return (
         <motion.div

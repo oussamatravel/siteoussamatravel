@@ -28,6 +28,7 @@ export default function AdminDashboardOverview() {
     const [stats, setStats] = useState<any[]>([]);
     const [pendingDossiers, setPendingDossiers] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState<any>(null);
     const supabase = createClient();
 
     useEffect(() => {
@@ -37,6 +38,15 @@ export default function AdminDashboardOverview() {
     const fetchDashboardData = async () => {
         setIsLoading(true);
         try {
+            // Get current user role
+            const { data: { user } } = await supabase.auth.getUser();
+            let role = 'admin';
+            if (user) {
+                const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+                if (profile) role = profile.role;
+            }
+            setCurrentUser({ id: user?.id, role });
+
             // 1. Fetch Stats
             const { count: clientCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
             const { count: pendingCount } = await supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'en_cours');
@@ -50,12 +60,21 @@ export default function AdminDashboardOverview() {
                 console.log("Invoices table query failed (normal if not created yet):", e.message || e);
             }
 
-            setStats([
+            const baseStats = [
                 { title: "Clients Totaux", value: clientCount || 0, trend: "Stable", up: true, icon: <Users className="w-5 h-5 text-emerald-500" />, bg: "bg-emerald-50" },
-                { title: "Dossiers à Valider", value: pendingCount || 0, trend: "Action", up: true, icon: <FileSearch className="w-5 h-5 text-amber-500" />, bg: "bg-amber-50" },
-                { title: "Revenus (Payés)", value: `${totalRevenue.toLocaleString()} DA`, trend: "+0%", up: true, icon: <BarChart3 className="w-5 h-5 text-sky-500" />, bg: "bg-sky-50" },
-                { title: "Taux Réussite", value: "100%", trend: "Stable", up: true, icon: <CheckCircle2 className="w-5 h-5 text-indigo-500" />, bg: "bg-indigo-50" },
-            ]);
+                { title: "Dossiers à Valider", value: pendingCount || 0, trend: "Action", up: true, icon: <FileSearch className="w-5 h-5 text-amber-500" />, bg: "bg-amber-50" }
+            ];
+
+            if (role === 'admin') {
+                baseStats.push({ title: "Revenus (Payés)", value: `${totalRevenue.toLocaleString()} DA`, trend: "+0%", up: true, icon: <BarChart3 className="w-5 h-5 text-sky-500" />, bg: "bg-sky-50" });
+            } else {
+                const { count: myDossiersCount } = await supabase.from('applications').select('*', { count: 'exact', head: true }).eq('assigned_to', user?.id);
+                baseStats.push({ title: "Mes Dossiers", value: myDossiersCount || 0, trend: "Actif", up: true, icon: <UserCheck className="w-5 h-5 text-sky-500" />, bg: "bg-sky-50" });
+            }
+
+            baseStats.push({ title: "Taux Réussite", value: "100%", trend: "Stable", up: true, icon: <CheckCircle2 className="w-5 h-5 text-indigo-500" />, bg: "bg-indigo-50" });
+
+            setStats(baseStats);
 
             // 2. Fetch Pending Dossiers
             const { data: apps, error: appError } = await supabase
@@ -76,13 +95,27 @@ export default function AdminDashboardOverview() {
                 service: app.service_type,
                 date: new Date(app.created_at).toLocaleDateString(),
                 status: "À vérifier",
-                avatar: app.profiles?.first_name?.substring(0, 1) || "?"
+                avatar: app.profiles?.first_name?.substring(0, 1) || "?",
+                assigned_to: app.assigned_to
             })));
 
         } catch (err: any) {
             console.error("Error fetching dashboard data:", err);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleAssignToMe = async (e: React.MouseEvent, dossierId: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!currentUser?.id) return;
+        try {
+            const { error } = await supabase.from('applications').update({ assigned_to: currentUser.id }).eq('id', dossierId);
+            if (error) throw error;
+            fetchDashboardData();
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -168,6 +201,15 @@ export default function AdminDashboardOverview() {
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2">
+                                                {!dossier.assigned_to && currentUser?.role === 'employee' ? (
+                                                    <button onClick={(e) => handleAssignToMe(e, dossier.id)} className="px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
+                                                        Prendre en charge
+                                                    </button>
+                                                ) : dossier.assigned_to === currentUser?.id ? (
+                                                    <span className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                                                        Mon dossier
+                                                    </span>
+                                                ) : null}
                                                 <div className="p-2.5 bg-slate-100 text-slate-400 rounded-xl hover:bg-slate-900 hover:text-white transition-all"><Eye className="w-4 h-4" /></div>
                                             </div>
                                         </div>
