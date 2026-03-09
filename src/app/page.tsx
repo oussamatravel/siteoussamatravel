@@ -17,7 +17,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#020617] font-sans selection:bg-amber-500 selection:text-slate-900 text-slate-300">
 
       {/* ─── INFOGRAPHIC HERO SECTION ─── */}
-      <section className="relative min-h-[90vh] flex items-center justify-center pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative min-h-[90vh] flex items-center justify-center pt-24 pb-12 md:pt-32 md:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background Visuals */}
         <div className="absolute inset-0 z-0">
           <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-sky-500/20 blur-[130px] rounded-full pointer-events-none" />
@@ -45,7 +45,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.95]"
+              className="text-5xl sm:text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.95]"
             >
               Franchissez<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-500 to-amber-400 italic">
@@ -148,7 +148,7 @@ export default function Home() {
       </section>
 
       {/* ─── DATA & STATS SECTION (INFOGRAPHIC) ─── */}
-      <section id="data" className="py-20 border-y border-white/5 bg-slate-950/50 relative">
+      <section id="data" className="py-12 md:py-20 border-y border-white/5 bg-slate-950/50 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 divide-x divide-white/5">
             {[
@@ -165,7 +165,7 @@ export default function Home() {
                 transition={{ delay: i * 0.1 }}
                 className="text-center px-4"
               >
-                <div className={`text-4xl md:text-6xl font-black ${stat.color} mb-2 tracking-tighter`}>{stat.value}</div>
+                <div className={`text-3xl sm:text-4xl md:text-6xl font-black ${stat.color} mb-2 tracking-tighter`}>{stat.value}</div>
                 <div className="text-white font-bold uppercase tracking-widest text-[10px] md:text-sm mb-1">{stat.label}</div>
                 <div className="text-slate-500 text-xs md:text-sm">{stat.sub}</div>
               </motion.div>
@@ -175,13 +175,13 @@ export default function Home() {
       </section>
 
       {/* ─── BENTO GRID SERVICES ─── */}
-      <section id="services" className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
-        <div className="mb-16">
+      <section id="services" className="py-16 md:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
+        <div className="mb-12 md:mb-16">
           <h2 className="text-[10px] font-black text-sky-500 uppercase tracking-[0.3em] mb-4">Notre Écosystème</h2>
-          <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter">Trois Piliers d'Expertise.</h3>
+          <h3 className="text-3xl md:text-6xl font-black text-white tracking-tighter">Trois Piliers d'Expertise.</h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[350px]">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-auto md:auto-rows-[350px]">
 
           {/* Bento Item 1 : Tourisme (Large) */}
           <Link href="/tourisme" className="md:col-span-8 row-span-2 relative rounded-[3rem] overflow-hidden group block cursor-pointer border border-white/10 bg-slate-900">
@@ -193,8 +193,8 @@ export default function Home() {
               <div className="w-16 h-16 rounded-3xl bg-sky-500/20 backdrop-blur-md border border-sky-400/30 flex items-center justify-center text-sky-400 mb-6 group-hover:scale-110 transition-transform">
                 <Plane className="w-8 h-8" />
               </div>
-              <h4 className="text-5xl font-black text-white mb-4 tracking-tighter">Tourisme & Visas C</h4>
-              <p className="text-slate-300 font-medium max-w-lg mb-8 text-lg leading-relaxed">Espace Schengen, Turquie, Asie, Amériques. Laissez nos experts préparer un dossier inattaquable pour votre prochain voyage de loisirs ou d'affaires.</p>
+              <h4 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tighter">Tourisme & Visas C</h4>
+              <p className="text-slate-300 font-medium max-w-lg mb-8 text-base md:text-lg leading-relaxed">Espace Schengen, Turquie, Asie, Amériques. Laissez nos experts préparer un dossier inattaquable pour votre prochain voyage.</p>
               <div className="px-6 py-4 bg-white text-slate-950 rounded-full font-black text-sm hover:bg-slate-200 transition-colors w-fit flex items-center gap-2">
                 Prendre Rendez-vous <ArrowRight className="w-4 h-4 group-hover:translate-x-1" />
               </div>
@@ -208,8 +208,8 @@ export default function Home() {
               <div className="w-16 h-16 rounded-3xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400 mb-8 group-hover:rotate-12 transition-transform">
                 <GraduationCap className="w-8 h-8" />
               </div>
-              <h4 className="text-4xl font-black text-white mb-4 leading-[1.1] tracking-tighter">Admissions<br />Universitaires</h4>
-              <p className="text-slate-400 font-medium mb-auto">Du choix de l'université jusqu'à l'obtention du CAQ, Permis d'Études et installation sur place.</p>
+              <h4 className="text-3xl md:text-4xl font-black text-white mb-4 leading-[1.1] tracking-tighter">Admissions<br />Universitaires</h4>
+              <p className="text-slate-400 font-medium mb-auto text-sm md:text-base">Du choix de l'université jusqu'à l'obtention du CAQ, Permis d'Études et installation sur place.</p>
 
               <div className="mt-10 space-y-6">
                 <div className="space-y-3">
@@ -234,8 +234,8 @@ export default function Home() {
                 <MapPin className="w-10 h-10" />
               </div>
               <div className="flex-1 text-center md:text-left">
-                <h4 className="text-4xl font-black text-white mb-3 tracking-tighter">Immigration & Résidence</h4>
-                <p className="text-slate-400 font-medium max-w-2xl text-lg leading-relaxed">Entrée Express, Travailleurs Qualifiés, Regroupement Familial. Des procédures complexes gérées de bout en bout par nos experts juridiques.</p>
+                <h4 className="text-3xl md:text-4xl font-black text-white mb-3 tracking-tighter">Immigration & Résidence</h4>
+                <p className="text-slate-400 font-medium max-w-2xl text-sm md:text-lg leading-relaxed">Entrée Express, Travailleurs Qualifiés, Regroupement Familial. Des procédures complexes gérées de bout en bout.</p>
               </div>
               <div className="shrink-0 w-full md:w-auto mt-4 md:mt-0">
                 <div className="w-full md:w-auto px-10 py-5 bg-amber-500 text-slate-950 rounded-full font-black text-lg flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(245,158,11,0.3)]">
@@ -249,18 +249,18 @@ export default function Home() {
       </section>
 
       {/* ─── CLIENT PLATFORM SHOWCASE ─── */}
-      <section className="py-24 relative overflow-hidden">
+      <section className="py-12 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#020617] to-slate-950"></div>
         <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-blue-500/10 blur-[150px] rounded-full pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-[4rem] p-10 md:p-16 flex flex-col lg:flex-row gap-16 shadow-[0_30px_100px_rgba(0,0,0,1)] items-center">
+          <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-[2rem] md:rounded-[4rem] p-8 md:p-16 flex flex-col lg:flex-row gap-12 md:gap-16 shadow-[0_30px_100px_rgba(0,0,0,1)] items-center">
 
-            <div className="lg:w-1/2 space-y-10">
+            <div className="lg:w-1/2 space-y-6 md:space-y-10">
               <div className="inline-block px-4 py-2 bg-blue-500/10 text-blue-400 font-black text-xs uppercase tracking-widest rounded-full border border-blue-500/20">
                 Technologie Oussama Travel
               </div>
-              <h2 className="text-5xl lg:text-6xl font-black text-white tracking-tighter leading-[1.1]">
+              <h2 className="text-4xl lg:text-6xl font-black text-white tracking-tighter leading-[1.1]">
                 Votre Espace Client <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-500 to-slate-200 italic">Nouvelle Génération.</span>
               </h2>
 
@@ -338,7 +338,7 @@ export default function Home() {
       </section>
 
       {/* ─── FOOTER HIGHLIGHT (CTA) ─── */}
-      <section className="py-32 relative overflow-hidden bg-sky-600">
+      <section className="py-16 md:py-32 relative overflow-hidden bg-sky-600">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542296332-2e4473faf563?q=80&w=2000&auto=format&fit=crop')] opacity-10 mix-blend-overlay object-cover"></div>
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
           <motion.div
@@ -346,7 +346,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-none mb-8">Votre Nouveau Départ Commence Ici.</h2>
+            <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-none mb-8">Votre Nouveau Départ Commence Ici.</h2>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <Link href="/auth/register">
                 <button className="px-12 py-6 bg-[#020617] text-white rounded-full font-black text-xl hover:scale-105 transition-transform flex items-center gap-3">
