@@ -162,8 +162,68 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
             </aside>
 
+            {/* Header Mobile Admin */}
+            <div className="lg:hidden fixed top-0 w-full bg-slate-950 text-white z-50 flex items-center justify-between p-4 border-b border-slate-800">
+                <Link href="/admin" className="flex items-center gap-2">
+                    <img
+                        src="/logo.png"
+                        alt="Oussama Travel Logo"
+                        className="h-8 w-auto object-contain"
+                    />
+                    <span className="text-[10px] bg-amber-500 text-slate-900 font-black px-2 py-0.5 rounded-sm uppercase tracking-widest hidden sm:inline-block">Admin</span>
+                </Link>
+                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="flex items-center gap-2 p-2 px-4 shadow-sm bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors text-sm font-bold">
+                    {isMobileMenuOpen ? "Fermer" : "Menu"}
+                    {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </button>
+            </div>
+
+            {/* Mobile Menu Dropdown */}
+            {isMobileMenuOpen && (
+                <div className="lg:hidden fixed inset-0 top-[73px] bg-slate-950 z-40 p-4 border-t border-slate-800 overflow-y-auto pb-20">
+                    <nav className="space-y-2">
+                        {navigation.map((item) => {
+                            const isActive = pathname === item.href;
+
+                            let badgeCount = 0;
+                            if (item.name === "Gestion Clients") badgeCount = counts.clients;
+                            else if (item.name === "Validation Dossiers") badgeCount = counts.dossiers;
+                            else if (item.name === "Rendez-vous") badgeCount = counts.rdv;
+                            else if (item.name === "Paiements") badgeCount = counts.paiements;
+                            else if (item.name === "Messagerie") badgeCount = counts.messages;
+                            else if (item.name === "Contacts Publics") badgeCount = counts.contacts;
+
+                            return (
+                                <Link key={item.name} href={item.href} onClick={() => setIsMobileMenuOpen(false)}>
+                                    <div className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive ? "bg-amber-500 text-gray-900 font-bold" : "text-slate-300 hover:bg-slate-800"
+                                        }`}>
+                                        <div className="flex items-center gap-3">
+                                            {item.icon}
+                                            {item.name}
+                                        </div>
+                                        {badgeCount > 0 && (
+                                            <div className={`text-[10px] font-black px-2 py-0.5 rounded-full shadow-md ${isActive ? 'bg-slate-950 text-amber-500' : 'bg-red-500 text-white'}`}>
+                                                {badgeCount}
+                                            </div>
+                                        )}
+                                    </div>
+                                </Link>
+                            );
+                        })}
+                        <Link
+                            href="/"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-3 mt-4 text-red-400 border border-red-500/20 rounded-xl w-full text-left"
+                        >
+                            <LogOut className="w-5 h-5" />
+                            Quitter l'Admin
+                        </Link>
+                    </nav>
+                </div>
+            )}
+
             {/* Main Content Area */}
-            <main className="flex-1 lg:ml-64 min-h-screen">
+            <main className="flex-1 lg:ml-64 min-h-screen pt-20 lg:pt-0">
                 {/* Top Header Admin */}
                 <header className="h-20 bg-white border-b border-slate-200 sticky top-0 z-30 px-6 flex items-center justify-between">
                     <div className="relative max-w-md w-full hidden md:block">
