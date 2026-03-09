@@ -54,7 +54,7 @@ export async function updateSession(request: NextRequest) {
     // 3. CRITIQUE: Protéger /admin — vérifier le rôle côté serveur
     // Un client authentifié ne doit pas pouvoir accéder aux routes /admin
     if (user && pathname.startsWith('/admin')) {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
         if (!profile || (profile.role !== 'admin' && profile.role !== 'employee')) {
             // Client normal qui tente d'accéder à /admin → rediriger vers /dashboard
             const url = request.nextUrl.clone()
@@ -63,19 +63,29 @@ export async function updateSession(request: NextRequest) {
         }
     }
 
-    // 4. Rediriger depuis /auth/login vers /dashboard si déjà connecté
+    // 4. Rediriger depuis /auth/login vers la bonne interface si déjà connecté
     if (
         user &&
         (pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register'))
     ) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle()
+
         const url = request.nextUrl.clone()
-        url.pathname = '/dashboard'
+        if (profile && (profile.role === 'admin' || profile.role === 'employee')) {
+            url.pathname = '/admin'
+        } else {
+            url.pathname = '/dashboard'
+        }
         return NextResponse.redirect(url)
     }
 
     // 5. Si un admin/employé atterrit sur /dashboard, le rediriger vers /admin
     if (user && pathname === '/dashboard') {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
         if (profile && (profile.role === 'admin' || profile.role === 'employee')) {
             const url = request.nextUrl.clone()
             url.pathname = '/admin'

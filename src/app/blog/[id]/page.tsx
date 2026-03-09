@@ -15,82 +15,90 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { Loader2 } from "lucide-react";
 
 export default function BlogPostDetail() {
     const params = useParams();
     const id = params.id;
     const [mounted, setMounted] = useState(false);
+    const [article, setArticle] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [extraArticles, setExtraArticles] = useState<any[]>([]);
+
+    const supabase = createClient();
 
     useEffect(() => {
         setMounted(true);
-    }, []);
+        fetchArticle();
+    }, [id]);
 
-    // Simulated article data (normally would fetch based on ID)
-    const articles = [
-        {
-            id: 1,
-            title: "Nouvelles Directives Visa Études Canada 2024",
-            content: `
-                <p>Le gouvernement canadien a récemment annoncé des changements majeurs concernant les étudiants internationaux. Ces nouvelles directives visent à préserver l'intégrité du système tout en garantissant une expérience de qualité pour les étudiants.</p>
-                
-                <h2>1. Plafond des permis d'études</h2>
-                <p>Pour la première fois, le Canada instaure un plafond sur le nombre de nouvelles demandes de permis d'études. Cette mesure temporaire de deux ans réduira d'environ 35% le nombre de nouveaux étudiants admis par rapport à 2023.</p>
-                
-                <h2>2. Preuve de fonds augmentée</h2>
-                <p>Le montant de la preuve de fonds nécessaire est passé de 10 000 $ à 20 635 $. Cela s'ajoute aux frais de scolarité de la première année et aux frais de voyage. Cette mise à jour est nécessaire pour refléter le coût de la vie actuel au Canada.</p>
-                
-                <h2>3. Lettre d'attestation provinciale</h2>
-                <p>Désormais, presque chaque demande de permis d'études devra être accompagnée d'une lettre d'attestation de la province ou du territoire où l'étudiant compte s'installer.</p>
-                
-                <blockquote>
-                    "Ces changements sont importants pour que les étudiants arrivent avec les ressources nécessaires pour réussir leur parcours académique au Canada."
-                </blockquote>
+    const fetchArticle = async () => {
+        setIsLoading(true);
+        // Fetch article
+        const { data, error } = await supabase
+            .from("blog_posts")
+            .select("*")
+            .eq("id", id)
+            .single();
 
-                <p>Chez Oussama Travel, nous aidons nos clients à naviguer dans ces nouvelles règles en préparant des dossiers financiers solides et en sélectionnant les établissements les mieux adaptés à ces nouveaux critères.</p>
-            `,
-            category: "Immigration",
-            date: "15 Janvier 2024",
-            author: "Expert Oussama Travel",
-            authorRole: "Consultant Principal",
-            readTime: "5 min",
-            views: "2.4k",
-            image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200&auto=format&fit=crop",
-            tag: "Canada"
-        },
-        {
-            id: 2,
-            title: "Top 5 des Destinations sans Visa pour les Algériens",
-            content: `
-                <p>Voyager avec un passeport algérien peut sembler restrictif, mais il existe des joyaux accessibles sans trop de complications administratives. Voici notre sélection pour vos vacances 2024.</p>
-                
-                <h2>1. La Malaisie : Un paradis tropical</h2>
-                <p>Sans visa pour 90 jours, c'est la destination idéale qui mélange gratte-ciels futuristes et jungle sauvage. Kuala Lumpur et les îles de Langkawi vous attendent.</p>
-                
-                <h2>2. La Turquie : L'e-Visa simplifié</h2>
-                <p>Bien que nécessitant un e-visa pour certains cas, la procédure est instantanée pour beaucoup. C'est le carrefour idéal entre culture, shopping et gastronomie.</p>
-                
-                <h2>3. La Tunisie : Le voisin accueillant</h2>
-                <p>Accessibles par route ou par avion, les plages de Hammamet et le charme de Sidi Bou Saïd restent des valeurs sûres pour un été réussi.</p>
-                
-                <h2>4. Hong Kong : L'Asie sans limites</h2>
-                <p>Peu d'Algériens le savent, mais Hong Kong est accessible avec une simple autorisation de voyage en ligne, offrant une expérience urbaine inégalée.</p>
-                
-                <p>Oussama Travel propose des packs complets (vol + hôtel + touriste) pour toutes ces destinations afin que vous ne pensiez qu'à vos bagages.</p>
-            `,
-            category: "Tourisme",
-            date: "10 Janvier 2024",
-            author: "Conseiller Voyage",
-            authorRole: "Chef de Produit",
-            readTime: "4 min",
-            views: "1.8k",
-            image: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?q=80&w=1200&auto=format&fit=crop",
-            tag: "Voyages"
+        if (data) {
+            setArticle({
+                id: data.id,
+                title: data.title,
+                content: data.content,
+                category: data.category,
+                date: new Date(data.created_at).toLocaleDateString("fr-FR", { day: 'numeric', month: 'long', year: 'numeric' }),
+                author: "Expert Oussama Travel",
+                authorRole: "Consultant Principal",
+                readTime: "5 min",
+                views: "•",
+                image: data.image_url || "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200",
+                tag: data.category
+            });
         }
-    ];
 
-    const article = articles.find(a => a.id === Number(id)) || articles[0];
+        // Fetch related
+        const { data: related } = await supabase
+            .from("blog_posts")
+            .select("*")
+            .neq("id", id)
+            .order("created_at", { ascending: false })
+            .limit(3);
+
+        if (related) {
+            setExtraArticles(related.map(r => ({
+                id: r.id,
+                title: r.title,
+                image: r.image_url || "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200",
+                tag: r.category,
+                date: new Date(r.created_at).toLocaleDateString("fr-FR")
+            })));
+        }
+
+        setIsLoading(false);
+    };
 
     if (!mounted) return null;
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <Loader2 className="w-10 h-10 animate-spin text-sky-500" />
+            </div>
+        );
+    }
+
+    if (!article) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center flex-col gap-4">
+                <h2 className="text-2xl font-black text-slate-800">Article Introuvable</h2>
+                <Link href="/blog">
+                    <button className="px-6 py-3 bg-sky-500 text-white rounded-full font-bold shadow-md">Retour au blog</button>
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-white font-sans">
@@ -210,7 +218,7 @@ export default function BlogPostDetail() {
                             {/* Related Posts */}
                             <div className="space-y-6">
                                 <h3 className="text-xl font-black text-slate-900 uppercase tracking-widest">Articles Liés</h3>
-                                {articles.filter(a => a.id !== article.id).map(a => (
+                                {extraArticles.map(a => (
                                     <Link key={a.id} href={`/blog/${a.id}`} className="flex gap-4 group cursor-pointer">
                                         <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0">
                                             <img src={a.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />

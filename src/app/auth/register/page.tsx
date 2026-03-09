@@ -47,6 +47,17 @@ export default function RegisterPage() {
             return;
         }
 
+        const getURL = () => {
+            let url =
+                process?.env?.NEXT_PUBLIC_SITE_URL ??
+                process?.env?.NEXT_PUBLIC_VERCEL_URL ??
+                'https://www.oussamatravel.com';
+
+            url = url.includes('http') ? url : `https://${url}`;
+            url = url.endsWith('/') ? url : `${url}/`;
+            return url;
+        };
+
         try {
             const { error: signUpError } = await supabase.auth.signUp({
                 email,
@@ -57,7 +68,7 @@ export default function RegisterPage() {
                         last_name: lastName.trim(),
                         phone: phone.trim(),
                     },
-                    emailRedirectTo: `${window.location.origin}/auth/callback`,
+                    emailRedirectTo: `${getURL()}auth/callback`,
                 },
             });
 

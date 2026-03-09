@@ -53,27 +53,52 @@ export default function DashboardOverview() {
     }, []);
 
     const fetchData = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-            // Fetch Profile
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single();
-            setUserProfile(profile);
+        try {
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError) throw authError;
 
-            // Fetch Applications
-            const { data: apps } = await supabase
-                .from('applications')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
-            setApplications(apps || []);
+            if (user) {
+                console.log("DEBUG: Utilisateur connecté ID:", user.id);
 
-            if (apps && apps.length > 0) {
-                fetchDocuments(user.id, apps[0].id);
+                // Fetch Profile - On utilise try/catch spécifique ici car c'est là que l'erreur 500 arrive
+                try {
+                    const { data: profile, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', user.id)
+                        .maybeSingle();
+
+                    if (profileError) {
+                        console.error("DEBUG ERROR: Erreur lors de la lecture du profil (500 ?):", profileError);
+                    } else if (profile) {
+                        console.log("DEBUG: Profil chargé avec succès. Rôle:", profile.role);
+                        setUserProfile(profile);
+                    } else {
+                        console.warn("DEBUG: Aucun profil trouvé pour cet utilisateur.");
+                    }
+                } catch (err: any) {
+                    console.error("DEBUG CRITICAL: Exception lors de la lecture du profil:", err.message);
+                }
+
+                // Fetch Applications
+                const { data: apps, error: appsError } = await supabase
+                    .from('applications')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false });
+
+                if (appsError) {
+                    console.error("DEBUG ERROR: Erreur lors de la lecture des dossiers:", appsError.message);
+                } else {
+                    console.log("DEBUG: Dossiers chargés:", apps?.length || 0);
+                    setApplications(apps || []);
+                    if (apps && apps.length > 0) {
+                        fetchDocuments(user.id, apps[0].id);
+                    }
+                }
             }
+        } catch (error: any) {
+            console.error("DEBUG GLOBAL ERROR:", error.message);
         }
     };
 
@@ -138,12 +163,15 @@ export default function DashboardOverview() {
 
     const handleCreateRequest = async () => {
         setLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) return;
-
         try {
-            const { error } = await supabase
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError) throw authError;
+            if (!user) {
+                alert("Vous devez être connecté pour créer une demande.");
+                return;
+            }
+
+            const { data, error } = await supabase
                 .from('applications')
                 .insert([
                     {
@@ -154,11 +182,17 @@ export default function DashboardOverview() {
                         session: selectedSession || null,
                         visa_category: visaCategory || null,
                         status: 'en_attente',
-                        reference_number: `OT-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
+                        reference_number: `OT-${new Date().getFullYear()}-${crypto.getRandomValues(new Uint32Array(1))[0].toString().slice(-6)}`
                     }
-                ]);
+                ])
+                .select();
 
-            if (error) throw error;
+            if (error) {
+                console.error("DEBUG ERROR: Échec de l'insertion du dossier:", error);
+                throw error;
+            }
+
+            console.log("DEBUG: Dossier créé avec succès:", data);
 
             setIsNewRequestModalOpen(false);
             setRequestStep(1);
@@ -170,8 +204,10 @@ export default function DashboardOverview() {
             setIsOtherCountry(false);
             setIsOtherVisaCategory(false);
             fetchData(); // Refresh list
+            alert("Votre demande a été enregistrée avec succès !");
         } catch (err: any) {
-            alert("Erreur lors de la création de la demande : " + err.message);
+            console.error("DEBUG ERROR handleCreateRequest:", err);
+            alert("Erreur lors de la création de la demande : " + (err.message || "Erreur inconnue"));
         } finally {
             setLoading(false);
         }

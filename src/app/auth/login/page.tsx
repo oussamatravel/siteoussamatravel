@@ -38,7 +38,7 @@ export default function LoginPage() {
                     .from('profiles')
                     .select('role')
                     .eq('id', user.id)
-                    .single();
+                    .maybeSingle(); // Plus robuste que single()
 
                 if (profile?.role === 'admin' || profile?.role === 'employee') {
                     router.push('/admin');
