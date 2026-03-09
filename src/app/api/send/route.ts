@@ -1,9 +1,6 @@
 import { Resend } from 'resend';
 import { NextRequest } from 'next/server';
 
-// La clé API doit être configurée dans les variables d'environnement
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 // Rate limiting simple en mémoire
 const rateLimit = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_MAX = 3;
@@ -68,6 +65,8 @@ export async function POST(req: NextRequest) {
     const safePhone = escapeHtml(phone || 'Non renseigné');
     const safeService = escapeHtml(service || 'Non spécifié');
     const safeMessage = escapeHtml(message);
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     const data = await resend.emails.send({
       from: 'Oussama Travel <onboarding@resend.dev>',
