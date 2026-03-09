@@ -60,7 +60,7 @@ export default function AdminDashboardOverview() {
                 console.log("Invoices table query failed (normal if not created yet):", e.message || e);
             }
 
-            const baseStats = [
+            const baseStats: any[] = [
                 { title: "Clients Totaux", value: clientCount || 0, trend: "Stable", up: true, icon: <Users className="w-5 h-5 text-emerald-500" />, bg: "bg-emerald-50" },
                 { title: "Dossiers à Valider", value: pendingCount || 0, trend: "Action", up: true, icon: <FileSearch className="w-5 h-5 text-amber-500" />, bg: "bg-amber-50" }
             ];
