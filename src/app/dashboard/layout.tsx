@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { LayoutDashboard, FolderOpen, FileCheck2, UserCircle, Bell, LogOut, Menu, X, CreditCard, MessageSquare, Calendar } from "lucide-react";
+import { LayoutDashboard, FolderOpen, FileCheck2, UserCircle, Bell, LogOut, Menu, X, CreditCard, MessageSquare, Calendar, Home } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -102,7 +102,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     })}
                 </nav>
 
-                <div className="p-4 border-t border-slate-800">
+                <div className="p-4 border-t border-slate-800 space-y-2">
+                    <Link href="/">
+                        <button className="flex items-center gap-3 px-4 py-3 text-sky-400 hover:bg-sky-400/10 hover:text-sky-300 rounded-xl transition-all w-full text-left font-bold border border-sky-500/10">
+                            <Home className="w-5 h-5" />
+                            Retour au Site
+                        </button>
+                    </Link>
                     <button
                         onClick={handleLogout}
                         className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-400/10 hover:text-red-300 rounded-xl transition-all w-full text-left"
@@ -151,13 +157,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 </Link>
                             );
                         })}
-                        <button
-                            onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
-                            className="flex items-center gap-3 px-4 py-3 mt-4 text-red-400 border border-red-500/20 rounded-xl w-full text-left"
-                        >
-                            <LogOut className="w-5 h-5" />
-                            Déconnexion
-                        </button>
+                        <div className="pt-4 border-t border-slate-800 space-y-2 mt-2">
+                            <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                                <button className="flex items-center gap-3 px-4 py-3 text-sky-400 border border-sky-500/20 rounded-xl w-full text-left font-bold bg-sky-500/5">
+                                    <Home className="w-5 h-5" />
+                                    Retour au Site
+                                </button>
+                            </Link>
+                            <button
+                                onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
+                                className="flex items-center gap-3 px-4 py-3 text-red-400 border border-red-500/20 rounded-xl w-full text-left"
+                            >
+                                <LogOut className="w-5 h-5" />
+                                Déconnexion
+                            </button>
+                        </div>
                     </nav>
                 </div>
             )}
