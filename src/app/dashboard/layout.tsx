@@ -102,7 +102,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     })}
                 </nav>
 
-                <div className="p-4 border-t border-slate-800 space-y-2">
+                <div className="p-4 border-t border-slate-800 space-y-2 bg-slate-900 relative z-10 shrink-0">
                     <Link href="/">
                         <button className="flex items-center gap-3 px-4 py-3 text-sky-400 hover:bg-sky-400/10 hover:text-sky-300 rounded-xl transition-all w-full text-left font-bold border border-sky-500/10">
                             <Home className="w-5 h-5" />
