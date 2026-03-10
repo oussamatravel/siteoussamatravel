@@ -175,6 +175,36 @@ export default function AdminDossiersPage() {
 
             if (error) throw error;
 
+            // Envoi de notification Email
+            const { data: session } = await supabase.auth.getSession();
+            if (session?.session?.access_token && selectedDossier.user_id) {
+                const statusName = mapStatus(newStatus);
+                fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.session.access_token}`
+                    },
+                    body: JSON.stringify({
+                        to_user_id: selectedDossier.user_id,
+                        subject: `Mise à jour de votre dossier - Oussama Travel`,
+                        html: `
+                            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
+                                <h2 style="color: #0f172a;">Mise à jour de votre dossier</h2>
+                                <p style="color: #475569;">Votre dossier <strong>${selectedDossier.type}</strong> (${selectedDossier.dest}) a été mis à jour par notre équipe.</p>
+                                <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+                                    <p style="margin: 0; color: #1e293b; font-weight: bold;">Nouveau statut : ${statusName}</p>
+                                </div>
+                                <p style="color: #475569;">Connectez-vous à votre espace client pour consulter les détails :</p>
+                                <a href="https://oussamatravel.com/dashboard" style="display: inline-block; background-color: #3b82f6; color: #fff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; margin-top: 10px;">Consulter mon dossier</a>
+                                <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
+                                <p style="color: #94a3b8; font-size: 12px; text-align: center;">Oussama Travel - Ne répondez pas directement à cet email.</p>
+                            </div>
+                        `
+                    })
+                }).catch(err => console.error("Échec silencieux de l'envoi d'email statut :", err));
+            }
+
             await fetchDossiers();
             setSelectedDossier(null);
         } catch (err: any) {
