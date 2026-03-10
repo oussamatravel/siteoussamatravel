@@ -135,7 +135,8 @@ export default function ApplicationChat({ applicationId, onClose }: { applicatio
                         // 3. Envoyer la demande d'e-mail
                         const { data: session } = await supabase.auth.getSession();
                         if (session?.session?.access_token) {
-                            fetch('/api/send-email', {
+                            const apiUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/send-email` : 'https://oussamatravel.com/api/send-email';
+                            fetch(apiUrl, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -158,7 +159,13 @@ export default function ApplicationChat({ applicationId, onClose }: { applicatio
                                         </div>
                                     `
                                 })
-                            }).catch(err => console.error("Échec silencieux de l'envoi d'email :", err));
+                            })
+                                .then(async (res) => {
+                                    if (!res.ok) {
+                                        console.error("Erreur API Email Chat:", await res.text());
+                                    }
+                                })
+                                .catch(err => console.error("Échec silencieux de l'envoi d'email :", err));
                         }
                     }
                 }

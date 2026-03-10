@@ -179,17 +179,18 @@ export default function AdminDossiersPage() {
             const { data: session } = await supabase.auth.getSession();
             if (session?.session?.access_token && selectedDossier.user_id) {
                 const statusName = mapStatus(newStatus);
-                fetch('/api/send-email', {
+                const apiUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/send-email` : 'https://oussamatravel.com/api/send-email';
+                fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.session.access_token}`
+                        'Authorization': `Bearer ${session.session.access_token} `
                     },
                     body: JSON.stringify({
                         to_user_id: selectedDossier.user_id,
                         subject: `Mise à jour de votre dossier - Oussama Travel`,
                         html: `
-                            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
+                    < div style = "font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;" >
                                 <h2 style="color: #0f172a;">Mise à jour de votre dossier</h2>
                                 <p style="color: #475569;">Votre dossier <strong>${selectedDossier.type}</strong> (${selectedDossier.dest}) a été mis à jour par notre équipe.</p>
                                 <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
@@ -199,10 +200,17 @@ export default function AdminDossiersPage() {
                                 <a href="https://oussamatravel.com/dashboard" style="display: inline-block; background-color: #3b82f6; color: #fff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; margin-top: 10px;">Consulter mon dossier</a>
                                 <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
                                 <p style="color: #94a3b8; font-size: 12px; text-align: center;">Oussama Travel - Ne répondez pas directement à cet email.</p>
-                            </div>
-                        `
+                            </div >
+        `
                     })
-                }).catch(err => console.error("Échec silencieux de l'envoi d'email statut :", err));
+                })
+                    .then(async (res) => {
+                        if (!res.ok) {
+                            const errText = await res.text();
+                            console.error("Erreur serveur send-email:", errText);
+                        }
+                    })
+                    .catch(err => console.error("Échec réseau send-email:", err));
             }
 
             await fetchDossiers();
@@ -224,7 +232,7 @@ export default function AdminDossiersPage() {
                     user_id: selectedDossier.user_id,
                     application_id: selectedDossier.id,
                     amount: parseFloat(invoiceAmount),
-                    description: invoiceDesc || `Frais ${selectedDossier.type} - ${selectedDossier.dest}`,
+                    description: invoiceDesc || `Frais ${selectedDossier.type} - ${selectedDossier.dest} `,
                     status: 'en_attente',
                     due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
                 });
@@ -247,7 +255,7 @@ export default function AdminDossiersPage() {
         try {
             const { data, error } = await supabase.storage
                 .from('client_documents')
-                .download(`${selectedDossier.user_id}/${selectedDossier.id}/${fileName}`);
+                .download(`${selectedDossier.user_id} /${selectedDossier.id}/${fileName} `);
 
             if (error) throw error;
 
@@ -346,16 +354,16 @@ export default function AdminDossiersPage() {
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-2">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${dossier.assigned_to ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
+                                                <div className={`w - 8 h - 8 rounded - full flex items - center justify - center text - [10px] font - bold ${dossier.assigned_to ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-400'} `}>
                                                     {dossier.assigned_to ? dossier.assignedName.substring(0, 2).toUpperCase() : '?'}
                                                 </div>
-                                                <span className={`text-xs font-bold ${dossier.assigned_to ? 'text-slate-900' : 'text-slate-400 italic'}`}>
+                                                <span className={`text - xs font - bold ${dossier.assigned_to ? 'text-slate-900' : 'text-slate-400 italic'} `}>
                                                     {dossier.assignedName}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm ${dossier.color}`}>
+                                            <span className={`inline - flex items - center gap - 1.5 px - 3 py - 1 rounded - full text - [10px] font - black uppercase tracking - wider border shadow - sm ${dossier.color} `}>
                                                 {dossier.statusLabel}
                                             </span>
                                         </td>
@@ -435,9 +443,9 @@ export default function AdminDossiersPage() {
 
                                             <button
                                                 onClick={() => setShowInvoiceForm(!showInvoiceForm)}
-                                                className={`w-full mt-4 p-4 border rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest transition-all shadow-sm ${showInvoiceForm ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-900 border-slate-200 hover:bg-slate-50'}`}
+                                                className={`w - full mt - 4 p - 4 border rounded - 2xl flex items - center justify - center gap - 2 font - black text - [10px] uppercase tracking - widest transition - all shadow - sm ${showInvoiceForm ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-900 border-slate-200 hover:bg-slate-50'} `}
                                             >
-                                                <Plus className={`w-4 h-4 transition-transform ${showInvoiceForm ? 'rotate-45' : ''}`} />
+                                                <Plus className={`w - 4 h - 4 transition - transform ${showInvoiceForm ? 'rotate-45' : ''} `} />
                                                 Générer Facture
                                             </button>
                                         </div>
