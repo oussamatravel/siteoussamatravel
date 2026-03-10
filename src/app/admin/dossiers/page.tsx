@@ -207,10 +207,14 @@ export default function AdminDossiersPage() {
                     .then(async (res) => {
                         if (!res.ok) {
                             const errText = await res.text();
-                            console.error("Erreur serveur send-email:", errText);
+                            alert("⚠️ Erreur lors de l'envoi de l'e-mail : " + errText);
+                        } else {
+                            alert("✅ Le statut a été modifié ET l'e-mail a été envoyé avec succès !");
                         }
                     })
-                    .catch(err => console.error("Échec réseau send-email:", err));
+                    .catch(err => {
+                        alert("⚠️ Erreur réseau vers l'API d'e-mail : " + err.message);
+                    });
             }
 
             await fetchDossiers();
