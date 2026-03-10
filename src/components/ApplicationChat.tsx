@@ -104,18 +104,72 @@ export default function ApplicationChat({ applicationId, onClose }: { applicatio
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Session expirée. Veuillez vous reconnecter.");
 
-            const { error } = await supabase
+            const { error: insertError } = await supabase
                 .from('messages')
                 .insert({
                     application_id: applicationId,
                     sender_id: user.id,
-                    content: newMessage.trim().substring(0, MAX_MSG_LENGTH) // Double protection
+                    content: newMessage.trim().substring(0, MAX_MSG_LENGTH)
                 });
 
-            if (error) throw error;
+            if (insertError) throw insertError;
+
+            // --- Envoi d'Email au client si c'est l'agence qui répond ---
+            try {
+                // 1. Déterminer notre rôle
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile && (profile.role === 'admin' || profile.role === 'employee')) {
+                    // 2. Trouver l'ID du client attaché à ce dossier
+                    const { data: application } = await supabase
+                        .from('applications')
+                        .select('user_id, service_type')
+                        .eq('id', applicationId)
+                        .single();
+
+                    if (application && application.user_id && application.user_id !== user.id) {
+                        // 3. Envoyer la demande d'e-mail
+                        const { data: session } = await supabase.auth.getSession();
+                        if (session?.session?.access_token) {
+                            fetch('/api/send-email', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${session.session.access_token}`
+                                },
+                                body: JSON.stringify({
+                                    to_user_id: application.user_id,
+                                    subject: `Nouveau message - Oussama Travel (${application.service_type})`,
+                                    html: `
+                                        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
+                                            <h2 style="color: #0f172a;">Nouveau message de votre conseiller !</h2>
+                                            <p style="color: #475569;">Vous avez reçu une nouvelle réponse concernant votre dossier <strong>${application.service_type}</strong>.</p>
+                                            <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+                                                <p style="margin: 0; color: #1e293b; font-style: italic;">"${newMessage.trim().substring(0, MAX_MSG_LENGTH)}"</p>
+                                            </div>
+                                            <p style="color: #475569;">Connectez-vous à votre espace client pour répondre :</p>
+                                            <a href="https://oussamatravel.com/auth/login" style="display: inline-block; background-color: #f59e0b; color: #000; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; margin-top: 10px;">Accéder à mon tableau de bord</a>
+                                            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
+                                            <p style="color: #94a3b8; font-size: 12px; text-align: center;">Oussama Travel - Ne répondez pas directement à cet email.</p>
+                                        </div>
+                                    `
+                                })
+                            }).catch(err => console.error("Échec silencieux de l'envoi d'email :", err));
+                        }
+                    }
+                }
+            } catch (emailErr) {
+                console.error("Erreur lors de la tentative d'envoi d'e-mail:", emailErr);
+                // On ne bloque pas l'UI pour une erreur d'email
+            }
+            // -----------------------------------------------------------
+
             setNewMessage("");
         } catch (err: any) {
-            // Erreur générique pour ne pas exposer les détails
             console.error("Send message error:", err);
             alert("Impossible d'envoyer le message. Veuillez réessayer.");
         } finally {
