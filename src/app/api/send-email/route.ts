@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email';
 import { createClient } from '@supabase/supabase-js';
 
-// Utilisation d'un client Admin pour contourner RLS et lire les adresses email
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(request: NextRequest) {
     try {
+        // Instanciation à l'intérieur de la route pour éviter l'erreur de Build Vercel (collect data)
+        const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+
         const body = await request.json();
         const { to_user_id, subject, html, text } = body;
 
