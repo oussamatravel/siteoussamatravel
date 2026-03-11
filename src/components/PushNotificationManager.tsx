@@ -31,15 +31,29 @@ export default function PushNotificationManager() {
         }
     };
 
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
     const subscribe = async () => {
         try {
+            setErrorMessage(null);
             setStatus('loading');
+
+            const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+            console.log("VAPID Key check:", vapidKey ? "Present" : "MISSING");
+
+            if (!vapidKey) {
+                throw new Error("Clé VAPID publique manquante (NEXT_PUBLIC_VAPID_PUBLIC_KEY).");
+            }
+
             const registration = await navigator.serviceWorker.ready;
+            console.log("Service Worker ready.");
 
             const sub = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!)
+                applicationServerKey: urlBase64ToUint8Array(vapidKey)
             });
+
+            console.log("Subscription successful:", sub);
 
             const supabase = createClient();
             const { data: { session } } = await supabase.auth.getSession();
@@ -62,8 +76,9 @@ export default function PushNotificationManager() {
             setSubscription(sub);
             setStatus('success');
             setTimeout(() => setStatus('idle'), 3000);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Erreur souscription push:', err);
+            setErrorMessage(err.message || "Erreur inconnue");
             setStatus('error');
         }
     };
@@ -124,6 +139,12 @@ export default function PushNotificationManager() {
                 <div className="mt-4 flex items-center gap-2 text-green-400 text-xs font-bold animate-bounce">
                     <CheckCircle2 className="w-4 h-4" />
                     Notifications activées avec succès !
+                </div>
+            )}
+
+            {errorMessage && (
+                <div className="mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200 text-[10px] font-medium font-mono">
+                    ERREUR: {errorMessage}
                 </div>
             )}
         </div>
