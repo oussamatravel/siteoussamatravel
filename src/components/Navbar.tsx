@@ -14,15 +14,39 @@ export default function Navbar() {
     const isHome = pathname === "/";
     const isDashboard = pathname.startsWith("/dashboard");
     const isAuth = pathname.startsWith("/auth");
-    const isAdmin = pathname.startsWith("/admin");
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [canInstall, setCanInstall] = useState(false);
 
     useEffect(() => {
+        setIsAdmin(pathname.startsWith("/admin"));
+
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50);
         };
         window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+
+        const checkInstall = () => {
+            if ((window as any).deferredPrompt) {
+                setCanInstall(true);
+            }
+        };
+
+        const interval = setInterval(checkInstall, 1000);
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            clearInterval(interval);
+        };
+    }, [pathname]);
+
+    const handleInstallClick = async () => {
+        const promptEvent = (window as any).deferredPrompt;
+        if (!promptEvent) return;
+        promptEvent.prompt();
+        const { outcome } = await promptEvent.userChoice;
+        console.log(`User response to the install prompt: ${outcome}`);
+        (window as any).deferredPrompt = null;
+        setCanInstall(false);
+    };
 
     if (isDashboard || isAuth || isAdmin) return null;
 
@@ -138,6 +162,14 @@ export default function Navbar() {
                                     <button className="w-full py-4 bg-amber-400 text-sky-950 font-black rounded-2xl uppercase tracking-widest text-[10px] shadow-lg shadow-amber-500/20">Rejoindre</button>
                                 </Link>
                             </div>
+                            {canInstall && (
+                                <button
+                                    onClick={handleInstallClick}
+                                    className="w-full mt-4 py-4 bg-sky-500 text-white font-black rounded-2xl uppercase tracking-widest text-[11px] shadow-lg flex items-center justify-center gap-2 animate-pulse"
+                                >
+                                    📥 Installer l'application officielle
+                                </button>
+                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>
