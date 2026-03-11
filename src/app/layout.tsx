@@ -4,6 +4,7 @@ import "./globals.css";
 import ChatSupport from "@/components/ChatSupport";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PwaRegister from "@/components/PwaRegister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,13 @@ const dancingScript = Dancing_Script({
 export const metadata: Metadata = {
   title: "Oussama Travel | Partout dans le monde",
   description: "Agence de voyages, études et immigration. Votre avenir, notre expertise.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Oussama Travel",
+  },
+  themeColor: "#0f172a",
 };
 
 export default function RootLayout({
@@ -46,6 +54,7 @@ export default function RootLayout({
         {children}
         <Footer />
         <ChatSupport />
+        <PwaRegister />
       </body>
     </html>
   );
