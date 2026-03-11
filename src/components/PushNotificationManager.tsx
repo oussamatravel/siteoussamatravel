@@ -10,6 +10,11 @@ export default function PushNotificationManager() {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
     useEffect(() => {
+        console.log("PushNotificationManager check:", {
+            serviceWorker: 'serviceWorker' in navigator,
+            PushManager: 'PushManager' in window
+        });
+
         if ('serviceWorker' in navigator && 'PushManager' in window) {
             setIsSupported(true);
             checkSubscription();
@@ -17,9 +22,13 @@ export default function PushNotificationManager() {
     }, []);
 
     const checkSubscription = async () => {
-        const registration = await navigator.serviceWorker.ready;
-        const sub = await registration.pushManager.getSubscription();
-        setSubscription(sub);
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const sub = await registration.pushManager.getSubscription();
+            setSubscription(sub);
+        } catch (err) {
+            console.error("Erreur checkSubscription:", err);
+        }
     };
 
     const subscribe = async () => {
@@ -39,7 +48,6 @@ export default function PushNotificationManager() {
                 throw new Error('Vous devez être connecté');
             }
 
-            // Envoyer l'abonnement à notre API
             const response = await fetch('/api/push/subscribe', {
                 method: 'POST',
                 headers: {
@@ -66,7 +74,6 @@ export default function PushNotificationManager() {
             if (subscription) {
                 await subscription.unsubscribe();
                 setSubscription(null);
-                // On pourrait aussi supprimer de la DB ici
             }
             setStatus('idle');
         } catch (err) {
@@ -74,7 +81,14 @@ export default function PushNotificationManager() {
         }
     };
 
-    if (!isSupported) return null;
+    if (!isSupported) {
+        return (
+            <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 mb-8 text-rose-400 text-xs italic">
+                ⚠️ Les notifications vibrantes ne sont pas supportées par ce navigateur ou cette connexion (nécessite HTTPS et Chrome/Safari/Edge récent).
+                Note: Assurez-vous de ne pas être dans un navigateur "Interne" (comme celui de WhatsApp ou Facebook).
+            </div>
+        );
+    }
 
     return (
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 backdrop-blur-xl">
@@ -116,7 +130,6 @@ export default function PushNotificationManager() {
     );
 }
 
-// Utilitaire pour convertir la clé VAPID
 function urlBase64ToUint8Array(base64String: string) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding)
