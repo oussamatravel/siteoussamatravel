@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email';
 import { createClient } from '@supabase/supabase-js';
+import { sendPushNotification } from '@/lib/push-notifications';
+
 
 export async function POST(request: NextRequest) {
     try {
@@ -74,7 +76,12 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: result.error }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, message: 'Email envoyé avec succès.' }, { status: 200 });
+        // 4. Envoyer également une Notification Push (Vibration)
+        // On enlève les balises HTML pour le corps de la notification push
+        const pushBody = text || subject;
+        await sendPushNotification(to_user_id, subject, pushBody, '/dashboard');
+
+        return NextResponse.json({ success: true, message: 'Email et Notification envoyés avec succès.' }, { status: 200 });
 
     } catch (error: any) {
         console.error("API send-email error:", error);

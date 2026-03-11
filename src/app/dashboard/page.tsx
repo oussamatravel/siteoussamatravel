@@ -23,6 +23,8 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import ApplicationChat from "@/components/ApplicationChat";
+import PushNotificationManager from "@/components/PushNotificationManager";
+
 
 export default function DashboardOverview() {
     const [isNewRequestModalOpen, setIsNewRequestModalOpen] = useState(false);
@@ -403,6 +405,8 @@ export default function DashboardOverview() {
                     </div>
                 </motion.div>
             )}
+
+            <PushNotificationManager />
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
