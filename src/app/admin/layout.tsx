@@ -27,6 +27,8 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import PushNotificationManager from "@/components/PushNotificationManager";
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -280,6 +282,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                 {/* Dynamic Content */}
                 <div className="p-6 lg:p-10">
+                    <PushNotificationManager />
                     {children}
                 </div>
             </main>
