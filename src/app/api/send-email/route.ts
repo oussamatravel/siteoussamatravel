@@ -4,10 +4,16 @@ import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
     try {
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            return NextResponse.json({
+                error: `Variables secrètes manquantes sur Vercel : URL=${!!process.env.NEXT_PUBLIC_SUPABASE_URL}, ROLE_KEY=${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`
+            }, { status: 500 });
+        }
+
         // Instanciation à l'intérieur de la route pour éviter l'erreur de Build Vercel (collect data)
         const supabaseAdmin = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
+            process.env.NEXT_PUBLIC_SUPABASE_URL,
+            process.env.SUPABASE_SERVICE_ROLE_KEY
         );
 
         const body = await request.json();
