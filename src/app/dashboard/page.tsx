@@ -406,8 +406,6 @@ export default function DashboardOverview() {
                 </motion.div>
             )}
 
-            <PushNotificationManager />
-
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 {stats.map((stat, i) => (

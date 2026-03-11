@@ -8,6 +8,8 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import PushNotificationManager from "@/components/PushNotificationManager";
+
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -177,7 +179,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
 
             {/* Main Content */}
-            <main className="flex-1 md:ml-64 pt-20 md:pt-0">
+            <main className="flex-1 md:ml-64 pt-20 md:pt-0 p-6">
+                <PushNotificationManager />
                 {children}
             </main>
         </div>
