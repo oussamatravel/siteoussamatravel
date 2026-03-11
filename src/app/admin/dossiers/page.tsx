@@ -196,8 +196,7 @@ export default function AdminDossiersPage() {
                                 <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
                                     <p style="margin: 0; color: #1e293b; font-weight: bold;">Nouveau statut : ${statusName}</p>
                                 </div>
-                                <p style="color: #475569;">Connectez-vous à votre espace client pour consulter les détails :</p>
-                                <a href="${window.location.origin}/dashboard" style="display: inline-block; background-color: #3b82f6; color: #fff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; margin-top: 10px;">Consulter mon dossier</a>
+                                <a href="https://www.oussamatravel.com/dashboard" style="display: inline-block; background-color: #3b82f6; color: #fff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; margin-top: 10px;">Consulter mon dossier</a>
                                 <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
                                 <p style="color: #94a3b8; font-size: 12px; text-align: center;">Oussama Travel - Ne répondez pas directement à cet email.</p>
                             </div >

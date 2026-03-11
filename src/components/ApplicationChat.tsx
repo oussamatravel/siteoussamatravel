@@ -153,7 +153,7 @@ export default function ApplicationChat({ applicationId, onClose }: { applicatio
                                                 <p style="margin: 0; color: #1e293b; font-style: italic;">"${newMessage.trim().substring(0, MAX_MSG_LENGTH)}"</p>
                                             </div>
                                             <p style="color: #475569;">Connectez-vous à votre espace client pour répondre :</p>
-                                            <a href="${window.location.origin}/auth/login" style="display: inline-block; background-color: #f59e0b; color: #000; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; margin-top: 10px;">Accéder à mon tableau de bord</a>
+                                            <a href="https://www.oussamatravel.com/auth/login" style="display: inline-block; background-color: #f59e0b; color: #000; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; margin-top: 10px;">Accéder à mon tableau de bord</a>
                                             <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
                                             <p style="color: #94a3b8; font-size: 12px; text-align: center;">Oussama Travel - Ne répondez pas directement à cet email.</p>
                                         </div>
