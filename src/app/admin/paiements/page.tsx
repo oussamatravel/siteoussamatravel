@@ -43,6 +43,8 @@ export default function AdminPaiementsPage() {
         dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     });
 
+    const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+
     const supabase = createClient();
 
     useEffect(() => {
@@ -192,6 +194,28 @@ export default function AdminPaiementsPage() {
             alert("Erreur lors de la mise à jour : " + err.message);
         } finally {
             setIsActionLoading(false);
+        }
+    };
+
+    const handleDeleteInvoice = async (invoiceId: string) => {
+        if (!confirm("Voulez-vous supprimer définitivement cette facture ?")) return;
+
+        setIsActionLoading(true);
+        try {
+            const { error } = await supabase
+                .from('invoices')
+                .delete()
+                .eq('id', invoiceId);
+
+            if (error) throw error;
+
+            alert("Facture supprimée !");
+            fetchInvoices();
+        } catch (err: any) {
+            alert("Erreur lors de la suppression : " + err.message);
+        } finally {
+            setIsActionLoading(false);
+            setSelectedInvoice(null);
         }
     };
 
@@ -357,7 +381,13 @@ export default function AdminPaiementsPage() {
                                                     </button>
                                                 </>
                                             )}
-                                            <button className="p-2.5 bg-white border border-slate-100 text-slate-300 hover:text-slate-900 hover:shadow-sm rounded-xl transition-all">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedInvoice(inv);
+                                                }}
+                                                className="p-2.5 bg-white border border-slate-100 text-slate-400 hover:text-slate-900 hover:shadow-sm rounded-xl transition-all"
+                                            >
                                                 <MoreVertical className="w-4 h-4" />
                                             </button>
                                         </td>
@@ -486,6 +516,74 @@ export default function AdminPaiementsPage() {
                                     </p>
                                 </div>
                             </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            <AnimatePresence>
+                {selectedInvoice && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => !isActionLoading && setSelectedInvoice(null)}
+                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col border border-slate-100"
+                        >
+                            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-white shadow-sm rounded-xl flex items-center justify-center text-slate-900">
+                                        <Receipt className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-sm font-black text-slate-900 uppercase tracking-tight">#{selectedInvoice.id.substring(0, 8)}</h2>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedInvoice.amount.toLocaleString()} DA</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setSelectedInvoice(null)} className="p-2 hover:bg-white rounded-xl transition-colors shadow-sm">
+                                    <X className="w-5 h-5 text-slate-400" />
+                                </button>
+                            </div>
+
+                            <div className="p-6 space-y-3">
+                                <button
+                                    onClick={() => {
+                                        handleUpdateStatus(selectedInvoice.id, 'paye');
+                                        setSelectedInvoice(null);
+                                    }}
+                                    className="w-full px-4 py-4 text-xs font-black text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-2xl flex items-center justify-center gap-3 transition-all uppercase tracking-widest"
+                                >
+                                    <Check className="w-4 h-4" />
+                                    Confirmer Paiement
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        handleUpdateStatus(selectedInvoice.id, 'annule');
+                                        setSelectedInvoice(null);
+                                    }}
+                                    className="w-full px-4 py-4 text-xs font-black text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-2xl flex items-center justify-center gap-3 transition-all uppercase tracking-widest"
+                                >
+                                    <Ban className="w-4 h-4" />
+                                    Annuler la Facture
+                                </button>
+                                <div className="h-px bg-slate-50 my-2" />
+                                <button
+                                    onClick={() => {
+                                        handleDeleteInvoice(selectedInvoice.id);
+                                        setSelectedInvoice(null);
+                                    }}
+                                    className="w-full px-4 py-4 text-xs font-black text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-2xl flex items-center justify-center gap-3 transition-all uppercase tracking-widest"
+                                >
+                                    <X className="w-4 h-4" />
+                                    Supprimer définitivement
+                                </button>
+                            </div>
                         </motion.div>
                     </div>
                 )}

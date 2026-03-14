@@ -184,7 +184,7 @@ export default function AdminDossiersPage() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.session.access_token} `
+                        'Authorization': `Bearer ${session.session.access_token}`
                     },
                     body: JSON.stringify({
                         to_user_id: selectedDossier.user_id,
@@ -254,7 +254,7 @@ export default function AdminDossiersPage() {
         try {
             const { data, error } = await supabase.storage
                 .from('client_documents')
-                .download(`${selectedDossier.user_id} /${selectedDossier.id}/${fileName} `);
+                .download(`${selectedDossier.user_id}/${selectedDossier.id}/${fileName}`);
 
             if (error) throw error;
 
@@ -264,7 +264,8 @@ export default function AdminDossiersPage() {
             a.download = fileName;
             a.click();
         } catch (err: any) {
-            alert("Erreur lors du téléchargement : " + err.message);
+            console.error("Download error:", err);
+            alert("Erreur lors du téléchargement : " + (err.message || "Fichier introuvable ou erreur réseau"));
         }
     };
 
@@ -353,16 +354,16 @@ export default function AdminDossiersPage() {
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-2">
-                                                <div className={`w - 8 h - 8 rounded - full flex items - center justify - center text - [10px] font - bold ${dossier.assigned_to ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-400'} `}>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${dossier.assigned_to ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
                                                     {dossier.assigned_to ? dossier.assignedName.substring(0, 2).toUpperCase() : '?'}
                                                 </div>
-                                                <span className={`text - xs font - bold ${dossier.assigned_to ? 'text-slate-900' : 'text-slate-400 italic'} `}>
+                                                <span className={`text-xs font-bold ${dossier.assigned_to ? 'text-slate-900' : 'text-slate-400 italic'}`}>
                                                     {dossier.assignedName}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <span className={`inline - flex items - center gap - 1.5 px - 3 py - 1 rounded - full text - [10px] font - black uppercase tracking - wider border shadow - sm ${dossier.color} `}>
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm ${dossier.color}`}>
                                                 {dossier.statusLabel}
                                             </span>
                                         </td>
@@ -442,9 +443,9 @@ export default function AdminDossiersPage() {
 
                                             <button
                                                 onClick={() => setShowInvoiceForm(!showInvoiceForm)}
-                                                className={`w - full mt - 4 p - 4 border rounded - 2xl flex items - center justify - center gap - 2 font - black text - [10px] uppercase tracking - widest transition - all shadow - sm ${showInvoiceForm ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-900 border-slate-200 hover:bg-slate-50'} `}
+                                                className={`w-full mt-4 p-4 border rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest transition-all shadow-sm ${showInvoiceForm ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-900 border-slate-200 hover:bg-slate-50'}`}
                                             >
-                                                <Plus className={`w - 4 h - 4 transition - transform ${showInvoiceForm ? 'rotate-45' : ''} `} />
+                                                <Plus className={`w-4 h-4 transition-transform ${showInvoiceForm ? 'rotate-45' : ''}`} />
                                                 Générer Facture
                                             </button>
                                         </div>
