@@ -11,7 +11,8 @@ import {
     Clock, 
     FileText,
     Sparkles,
-    Compass
+    Compass,
+    User
 } from "lucide-react";
 import Link from "next/link";
 
@@ -204,5 +205,3 @@ export default function Tourisme() {
     );
 }
 
-import { User } from "lucide-react";
-import { CalendarDays } from "lucide-react";
