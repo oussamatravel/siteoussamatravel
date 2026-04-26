@@ -94,6 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { name: "Contacts Publics", href: "/admin/contacts", icon: <Bell className="w-5 h-5" /> },
         { name: "Paiements", href: "/admin/paiements", icon: <CreditCard className="w-5 h-5" /> },
         { name: "Blog", href: "/admin/blog", icon: <BookOpen className="w-5 h-5" /> },
+        { name: "Universités Italie", href: "/admin/italie-universites", icon: <GraduationCap className="w-5 h-5" /> },
         { name: "Rendez-vous", href: "/admin/rdv", icon: <CalendarCheck className="w-5 h-5" /> },
         { name: "Gestion Rôles", href: "/admin/roles", icon: <Crown className="w-5 h-5" />, adminOnly: true },
         { name: "Paramètres Services", href: "/admin/parametres", icon: <Settings className="w-5 h-5" /> },

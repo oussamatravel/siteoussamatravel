@@ -1,5 +1,5 @@
-import { Resend } from 'resend';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { sendEmail } from '@/lib/email';
 
 // Rate limiting simple en mémoire
 const rateLimit = new Map<string, { count: number; resetAt: number }>();
@@ -17,11 +17,6 @@ function escapeHtml(unsafe: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  // Vérification de la configuration
-  if (!process.env.RESEND_API_KEY) {
-    return new Response(JSON.stringify({ error: 'Service email non configuré.' }), { status: 503 });
-  }
-
   // Rate limiting par IP
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ?? '127.0.0.1';
   const now = Date.now();
@@ -29,7 +24,7 @@ export async function POST(req: NextRequest) {
   if (rl) {
     if (now < rl.resetAt) {
       if (rl.count >= RATE_LIMIT_MAX) {
-        return new Response(JSON.stringify({ error: 'Trop de requêtes. Veuillez patienter.' }), { status: 429 });
+        return NextResponse.json({ error: 'Trop de requêtes. Veuillez patienter.' }, { status: 429 });
       }
       rl.count++;
     } else {
@@ -45,18 +40,18 @@ export async function POST(req: NextRequest) {
 
     // Validation des champs requis
     if (!name || !email || !message) {
-      return new Response(JSON.stringify({ error: 'Champs requis manquants.' }), { status: 400 });
+      return NextResponse.json({ error: 'Champs requis manquants.' }, { status: 400 });
     }
 
     // Validation du format email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return new Response(JSON.stringify({ error: 'Format email invalide.' }), { status: 400 });
+      return NextResponse.json({ error: 'Format email invalide.' }, { status: 400 });
     }
 
     // Limiter la taille des champs pour éviter les abus
     if (name.length > 100 || message.length > 2000 || (phone && phone.length > 20)) {
-      return new Response(JSON.stringify({ error: 'Données trop longues.' }), { status: 400 });
+      return NextResponse.json({ error: 'Données trop longues.' }, { status: 400 });
     }
 
     // Échapper toutes les variables avant injection dans le HTML (Anti-XSS)
@@ -66,11 +61,9 @@ export async function POST(req: NextRequest) {
     const safeService = escapeHtml(service || 'Non spécifié');
     const safeMessage = escapeHtml(message);
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
-    const data = await resend.emails.send({
-      from: 'Oussama Travel <onboarding@resend.dev>',
-      to: ['directeur.ota@gmail.com'],
+    // Utilisation de la fonction centralisée sendEmail
+    const result = await sendEmail({
+      to: 'directeur@oussamatravel.com',
       subject: `Nouveau Dossier : ${safeService} - ${safeName}`,
       html: `
         <div style="font-family: sans-serif; padding: 20px; color: #333; line-height: 1.6;">
@@ -84,17 +77,16 @@ export async function POST(req: NextRequest) {
           <div style="background: #f4f4f4; padding: 15px; border-radius: 10px; white-space: pre-wrap;">
             ${safeMessage}
           </div>
-          <hr />
-          <p style="font-size: 11px; color: #999;">Envoyé depuis le site Oussama Travel</p>
         </div>
       `,
     });
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    if (result.error) throw result.error;
+
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    // Ne jamais exposer les détails d'erreur internes
     console.error('[API/send] Error:', error);
-    return new Response(JSON.stringify({ error: 'Une erreur est survenue. Veuillez réessayer.' }), { status: 500 });
+    return NextResponse.json({ error: 'Une erreur est survenue. Veuillez réessayer.' }, { status: 500 });
   }
 }
 

@@ -97,7 +97,9 @@ export default function Etudes() {
             image: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=800&auto=format&fit=crop",
             color: "text-green-700",
             bg: "bg-green-50",
-            programs: ["Laurea Triennale", "Laurea Magistrale", "MBA & Arts"]
+            programs: ["Laurea Triennale", "Laurea Magistrale", "MBA & Arts"],
+            link: "/etudes/italie/universites",
+            linkText: "Liste des Universités"
         },
         {
             code: "tr",
@@ -327,6 +329,14 @@ export default function Etudes() {
                                                     </div>
                                                 ))}
                                             </div>
+
+                                            {dest.link && (
+                                                <div className="mt-6">
+                                                    <Link href={dest.link} className="w-full py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-slate-950 transition-all flex items-center justify-center gap-2">
+                                                        {dest.linkText} <ArrowRight className="w-3 h-3" />
+                                                    </Link>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Hover Arrow */}
