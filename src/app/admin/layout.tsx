@@ -20,7 +20,8 @@ import {
     BookOpen,
     CalendarCheck,
     Crown,
-    Home
+    Home,
+    GraduationCap
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
