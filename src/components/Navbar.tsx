@@ -65,10 +65,10 @@ export default function Navbar() {
             <motion.nav
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className={`max-w-7xl mx-auto h-20 md:h-24 rounded-[2rem] border transition-all duration-500 pointer-events-auto flex items-center justify-between px-8 relative
+                className={`max-w-7xl mx-auto h-20 md:h-24 rounded-[2.5rem] border transition-all duration-500 pointer-events-auto flex items-center justify-between px-10 relative
                 ${(isScrolled || !isHome)
-                        ? "bg-sky-950/90 backdrop-blur-2xl border-sky-800 shadow-[0_20px_50px_rgba(7,89,133,0.3)] py-4"
-                        : "bg-sky-900/30 backdrop-blur-xl border-white/10 shadow-lg py-6"
+                        ? "bg-white/80 backdrop-blur-2xl border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.05)] py-4"
+                        : "bg-white/40 backdrop-blur-xl border-white/50 shadow-xl py-6"
                     }`}
             >
                 {/* Logo */}
@@ -76,7 +76,7 @@ export default function Navbar() {
                     <img
                         src="/logo.png"
                         alt="Oussama Travel Logo"
-                        className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform"
+                        className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform brightness-0 invert-0"
                         style={{ minWidth: '150px' }}
                     />
                 </Link>
@@ -89,18 +89,17 @@ export default function Navbar() {
                             <Link
                                 key={link.name}
                                 href={link.href}
-                                className="relative px-4 py-2 text-[13px] font-bold uppercase tracking-[0.15em] transition-all group shrink-0 text-white"
+                                className="relative px-5 py-2 text-[11px] font-black uppercase tracking-[0.2em] transition-all group shrink-0 text-slate-600"
                             >
-                                <span className={`relative z-10 transition-colors group-hover:text-amber-400 ${isActive ? "text-amber-400" : ""}`}>
+                                <span className={`relative z-10 transition-colors group-hover:text-blue-600 ${isActive ? "text-blue-600" : ""}`}>
                                     {link.name}
                                 </span>
                                 {isActive && (
                                     <motion.div
                                         layoutId="activeNav"
-                                        className="absolute inset-0 bg-white/5 rounded-xl -z-0"
+                                        className="absolute inset-0 bg-blue-500/5 rounded-xl -z-0"
                                     />
                                 )}
-                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-amber-400 transition-all group-hover:w-full opacity-0 group-hover:opacity-100 rounded-full shadow-[0_0_10px_#fbbf24]"></span>
                             </Link>
                         );
                     })}
@@ -109,16 +108,16 @@ export default function Navbar() {
                 {/* Auth Buttons */}
                 <div className="hidden lg:flex items-center gap-4 shrink-0">
                     <Link href="/dashboard">
-                        <button className="flex items-center gap-2 px-5 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-full transition-all border text-white border-white/20 hover:bg-white/10">
-                            <User className="w-4 h-4 text-amber-400" />
-                            Espace Client
+                        <button className="flex items-center gap-2 px-6 py-3 text-[10px] font-black uppercase tracking-widest rounded-full transition-all border text-slate-600 border-slate-200 hover:bg-slate-50">
+                            <User className="w-4 h-4 text-blue-600" />
+                            Client
                         </button>
                     </Link>
                     <Link href="/auth/register">
-                        <button className={`px-6 py-2.5 font-black text-[11px] uppercase tracking-widest rounded-full transition-all shadow-xl flex items-center gap-2 group
+                        <button className={`px-8 py-3 font-black text-[10px] uppercase tracking-widest rounded-full transition-all shadow-xl flex items-center gap-2 group
                             ${(isScrolled || !isHome)
-                                ? "bg-amber-400 text-sky-950 hover:bg-white hover:scale-105 shadow-amber-500/20"
-                                : "bg-white text-sky-950 hover:bg-amber-400 hover:scale-105 shadow-white/20"
+                                ? "bg-slate-950 text-white hover:bg-blue-600 hover:scale-105"
+                                : "bg-blue-600 text-white hover:bg-slate-950 hover:scale-105"
                             }`}>
                             Décoller
                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -141,25 +140,25 @@ export default function Navbar() {
                             initial={{ opacity: 0, y: 20, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                            className="absolute top-[calc(100%+10px)] left-0 right-0 lg:hidden bg-sky-950/95 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-sky-800 overflow-hidden z-50 p-6 space-y-2"
+                            className="absolute top-[calc(100%+10px)] left-0 right-0 lg:hidden bg-white/90 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden z-50 p-8 space-y-2"
                         >
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.name}
                                     href={link.href}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 text-sky-100 hover:text-amber-400 font-black uppercase tracking-widest text-sm group"
+                                    className="flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50 text-slate-600 hover:text-blue-600 font-black uppercase tracking-widest text-sm group"
                                 >
                                     {link.name}
-                                    <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-amber-400" />
+                                    <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-600" />
                                 </Link>
                             ))}
-                            <div className="pt-4 border-t border-sky-800 grid grid-cols-2 gap-3 mt-4">
+                            <div className="pt-6 border-t border-slate-100 grid grid-cols-2 gap-4 mt-4">
                                 <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                                    <button className="w-full py-4 text-white font-black uppercase tracking-widest text-[10px] border border-sky-800 rounded-2xl hover:bg-white/5">Connexion</button>
+                                    <button className="w-full py-4 text-slate-600 font-black uppercase tracking-widest text-[10px] border border-slate-200 rounded-2xl hover:bg-slate-50">Connexion</button>
                                 </Link>
                                 <Link href="/auth/register" onClick={() => setIsMobileMenuOpen(false)}>
-                                    <button className="w-full py-4 bg-amber-400 text-sky-950 font-black rounded-2xl uppercase tracking-widest text-[10px] shadow-lg shadow-amber-500/20">Rejoindre</button>
+                                    <button className="w-full py-4 bg-slate-950 text-white font-black rounded-2xl uppercase tracking-widest text-[10px] shadow-lg shadow-slate-900/10">Rejoindre</button>
                                 </Link>
                             </div>
                             {canInstall && (

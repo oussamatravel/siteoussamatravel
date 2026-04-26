@@ -1,362 +1,347 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Plane, GraduationCap, FileText, ArrowRight, Star, ShieldCheck, MapPin, TrendingUp, Check } from "lucide-react";
+import { 
+  Plane, 
+  GraduationCap, 
+  MapPin, 
+  ArrowRight, 
+  CheckCircle2, 
+  Globe2, 
+  Search,
+  Sparkles,
+  Users,
+  ShieldCheck,
+  Star,
+  TrendingUp,
+  Compass,
+  LayoutDashboard
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Home() {
   const fadeIn = {
-    initial: { opacity: 0, y: 30 },
+    initial: { opacity: 0, y: 20 },
     whileInView: { opacity: 1, y: 0 },
     viewport: { once: true },
-    transition: { duration: 0.7 }
+    transition: { duration: 0.6 }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.2 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] font-sans selection:bg-amber-500 selection:text-slate-900 text-slate-300">
-
-      {/* ─── INFOGRAPHIC HERO SECTION ─── */}
-      <section className="relative min-h-[90vh] flex items-center justify-center pt-24 pb-12 md:pt-32 md:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Background Visuals */}
+    <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden">
+      
+      {/* ─── HERO SECTION (ULTRA PREMIUM) ─── */}
+      <section className="relative min-h-screen flex items-center justify-center pt-32 pb-20 px-4 overflow-hidden">
+        {/* Cinematic Background Image */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-sky-500/20 blur-[130px] rounded-full pointer-events-none" />
-          <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-amber-500/15 blur-[120px] rounded-full pointer-events-none" />
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay"></div>
-          {/* Subtle Grid */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20"></div>
+          <Image 
+            src="/travel_study_hero_bg_1777198899219.png" 
+            alt="Premium Travel & Study"
+            fill
+            className="object-cover opacity-60 scale-105"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/40 to-white" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-white/30" />
         </div>
 
-        <div className="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        {/* Floating Decorative Elements */}
+        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-blue-400/20 blur-[150px] rounded-full animate-pulse" />
+        <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-amber-400/10 blur-[120px] rounded-full animate-pulse" />
 
-          {/* Left Text Content */}
-          <div className="lg:col-span-7 space-y-8">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-amber-400 font-bold text-xs uppercase tracking-widest shadow-2xl"
+        <div className="max-w-7xl mx-auto w-full relative z-10 text-center lg:text-left grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="lg:col-span-8 space-y-8"
+          >
+            <motion.div 
+              variants={itemVariants}
+              className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-white/80 backdrop-blur-md border border-slate-200 text-blue-600 font-black text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-blue-900/5"
             >
-              <Star className="w-4 h-4 fill-amber-400" />
-              <span>Votre Pass Pour Le Monde</span>
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+              </span>
+              L'Agence de Référence à Béjaïa
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1 }}
-              className="text-5xl sm:text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.95]"
+            <motion.h1 
+              variants={itemVariants}
+              className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tighter leading-[0.8] text-slate-950 uppercase"
             >
-              Franchissez<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-500 to-amber-400 italic">
-                Les Frontières.
+              Visez le <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-sky-500 to-amber-500 italic">
+                Sommet.
               </span>
             </motion.h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-xl text-slate-400 max-w-2xl leading-relaxed font-medium"
+            <motion.p 
+              variants={itemVariants}
+              className="text-xl md:text-3xl text-slate-500 max-w-2xl font-medium leading-tight"
             >
-              Une approche data-driven pour l'obtention de cas de visa, vos admissions universitaires et procédures d'immigration complexes. <strong className="text-white font-bold">La précision d'une agence experte.</strong>
+              Plus qu'une agence, votre partenaire vers la <br />
+              <span className="text-slate-900 font-black border-b-4 border-amber-400/30">réussite internationale.</span>
             </motion.p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-5"
+            <motion.div 
+              variants={itemVariants}
+              className="flex flex-col sm:flex-row gap-6 pt-4"
             >
               <Link href="/auth/register">
-                <button className="px-8 py-4 bg-white text-slate-950 rounded-full font-black text-lg hover:scale-105 transition-transform flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(255,255,255,0.3)]">
-                  Lancer mon Dossier
-                  <ArrowRight className="w-5 h-5" />
+                <button className="px-12 py-7 bg-slate-950 text-white rounded-[2.5rem] font-black text-xl hover:bg-blue-600 transition-all shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] flex items-center justify-center gap-4 group">
+                  Démarrer mon Dossier
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
                 </button>
               </Link>
               <Link href="#services">
-                <button className="px-8 py-4 bg-white/5 text-white border border-white/10 rounded-full font-bold text-lg hover:bg-white/10 transition-colors flex items-center justify-center gap-2 backdrop-blur-sm">
-                  Découvrir nos services
+                <button className="px-10 py-7 bg-white/50 backdrop-blur-xl text-slate-600 border border-slate-200 rounded-[2.5rem] font-black text-xl hover:bg-white hover:shadow-xl transition-all flex items-center justify-center gap-3">
+                  Explorer
                 </button>
               </Link>
             </motion.div>
-          </div>
+          </motion.div>
 
-          {/* Right Visual / Infographic Cards */}
-          <div className="lg:col-span-5 relative h-[500px] hidden lg:block">
-            {/* Main Center Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 50, rotate: -5 }}
-              animate={{ opacity: 1, y: 0, rotate: -2 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 p-8 bg-slate-900/80 backdrop-blur-2xl border border-slate-700/50 rounded-[3rem] shadow-2xl z-20"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6" />
-                </div>
-                <span className="text-emerald-400 font-black text-sm bg-emerald-400/10 px-3 py-1 rounded-full">+24% ce mois</span>
-              </div>
-              <h3 className="text-5xl font-black text-white mb-2">98<span className="text-3xl text-slate-500">%</span></h3>
-              <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Taux d'Approbation</p>
-
-              {/* Mini Chart */}
-              <div className="flex items-end gap-2 h-16 mt-6 border-b border-slate-700/50 pb-2">
-                {[40, 60, 50, 80, 70, 95].map((h, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ height: 0 }}
-                    animate={{ height: `${h}%` }}
-                    transition={{ duration: 1, delay: 0.8 + (i * 0.1) }}
-                    className={`flex-1 rounded-t-sm ${i === 5 ? 'bg-sky-500' : 'bg-slate-700'}`}
-                  />
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Floating Card 1 */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="absolute top-10 right-0 w-48 p-5 bg-amber-500/10 backdrop-blur-xl border border-amber-500/20 rounded-[2rem] shadow-xl z-30"
-            >
-              <ShieldCheck className="w-8 h-8 text-amber-400 mb-3" />
-              <p className="text-white font-black leading-tight text-sm">Contrôle Juridique Inclus</p>
-            </motion.div>
-
-            {/* Floating Card 2 */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.7 }}
-              className="absolute bottom-10 left-0 w-56 p-5 bg-blue-500/10 backdrop-blur-xl border border-blue-500/20 rounded-[2rem] shadow-xl z-30"
-            >
-              <div className="flex -space-x-3 mb-3">
-                {['CA', 'FR', 'UK'].map((c, i) => (
-                  <div key={i} className={`w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-[10px] font-bold ${i === 0 ? 'z-30' : i === 1 ? 'z-20' : 'z-10'}`}>
-                    {c}
-                  </div>
-                ))}
-                <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-white text-slate-900 flex items-center justify-center text-[10px] font-black z-0">+10k</div>
-              </div>
-              <p className="text-slate-300 text-xs font-bold leading-tight">Dossiers traités depuis notre création</p>
-            </motion.div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ─── DATA & STATS SECTION (INFOGRAPHIC) ─── */}
-      <section id="data" className="py-12 md:py-20 border-y border-white/5 bg-slate-950/50 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 divide-x divide-white/5">
-            {[
-              { label: "Projets Valides", value: "12,450", sub: "À travers le monde", color: "text-sky-400" },
-              { label: "Destinations", value: "45+", sub: "États & Pays", color: "text-amber-400" },
-              { label: "Délai moyen", value: "< 24h", sub: "Traitement interne", color: "text-white" },
-              { label: "Expertise", value: "10 Ans", sub: "Sur le marché DZ", color: "text-blue-400" },
-            ].map((stat, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center px-4"
-              >
-                <div className={`text-3xl sm:text-4xl md:text-6xl font-black ${stat.color} mb-2 tracking-tighter`}>{stat.value}</div>
-                <div className="text-white font-bold uppercase tracking-widest text-[10px] md:text-sm mb-1">{stat.label}</div>
-                <div className="text-slate-500 text-xs md:text-sm">{stat.sub}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── BENTO GRID SERVICES ─── */}
-      <section id="services" className="py-16 md:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
-        <div className="mb-12 md:mb-16">
-          <h2 className="text-[10px] font-black text-sky-500 uppercase tracking-[0.3em] mb-4">Notre Écosystème</h2>
-          <h3 className="text-3xl md:text-6xl font-black text-white tracking-tighter">Trois Piliers d'Expertise.</h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-auto md:auto-rows-[350px]">
-
-          {/* Bento Item 1 : Tourisme (Large) */}
-          <Link href="/tourisme" className="md:col-span-8 row-span-2 relative rounded-[3rem] overflow-hidden group block cursor-pointer border border-white/10 bg-slate-900">
-            <div className="absolute inset-0">
-              <Image src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=2000&auto=format&fit=crop" priority width={1000} height={800} className="w-full h-full object-cover opacity-40 group-hover:scale-105 group-hover:opacity-30 transition-all duration-700" alt="Tourisme & Visas" />
-              <div className="absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-t from-[#020617] via-[#020617]/80 to-transparent" />
-            </div>
-            <div className="absolute inset-0 p-10 flex flex-col justify-end">
-              <div className="w-16 h-16 rounded-3xl bg-sky-500/20 backdrop-blur-md border border-sky-400/30 flex items-center justify-center text-sky-400 mb-6 group-hover:scale-110 transition-transform">
-                <Plane className="w-8 h-8" />
-              </div>
-              <h4 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tighter">Tourisme & Visas C</h4>
-              <p className="text-slate-300 font-medium max-w-lg mb-8 text-base md:text-lg leading-relaxed">Espace Schengen, Turquie, Asie, Amériques. Laissez nos experts préparer un dossier inattaquable pour votre prochain voyage.</p>
-              <div className="px-6 py-4 bg-white text-slate-950 rounded-full font-black text-sm hover:bg-slate-200 transition-colors w-fit flex items-center gap-2">
-                Prendre Rendez-vous <ArrowRight className="w-4 h-4 group-hover:translate-x-1" />
-              </div>
-            </div>
-          </Link>
-
-          {/* Bento Item 2 : Études (Vertical) */}
-          <Link href="/etudes" className="md:col-span-4 row-span-2 relative rounded-[3rem] overflow-hidden group block border border-blue-500/20 bg-blue-950/20 backdrop-blur-md hover:bg-blue-900/30 transition-colors">
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 to-[#020617]" />
-            <div className="absolute inset-0 p-10 flex flex-col">
-              <div className="w-16 h-16 rounded-3xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400 mb-8 group-hover:rotate-12 transition-transform">
-                <GraduationCap className="w-8 h-8" />
-              </div>
-              <h4 className="text-3xl md:text-4xl font-black text-white mb-4 leading-[1.1] tracking-tighter">Admissions<br />Universitaires</h4>
-              <p className="text-slate-400 font-medium mb-auto text-sm md:text-base">Du choix de l'université jusqu'à l'obtention du CAQ, Permis d'Études et installation sur place.</p>
-
-              <div className="mt-10 space-y-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between text-xs font-black text-slate-300 uppercase tracking-widest"><span className="text-blue-400">Canada</span><span>85%</span></div>
-                  <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-blue-500 rounded-full relative"><div className="absolute inset-0 bg-white/20 animate-pulse"></div></div></div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-xs font-black text-slate-300 uppercase tracking-widest"><span className="text-white">France</span><span>60%</span></div>
-                  <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-white rounded-full relative w-[60%]"><div className="absolute inset-0 bg-white/20 animate-pulse"></div></div></div>
-                </div>
-                <div className="w-full py-4 border border-white/10 text-white rounded-2xl font-bold transition-colors flex items-center justify-center gap-2 mt-4 group-hover:border-blue-500/50">
-                  Voir les destinations <ArrowRight className="w-4 h-4 group-hover:translate-x-1" />
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Bento Item 3 : Immigration (Horizontal) */}
-          <Link href="/immigration" className="md:col-span-12 row-span-1 relative rounded-[3rem] overflow-hidden group block border border-amber-500/20 bg-amber-950/20 backdrop-blur-md hover:bg-amber-900/30 transition-colors">
-            <div className="absolute inset-0 flex items-center p-10 md:p-14 gap-10 flex-col md:flex-row">
-              <div className="w-24 h-24 rounded-[2rem] bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-400 shrink-0 shadow-[0_0_40px_rgba(245,158,11,0.1)] group-hover:scale-110 transition-transform">
-                <MapPin className="w-10 h-10" />
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                <h4 className="text-3xl md:text-4xl font-black text-white mb-3 tracking-tighter">Immigration & Résidence</h4>
-                <p className="text-slate-400 font-medium max-w-2xl text-sm md:text-lg leading-relaxed">Entrée Express, Travailleurs Qualifiés, Regroupement Familial. Des procédures complexes gérées de bout en bout.</p>
-              </div>
-              <div className="shrink-0 w-full md:w-auto mt-4 md:mt-0">
-                <div className="w-full md:w-auto px-10 py-5 bg-amber-500 text-slate-950 rounded-full font-black text-lg flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(245,158,11,0.3)]">
-                  Calculer mon Score CRS <ArrowRight className="w-5 h-5 group-hover:translate-x-1" />
-                </div>
-              </div>
-            </div>
-          </Link>
-
-        </div>
-      </section>
-
-      {/* ─── CLIENT PLATFORM SHOWCASE ─── */}
-      <section className="py-12 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#020617] to-slate-950"></div>
-        <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-blue-500/10 blur-[150px] rounded-full pointer-events-none"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-[2rem] md:rounded-[4rem] p-8 md:p-16 flex flex-col lg:flex-row gap-12 md:gap-16 shadow-[0_30px_100px_rgba(0,0,0,1)] items-center">
-
-            <div className="lg:w-1/2 space-y-6 md:space-y-10">
-              <div className="inline-block px-4 py-2 bg-blue-500/10 text-blue-400 font-black text-xs uppercase tracking-widest rounded-full border border-blue-500/20">
-                Technologie Oussama Travel
-              </div>
-              <h2 className="text-4xl lg:text-6xl font-black text-white tracking-tighter leading-[1.1]">
-                Votre Espace Client <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-500 to-slate-200 italic">Nouvelle Génération.</span>
-              </h2>
-
-              <div className="space-y-6">
-                {[
-                  { title: "Suivi en temps réel", desc: "Soyez notifié de chaque avancement de votre dossier instantanément." },
-                  { title: "Messagerie Chiffrée", desc: "Échangez avec votre conseiller dédié via votre tableau de bord." },
-                  { title: "Drive Sécurisé", desc: "Uploadez vos documents dans notre coffre-fort numérique personnel." }
-                ].map((item, i) => (
-                  <div key={i} className="flex gap-4 group">
-                    <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400 shrink-0 group-hover:bg-blue-500 group-hover:text-slate-950 transition-colors">
-                      <Check className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-white font-bold text-lg">{item.title}</h4>
-                      <p className="text-slate-400 text-sm mt-1">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Link href="/auth/register" className="inline-block">
-                <button className="px-10 py-5 bg-white text-slate-950 rounded-full font-black text-lg hover:scale-105 transition-transform">
-                  Créer un compte gratuit
-                </button>
-              </Link>
-            </div>
-
-            <div className="lg:w-1/2 w-full perspective-[1000px]">
-              {/* Infographic Dashboard Mockup */}
-              <motion.div
-                initial={{ rotateY: -15, rotateX: 5 }}
-                whileInView={{ rotateY: 0, rotateX: 0 }}
-                transition={{ duration: 1 }}
-                viewport={{ once: true }}
-                className="w-full h-auto bg-[#0b1120] rounded-[2rem] border border-slate-700 shadow-2xl relative overflow-hidden flex flex-col transform-gpu"
-              >
-                {/* Header Mockup */}
-                <div className="h-12 border-b border-slate-800/80 bg-slate-900/50 flex items-center px-6 gap-3 backdrop-blur-md">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                  <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
-                  <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
-                </div>
-                {/* Body Mockup */}
-                <div className="p-8 space-y-6">
-                  {/* Status Bar */}
-                  <div className="flex justify-between items-end">
-                    <div className="space-y-2">
-                      <div className="w-32 h-4 bg-slate-800 rounded"></div>
-                      <div className="w-48 h-8 bg-slate-700 rounded-md"></div>
-                    </div>
-                    <div className="w-16 h-16 rounded-full border-4 border-blue-500 border-r-slate-800 flex items-center justify-center text-blue-400 font-bold text-sm">75%</div>
-                  </div>
-
-                  {/* Steps */}
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((s, i) => (
-                      <div key={i} className={`p-4 rounded-2xl border ${i === 0 ? 'bg-emerald-500/10 border-emerald-500/20' : i === 1 ? 'bg-blue-500/10 border-blue-500/20' : 'bg-slate-800/50 border-slate-700'} flex items-center gap-4`}>
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${i === 0 ? 'bg-emerald-500/20 text-emerald-400' : i === 1 ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700 text-slate-500'}`}>
-                          {i === 0 ? <Check className="w-5 h-5" /> : <div className="w-2 h-2 rounded-full bg-current pulse"></div>}
-                        </div>
-                        <div className="space-y-2 flex-1">
-                          <div className="w-1/3 h-3 bg-white/20 rounded"></div>
-                          <div className="w-2/3 h-2 bg-white/10 rounded"></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ─── FOOTER HIGHLIGHT (CTA) ─── */}
-      <section className="py-16 md:py-32 relative overflow-hidden bg-sky-600">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542296332-2e4473faf563?q=80&w=2000&auto=format&fit=crop')] opacity-10 mix-blend-overlay object-cover"></div>
-        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+          {/* Side Info Cards (Glassmorphism) */}
+          <motion.div 
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1, duration: 1 }}
+            className="lg:col-span-4 hidden lg:flex flex-col gap-6"
           >
-            <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-none mb-8">Votre Nouveau Départ Commence Ici.</h2>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link href="/auth/register">
-                <button className="px-12 py-6 bg-[#020617] text-white rounded-full font-black text-xl hover:scale-105 transition-transform flex items-center gap-3">
-                  Créer mon Profil
-                  <ArrowRight className="w-6 h-6" />
-                </button>
-              </Link>
+            <div className="p-8 bg-white/60 backdrop-blur-2xl border border-white/50 rounded-[3rem] shadow-2xl shadow-slate-200/50 transform hover:-translate-y-2 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mb-6 shadow-lg shadow-blue-200">
+                <Star className="w-6 h-6 fill-white" />
+              </div>
+              <h3 className="text-4xl font-black text-slate-950 mb-2 leading-none">98%</h3>
+              <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Taux de visa 2025</p>
+            </div>
+
+            <div className="p-8 bg-slate-950 text-white rounded-[3rem] shadow-2xl shadow-blue-900/20 transform hover:-translate-y-2 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center mb-6 shadow-lg shadow-amber-400/20">
+                <GraduationCap className="w-6 h-6" />
+              </div>
+              <p className="text-2xl font-black leading-tight mb-2">+150 Universités</p>
+              <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Partenariats Mondiaux</p>
             </div>
           </motion.div>
         </div>
+      </section>
+
+      {/* ─── SERVICES GRID (BENTO ULTRA CLEAN) ─── */}
+      <section id="services" className="py-32 px-4 max-w-7xl mx-auto">
+        <div className="text-center mb-24">
+          <motion.h2 
+            {...fadeIn}
+            className="text-[10px] font-black text-blue-600 uppercase tracking-[0.5em] mb-4"
+          >
+            Nos Domaines d'Action
+          </motion.h2>
+          <motion.h3 
+            {...fadeIn}
+            className="text-4xl md:text-7xl font-black text-slate-950 tracking-tighter"
+          >
+            Expertise Sans <span className="italic text-slate-400">Compromis.</span>
+          </motion.h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          
+          {/* Tourisme & Visa (Large) */}
+          <Link href="/tourisme" className="md:col-span-8 group relative overflow-hidden rounded-[4rem] bg-slate-50 border border-slate-100 p-12 h-[500px] flex flex-col justify-end hover:shadow-3xl hover:shadow-sky-100 transition-all duration-700">
+            <div className="absolute top-0 right-0 w-full h-full -z-10 opacity-0 group-hover:opacity-10 transition-opacity">
+              <Image src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1200" fill className="object-cover" alt="Travel" />
+            </div>
+            <div className="w-20 h-20 rounded-3xl bg-blue-600 text-white flex items-center justify-center mb-10 shadow-2xl shadow-blue-200 group-hover:scale-110 transition-transform">
+              <Plane className="w-10 h-10" />
+            </div>
+            <h4 className="text-4xl md:text-6xl font-black text-slate-950 mb-4 tracking-tighter uppercase">Visas & <br />Tourisme</h4>
+            <p className="text-slate-500 text-lg font-medium max-w-md mb-10 leading-relaxed">
+              Dossiers personnalisés pour visas Schengen, Turquie, Asie et plus. Précision et rapidité garanties.
+            </p>
+            <div className="flex items-center gap-4 text-blue-600 font-black text-xs uppercase tracking-[0.3em] group-hover:translate-x-4 transition-transform">
+              Voir les détails <ArrowRight className="w-5 h-5" />
+            </div>
+          </Link>
+
+          {/* Etudes (Tall) */}
+          <Link href="/etudes" className="md:col-span-4 group relative overflow-hidden rounded-[4rem] bg-indigo-50 border border-indigo-100 p-12 flex flex-col hover:shadow-3xl hover:shadow-indigo-100 transition-all duration-700">
+            <div className="w-20 h-20 rounded-3xl bg-indigo-600 text-white flex items-center justify-center mb-10 shadow-2xl shadow-indigo-200 group-hover:rotate-12 transition-transform">
+              <GraduationCap className="w-10 h-10" />
+            </div>
+            <h4 className="text-4xl font-black text-slate-950 mb-4 tracking-tighter uppercase leading-none">Études <br />Mondiales</h4>
+            <p className="text-slate-500 font-medium mb-10 leading-relaxed">
+              Admission dans les universités d'élite en Italie, France et Canada.
+            </p>
+            <div className="mt-auto space-y-4">
+               <div className="px-6 py-4 bg-white/60 backdrop-blur-md rounded-2xl border border-white/50 text-[10px] font-black uppercase text-indigo-600 tracking-widest text-center">
+                 Liste Universités Italie 2026
+               </div>
+               <div className="px-6 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest text-center shadow-lg shadow-indigo-200">
+                 Démarrer Admissions
+               </div>
+            </div>
+          </Link>
+
+          {/* Immigration (Wide) */}
+          <Link href="/immigration" className="md:col-span-12 group relative overflow-hidden rounded-[4rem] bg-amber-50 border border-amber-100 p-12 md:p-16 flex flex-col md:flex-row items-center gap-10 hover:shadow-3xl hover:shadow-amber-100 transition-all duration-700">
+             <div className="w-24 h-24 rounded-[2.5rem] bg-amber-500 text-white flex items-center justify-center shadow-2xl shadow-amber-200 group-hover:scale-110 transition-transform shrink-0">
+               <MapPin className="w-12 h-12" />
+             </div>
+             <div className="flex-1 text-center md:text-left">
+               <h4 className="text-4xl md:text-5xl font-black text-slate-950 mb-4 tracking-tighter uppercase">Immigration Canada</h4>
+               <p className="text-slate-500 text-lg font-medium max-w-3xl leading-relaxed">
+                 Experts en Entrée Express, Travailleurs Qualifiés et Regroupement Familial. Nous bâtissons votre avenir au Canada.
+               </p>
+             </div>
+             <div className="w-full md:w-auto px-12 py-6 bg-slate-950 text-white rounded-full font-black text-lg shadow-2xl hover:bg-amber-500 transition-colors shrink-0">
+               Calculer mon Score
+             </div>
+          </Link>
+        </div>
+      </section>
+
+      {/* ─── WHY US (VIBRANT) ─── */}
+      <section className="py-32 bg-slate-50 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div className="space-y-10">
+              <h2 className="text-4xl md:text-7xl font-black text-slate-950 tracking-tighter leading-[0.9]">
+                La Confiance <br />
+                <span className="text-blue-600">Se Mérite.</span>
+              </h2>
+              <p className="text-xl text-slate-500 font-medium leading-relaxed">
+                Depuis plus de 10 ans, nous accompagnons les familles algériennes dans leurs projets les plus ambitieux.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {[
+                  { title: "Transparence", desc: "Aucun frais caché.", icon: <ShieldCheck className="w-6 h-6" /> },
+                  { title: "Rapidité", desc: "Traitement sous 24h.", icon: <TrendingUp className="w-6 h-6" /> },
+                  { title: "Expertise", desc: "Consultants agréés.", icon: <CheckCircle2 className="w-6 h-6" /> },
+                  { title: "Support", desc: "Accompagnement 24/7.", icon: <Users className="w-6 h-6" /> },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-4 p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                    <div className="text-blue-600 mt-1">{item.icon}</div>
+                    <div>
+                      <h4 className="font-black text-slate-950 uppercase text-xs tracking-widest mb-1">{item.title}</h4>
+                      <p className="text-slate-400 text-xs font-medium">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="relative h-[600px] w-full rounded-[4rem] overflow-hidden shadow-3xl">
+              <Image src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1200" fill className="object-cover" alt="Team" />
+              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent" />
+              <div className="absolute bottom-10 left-10 p-10 bg-white/10 backdrop-blur-3xl rounded-[3rem] border border-white/20 text-white max-w-xs">
+                 <p className="text-4xl font-black mb-2">+12k</p>
+                 <p className="text-xs font-bold uppercase tracking-widest opacity-80">Dossiers traités avec succès depuis Béjaïa.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── PLATFORM (TECH FEEL) ─── */}
+      <section className="py-32 px-4 max-w-7xl mx-auto">
+         <div className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-[5rem] p-12 md:p-24 relative overflow-hidden shadow-3xl">
+           <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/20 blur-[150px] rounded-full" />
+           <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-500/10 blur-[150px] rounded-full" />
+           
+           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+             <div className="space-y-10">
+                <div className="inline-block px-6 py-2 bg-white/5 border border-white/10 rounded-full text-blue-400 font-black text-[10px] uppercase tracking-widest">
+                  Plateforme Exclusive Client
+                </div>
+                <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-none">
+                  Votre Projet <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-300 italic">Dans Votre Poche.</span>
+                </h2>
+                <p className="text-slate-400 text-xl font-medium leading-relaxed">
+                  Accédez à votre espace sécurisé pour suivre votre visa, uploader vos documents et discuter avec nos experts en direct.
+                </p>
+                <Link href="/auth/register">
+                  <button className="px-12 py-6 bg-white text-slate-950 rounded-full font-black text-xl hover:bg-blue-400 hover:text-white transition-all shadow-xl flex items-center gap-4">
+                    Rejoindre l'Espace <LayoutDashboard className="w-6 h-6" />
+                  </button>
+                </Link>
+             </div>
+
+             <div className="relative">
+               {/* Dashboard Mockup Visual */}
+               <motion.div 
+                 whileHover={{ rotateY: -5, rotateX: 5 }}
+                 className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-10 space-y-8 shadow-2xl transition-transform duration-500"
+               >
+                 <div className="flex items-center justify-between">
+                    <div className="flex gap-2">
+                      <div className="w-3 h-3 rounded-full bg-rose-500" />
+                      <div className="w-3 h-3 rounded-full bg-amber-500" />
+                      <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                    </div>
+                    <div className="w-20 h-2 bg-white/10 rounded-full" />
+                 </div>
+                 <div className="space-y-4">
+                    <div className="h-16 w-full bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center px-6 gap-6">
+                       <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                       <div className="h-3 w-1/2 bg-white/20 rounded-full" />
+                    </div>
+                    <div className="h-16 w-full bg-white/5 border border-white/10 rounded-2xl flex items-center px-6 gap-6">
+                       <div className="w-6 h-6 rounded-full border-2 border-blue-500 animate-spin border-t-transparent" />
+                       <div className="h-3 w-2/3 bg-white/20 rounded-full" />
+                    </div>
+                    <div className="h-16 w-full bg-white/5 border border-white/10 rounded-2xl flex items-center px-6 gap-6 opacity-40">
+                       <div className="w-6 h-6 rounded-full bg-white/10" />
+                       <div className="h-3 w-1/3 bg-white/10 rounded-full" />
+                    </div>
+                 </div>
+               </motion.div>
+             </div>
+           </div>
+         </div>
+      </section>
+
+      {/* ─── CONTACT CALLOUT ─── */}
+      <section className="py-32 text-center bg-white">
+         <motion.div 
+            whileInView={{ scale: [0.95, 1], opacity: [0, 1] }}
+            className="max-w-4xl mx-auto px-4"
+         >
+           <h2 className="text-4xl md:text-8xl font-black text-slate-950 tracking-tighter mb-12">
+             Commençons <br />
+             <span className="text-blue-600 uppercase italic">Aujourd'hui.</span>
+           </h2>
+           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+             <Link href="/contact">
+               <button className="px-12 py-7 bg-slate-950 text-white rounded-[2.5rem] font-black text-xl shadow-2xl hover:bg-blue-600 transition-all flex items-center gap-4">
+                 Nous Contacter <ArrowRight className="w-6 h-6" />
+               </button>
+             </Link>
+             <Link href="/auth/register">
+               <button className="px-12 py-7 bg-white text-slate-900 border border-slate-200 rounded-[2.5rem] font-black text-xl hover:bg-slate-50 transition-all">
+                 S'inscrire
+               </button>
+             </Link>
+           </div>
+           <p className="mt-16 text-slate-300 font-black uppercase text-[10px] tracking-[0.5em]">Bejaia • Alger • Oran • Tizi Ouzou</p>
+         </motion.div>
       </section>
 
     </div>
