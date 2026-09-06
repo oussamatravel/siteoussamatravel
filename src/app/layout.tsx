@@ -38,6 +38,9 @@ export const metadata: Metadata = {
     title: "Oussama Travel",
   },
   themeColor: "#0f172a",
+  other: {
+    "facebook-domain-verification": "8qz0tju6apxabz5x54b32dxaiux4rg",
+  },
 };
 
 export default function RootLayout({
